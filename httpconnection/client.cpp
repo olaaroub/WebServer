@@ -19,16 +19,16 @@ void client:: onEvent(std::map<int, network *> &infos)
 {
     if (event & EPOLLIN)
     {
-        int cont = recv(socket_fd, &request_str, 1023, 0);
-        if (cont < 0)
-            std::cout << "read filed" << std::endl;
-        request_str[cont] = '\0';
-        std::cout << request_str << std::endl;
+        // int cont = recv(socket_fd, &request_str, 1023, 0);
+        // if (cont < 0)
+        //     std::cout << "read filed" << std::endl;
+        // request_str[cont] = '\0';
+        // std::cout << request_str << std::endl;
+        request.run_parser(socket_fd);
         epoll_modify();
     }
     else if (event & EPOLLOUT)
     {
-        std::cout << "ddd\n";
         send(socket_fd, "thanks client\n", 14, 0);
         close(socket_fd);
 

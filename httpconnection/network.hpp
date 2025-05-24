@@ -1,7 +1,7 @@
-#ifndef REQUEST_HPP
-#define REQUEST_HPP
+#ifndef NETWORK_HPP
+#define NETWORK_HPP
 
-#include "WebServer.hpp"
+#include "../lib.hpp"
 
 class network
 {

@@ -1,7 +1,9 @@
 NAME= webserver
 CXX= c++
 CXXFLAGS= #-Wall -Wextra -Werror -std=c++98
-OBJ= main.cpp WebServer.cpp network.cpp server.cpp client.cpp
+HTTPCONNECTION= network.cpp server.cpp client.cpp
+REQUEST= Body.cpp RequestLine.cpp Headers.cpp request.cpp
+OBJ= main.cpp WebServer.cpp $(addprefix httpconnection/, $(HTTPCONNECTION)) $(addprefix request/, $(REQUEST))
 OBJ_O= $(OBJ:.cpp=.o)
 
 all: $(NAME)
