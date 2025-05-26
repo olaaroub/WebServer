@@ -17,19 +17,21 @@ void client:: epoll_modify()
 
 void client:: onEvent(std::map<int, network *> &infos)
 {
-    if (event & EPOLLIN)
+    if (event & (EPOLLERR | EPOLLHUP))
     {
-        // int cont = recv(socket_fd, &request_str, 1023, 0);
-        // if (cont < 0)
-        //     std::cout << "read filed" << std::endl;
-        // request_str[cont] = '\0';
-        // std::cout << request_str << std::endl;
-        request.run_parser(socket_fd);
-        epoll_modify();
+        perror("ERROR: ");
+        close(socket_fd);
+        epoll_ctl(kernel_identifier , EPOLL_CTL_DEL, socket_fd, 0);
+    }
+    else if (event & EPOLLIN)
+    {
+        if (request.run_parser(socket_fd))
+            epoll_modify();
     }
     else if (event & EPOLLOUT)
     {
         send(socket_fd, "thanks client\n", 14, 0);
+        epoll_ctl(kernel_identifier , EPOLL_CTL_DEL, socket_fd, 0);
         close(socket_fd);
 
     }

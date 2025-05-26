@@ -15,8 +15,11 @@ class Request
 
         std::string baffer;
         short stute;
+        bool request_ended;
+
+        void is_finished();
     public:
-        void run_parser(int socket_fd);
+        bool run_parser(int socket_fd);
 };
 
 #endif
