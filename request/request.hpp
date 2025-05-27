@@ -13,11 +13,11 @@ class Request
         RequestLine RequestLine;
         Body Body;
 
-        std::string baffer;
+        // std::string baffer;
         short stute;
         bool request_ended;
 
-        void is_finished();
+        void is_finished(std::string baffer);
     public:
         bool run_parser(int socket_fd);
 };
