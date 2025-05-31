@@ -5,7 +5,7 @@
 #include "Headers.hpp"
 #include "RequestLine.hpp"
 #include "Body.hpp"
-
+#include <fstream>
 class Request
 {
     private:
@@ -13,13 +13,18 @@ class Request
         RequestLine RequestLine;
         Body Body;
 
-        // std::string baffer;
-        short stute;
+        std::string buffer;
+        short state;
         bool request_ended;
 
-        void is_finished(std::string baffer);
+        void is_finished();
+        void ParsRequstLine();
+        void ParsHeaders();
+        void ParsBody();
+        void StateOFParser();
     public:
         bool run_parser(int socket_fd);
+
 };
 
 #endif

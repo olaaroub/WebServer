@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 class RequestLine
 {
@@ -11,6 +12,16 @@ class RequestLine
         std::string url;
         std::string HttpVerction;
         std::vector<std::string> Query_parameters;
+        std::string line;
+
+        void SeparateMethod();
+        void SeparateUrl();
+        void SeparateQuerys();
+    public:
+        void set_line(std::string line);
+        std::string &get_line();
+        void ParsRequestLine();
+        std::string get_method();
 };
 
 #endif
