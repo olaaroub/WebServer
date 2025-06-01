@@ -4,6 +4,7 @@
 #include "Delete.hpp"
 #include "Get.hpp"
 #include "Post.hpp"
+#include <iostream>
 
 class Methods
 {
@@ -11,6 +12,8 @@ class Methods
         Post post;
         Get get;
         Delete Delete;
+    public:
+        void response(std::string MethodName) {}
 };
 
 
