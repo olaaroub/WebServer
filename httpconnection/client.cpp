@@ -1,8 +1,14 @@
 #include "client.hpp"
 
-client:: client() : network() {is_server = false;}
+client:: client() : network()
+{
+    is_server = false;
+}
 
-client:: client(int kernel_id) : network(kernel_id, false){}
+client:: client(int kernel_id) : network(kernel_id, false)
+{
+
+}
 
 void client:: epoll_modify()
 {
@@ -25,7 +31,8 @@ void client:: onEvent(std::map<int, network *> &infos)
     }
     else if (event & EPOLLIN)
     {
-        if (request.run_parser(socket_fd))
+        int is_finish = request.run_parser(socket_fd);
+        if (is_finish)
             epoll_modify();
     }
     else if (event & EPOLLOUT)

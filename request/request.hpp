@@ -20,8 +20,8 @@ class Request
         void is_finished();
         void ParsRequstLine();
         void ParsHeaders();
-        void ParsBody();
-        void StateOFParser();
+        void ParsBody(int socket_fd);
+        void StateOFParser(int socket_fd);
     public:
         bool run_parser(int socket_fd);
 

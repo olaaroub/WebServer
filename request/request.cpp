@@ -46,23 +46,46 @@ void Request:: ParsHeaders()
         Headers.set_buffer(buffer);
 }
 
-void Request:: ParsBody()
+void Request:: ParsBody(int socket_fd)
 {
     std::fstream body("body.bin", std::ios::binary | std::ios::out);
-    if (!body)
+    if (!body.is_open())
         throw std::string("ERROR: file not open!");
     body << buffer;
+    if (!Headers.map["Content-Length"].empty())
+    {
+        // std::cout << "Dddd\n";
+        int cont = atoi(Headers.map["Content-Length"].c_str());
+        cont -= buffer.size() - 1;
+        if (cont - 1 == 0)
+        {
+            request_ended = true;
+            return;
+        }
+        if (cont < 0)
+            throw std::string("ERROR: !");
+        char buf[cont];
+        int read_cont = read(socket_fd, &buf, cont - 1);
+        if (cont <= 0)
+        {
+            close(socket_fd);
+            throw std::string("ERROR: read failed");
+        }
+        buffer.append(buf, read_cont);
+        body << buffer;
+        request_ended = true;
+    }
+
 }
 
-void Request:: StateOFParser()
+void Request:: StateOFParser(int socket_fd)
 {
-    std::cout << state << std::endl;
     if (state == 0)
         ParsRequstLine();
     if (state == 1)
         ParsHeaders();
     if (state == 2 && RequestLine.get_method() == "POST")
-        ParsBody();
+        ParsBody(socket_fd);
 
 }
 
@@ -80,8 +103,9 @@ bool Request:: run_parser(int socket_fd)
     }
     baff.append(bfr, cont);
     buffer = baff;
-    StateOFParser();
-    // is_finished();
-    // std::cout << "request line: '" << RequestLine.get_line() << "' Headers: '" << Headers.get_buffer() << "'\n";
+    std::cout << "is here\n";
+    // std::cout << buffer << std::endl;
+    StateOFParser(socket_fd);
+    is_finished();
     return request_ended;
 }

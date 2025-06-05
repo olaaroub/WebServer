@@ -33,8 +33,8 @@ void RequestLine:: SeparateQuerys()
     cont = line.find(" ");
     Query_parameters.push_back(line.substr(0, cont));
     line = line.substr(++cont);
-    for(int i = 0;i < Query_parameters.size(); i++)
-        std::cout << Query_parameters.at(i) << std::endl;
+    // for(int i = 0;i < Query_parameters.size(); i++)
+    //     std::cout << Query_parameters.at(i) << std::endl;
 }
 
 void RequestLine:: SeparateUrl()
@@ -61,7 +61,7 @@ void RequestLine:: ParsRequestLine()
 {
     SeparateMethod();
     SeparateUrl();
-    std::cout << " method: '" << method << "' url: '" << url << "' httpv: '" << HttpVerction << "'" << std::endl; 
+    // std::cout << " method: '" << method << "' url: '" << url << "' httpv: '" << HttpVerction << "'" << std::endl; 
 }
 
 std::string RequestLine:: get_method()
