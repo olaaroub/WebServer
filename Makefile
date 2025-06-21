@@ -1,18 +1,39 @@
-NAME= webserver
-CXX= c++
-CXXFLAGS= #-Wall -Wextra -Werror -std=c++98
-OBJ= main.cpp WebServer.cpp network.cpp server.cpp client.cpp
-OBJ_O= $(OBJ:.cpp=.o)
+CXX = c++
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+# CXXFLAGS += -fsanitize=address -g3
+# CXXFLAGS += -DDEBUG_MODE=1
+
+NAME = webserver
+
+SRC = main.cpp client.cpp network.cpp \
+ 		server.cpp WebServer.cpp\
+		
+
+OPATH = dependencies
+OBJ = $(SRC:.cpp=.o)
+OBJS = $(addprefix $(OPATH)/,$(OBJ))
+DEPS = $(OBJS:.o=.d)
 
 all: $(NAME)
 
-$(NAME): $(OBJ_O)
-	$(CXX) $(CXXFLAGS) $(OBJ_O) -o $(NAME)
+$(NAME): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $@
+
+$(OPATH)/%.o: %.cpp | $(OPATH)
+	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
+
+$(OPATH):
+	mkdir -p $(OPATH)
+
+-include $(DEPS)
 
 clean:
-	rm -rf $(OBJ_O)
+	rm -f $(OBJS) $(DEPS)
 
 fclean: clean
-	rm -rf $(NAME)
+	rm -f $(NAME)
+	rm -rf $(OPATH)
 
-re:	fclean all
+re: fclean all
+
+.PHONY: all clean fclean re
