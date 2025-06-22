@@ -1,6 +1,5 @@
-#include "WebServer.hpp"
-#include "server.hpp"
-#include <arpa/inet.h> 
+ #include "WebServer.hpp"
+
 // std::vector<network *> WebServer::servers;
 int WebServer:: kernel_identifier = 0;
 struct epoll_event *WebServer:: evlist;
@@ -51,13 +50,37 @@ void WebServer:: lisning()
 void WebServer:: setup_servers()
 {
     kernel_identifier = epoll_create(MAX_EPOLL);
-    server *instance = new server(9999, inet_addr("127.0.0.1"), kernel_identifier);
-    server *instance1 = new server(9991, inet_addr("127.0.0.2"), kernel_identifier);
-    server *instance2 = new server(9992, inet_addr("127.0.0.3"), kernel_identifier);
+    try
+    {
+        server *instance = new server(9999, inet_addr("127.0.0.1"), kernel_identifier);
+        add_server(instance);
 
-    add_server(instance);
-    add_server(instance1);
-    add_server(instance2);
+    }
+    catch(std::string error)
+    {
+        std::cerr << error << std::endl; 
+    }
+    try
+    {
+        server *instance1 = new server(9991, inet_addr("127.0.0.2"), kernel_identifier);
+        add_server(instance1);
+
+    }
+    catch(std::string error)
+    {
+        std::cerr << error << std::endl; 
+    }
+    try
+    {
+        server *instance2 = new server(9992, inet_addr("127.0.0.3"), kernel_identifier);
+        add_server(instance2);
+
+    }
+    catch(std::string error)
+    {
+        std::cerr << error << std::endl; 
+    }
+
 }
 
 

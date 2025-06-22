@@ -5,10 +5,9 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <sys/epoll.h>
-
+#include "fcntl.h"
 int main() 
 {
-
     int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_fd < 0)
         std::cout << "ERROR: fd error" << std::endl;
