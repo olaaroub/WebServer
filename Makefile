@@ -1,21 +1,63 @@
-NAME= webserver
-CXX= c++
-CXXFLAGS= #-Wall -Wextra -Werror -std=c++98
-HTTPCONNECTION= network.cpp server.cpp client.cpp
-REQUEST= Body.cpp RequestLine.cpp Headers.cpp request.cpp
-METHODS= Methods.cpp  Get.cpp  Post.cpp  Delete.cpp 
-OBJ= main.cpp WebServer.cpp $(addprefix httpconnection/, $(HTTPCONNECTION)) $(addprefix request/, $(REQUEST)) $(addprefix methods/, $(METHODS))
-OBJ_O= $(OBJ:.cpp=.o)
+CXX = c++
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+# CXXFLAGS += -fsanitize=address -g3
 
-all: $(NAME)
+NAME = webserv
 
-$(NAME): $(OBJ_O)
-	$(CXX) $(CXXFLAGS) $(OBJ_O) -o $(NAME)
+SPATH = ./Sources/
+SRC = 	main.cpp \
+ 		WebServer.cpp\
+		test.cpp \
+		ConfigParse/ConfigParser.cpp \
+		Connections/client.cpp \
+		Connections/network.cpp \
+		Connections/server.cpp \
+		Methods/Delete.cpp \
+		Methods/Get.cpp \
+		Methods/Methods.cpp \
+		Methods/Post.cpp \
+		Requests/Body.cpp \
+		Requests/Headers.cpp \
+		Requests/request.cpp \
+		Requests/RequestLine.cpp \
+
+SRCS = $(addprefix $(SPATH), $(SRC))
+
+OPATH = ./dependencies/
+OBJ = $(SRC:.cpp=.o)
+OBJS = $(addprefix $(OPATH),$(OBJ))
+DEPS = $(OBJS:.o=.d)
+
+INC			=	-I ./Includes/\
+
+all: $(OPATH)  $(NAME)
+
+$(OPATH):
+	mkdir -p $(OPATH)
+	mkdir -p $(OPATH)/ConfigParser
+	mkdir -p $(OPATH)/Connections
+	mkdir -p $(OPATH)/Methods
+	mkdir -p $(OPATH)/Requests
+
+
+$(OPATH)%.o:  $(SPATH)%.cpp
+	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@ $(INC)
+
+
+$(NAME): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ $(INC)
+
+
+-include $(DEPS)
 
 clean:
-	rm -rf $(OBJ_O)
+	rm -f $(OBJS) $(DEPS)
 
 fclean: clean
-	rm -rf $(NAME)
+	rm -f $(NAME)
+	rm -rf $(OPATH)
 
-re:	fclean all
+re: fclean all
+
+.PHONY: all clean fclean re
+

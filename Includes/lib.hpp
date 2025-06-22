@@ -12,6 +12,6 @@
 #include <sys/epoll.h>
 #include <algorithm>
 #include <map>
-#include <arpa/inet.h> 
+#include <arpa/inet.h>
 
 #endif

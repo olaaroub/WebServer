@@ -1,7 +1,7 @@
 #ifndef BODY_HPP
 #define BODY_HPP
 
-#include "../lib.hpp"
+#include "lib.hpp"
 
 class Body
 {

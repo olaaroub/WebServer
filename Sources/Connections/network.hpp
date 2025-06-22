@@ -1,7 +1,7 @@
 #ifndef NETWORK_HPP
 #define NETWORK_HPP
 
-#include "../lib.hpp"
+#include "lib.hpp"
 
 class network
 {

@@ -1,7 +1,7 @@
 #ifndef WEBSERVER_HPP
 #define WEBSERVER_HPP
 
-#include "httpconnection/server.hpp"
+#include "Connections/server.hpp"
 
 #define MAX_EPOLL 100
 
@@ -15,8 +15,8 @@ class WebServer
         static void setup_servers();
         static void lisning();
         static void epollEvent(int fd, int event);
-    public:
         WebServer();
+    public:
 
         static int kernel_identifier;
         static void pars_config_file(std::string file_name);

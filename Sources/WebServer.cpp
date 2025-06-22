@@ -1,11 +1,9 @@
- #include "WebServer.hpp"
+#include "WebServer.hpp"
 
 // std::vector<network *> WebServer::servers;
 int WebServer:: kernel_identifier = 0;
 struct epoll_event *WebServer:: evlist;
 std::map<int, network *> WebServer:: infos;
-
-WebServer:: WebServer() {}
 
 void WebServer:: add_server(network *instance)
 {
@@ -41,7 +39,7 @@ void WebServer:: lisning()
         {
             int fd = evlist[i].data.fd;
             epollEvent(fd, evlist[i].events);
-            
+
         }
     }
 }
@@ -58,7 +56,7 @@ void WebServer:: setup_servers()
     }
     catch(std::string error)
     {
-        std::cerr << error << std::endl; 
+        std::cerr << error << std::endl;
     }
     try
     {
@@ -68,7 +66,7 @@ void WebServer:: setup_servers()
     }
     catch(std::string error)
     {
-        std::cerr << error << std::endl; 
+        std::cerr << error << std::endl;
     }
     try
     {
@@ -78,7 +76,7 @@ void WebServer:: setup_servers()
     }
     catch(std::string error)
     {
-        std::cerr << error << std::endl; 
+        std::cerr << error << std::endl;
     }
 
 }
@@ -95,7 +93,7 @@ void WebServer:: run_webserver()
     }
     catch(std::string error)
     {
-        std::cerr << error << std::endl; 
+        std::cerr << error << std::endl;
     }
-    
+
 }
