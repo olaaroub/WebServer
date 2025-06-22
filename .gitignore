@@ -4,3 +4,5 @@
 *.a
 *.out
 dependencies/
+body.bin
+webserv

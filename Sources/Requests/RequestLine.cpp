@@ -12,7 +12,7 @@ std::string& RequestLine:: get_line()
 
 void RequestLine:: SeparateMethod()
 {
-    int cont = line.find(" ");
+    size_t cont = line.find(" ");
     if (cont == std::string::npos)
         throw std::string("REQUEST ERROR: method not found");
     method = line.substr(0, cont);
@@ -21,7 +21,7 @@ void RequestLine:: SeparateMethod()
 
 void RequestLine:: SeparateQuerys()
 {
-    int cont;
+    size_t cont;
     while (true)
     {
         cont = line.find("&");
@@ -39,8 +39,8 @@ void RequestLine:: SeparateQuerys()
 
 void RequestLine:: SeparateUrl()
 {
-    int cont = line.find("?");
-    int cont1 = line.find(" ");
+    size_t cont = line.find("?");
+    size_t cont1 = line.find(" ");
     if (cont1 == std::string::npos)
         throw std::string("REQUEST ERROR: url error");
     if (cont != std::string::npos)

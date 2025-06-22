@@ -7,7 +7,6 @@ NAME = webserv
 SPATH = ./Sources/
 SRC = 	main.cpp \
  		WebServer.cpp\
-		test.cpp \
 		ConfigParse/ConfigParser.cpp \
 		Connections/client.cpp \
 		Connections/network.cpp \
@@ -16,7 +15,6 @@ SRC = 	main.cpp \
 		Methods/Get.cpp \
 		Methods/Methods.cpp \
 		Methods/Post.cpp \
-		Requests/Body.cpp \
 		Requests/Headers.cpp \
 		Requests/request.cpp \
 		Requests/RequestLine.cpp \
@@ -34,7 +32,7 @@ all: $(OPATH)  $(NAME)
 
 $(OPATH):
 	mkdir -p $(OPATH)
-	mkdir -p $(OPATH)/ConfigParser
+	mkdir -p $(OPATH)/ConfigParse
 	mkdir -p $(OPATH)/Connections
 	mkdir -p $(OPATH)/Methods
 	mkdir -p $(OPATH)/Requests

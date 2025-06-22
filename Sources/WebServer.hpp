@@ -1,8 +1,7 @@
 #ifndef WEBSERVER_HPP
 #define WEBSERVER_HPP
 
-#include "Connections/server.hpp"
-
+#include "server.hpp"
 #define MAX_EPOLL 100
 
 class WebServer
@@ -19,8 +18,7 @@ class WebServer
     public:
 
         static int kernel_identifier;
-        static void pars_config_file(std::string file_name);
-        static void run_webserver();
+        static void run_webserver(std::string file_name);
 };
 
 

@@ -4,14 +4,12 @@
 // #include "lib.hpp"
 #include "Headers.hpp"
 #include "RequestLine.hpp"
-#include "Body.hpp"
 #include <fstream>
 class Request
 {
     private:
         Headers Headers;
         RequestLine RequestLine;
-        Body Body;
 
         std::string buffer;
         short state;

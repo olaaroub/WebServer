@@ -2,7 +2,7 @@
 #define NETWORK_HPP
 
 #include "lib.hpp"
-
+#include <cstdio>
 class network
 {
     protected:

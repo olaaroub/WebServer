@@ -21,7 +21,7 @@ void Headers:: AddToMap(std::string line)
 
 void Headers:: HeadersParser()
 {
-    int cont;
+    size_t cont;
 
     while (true)
     {

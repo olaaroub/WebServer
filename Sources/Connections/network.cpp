@@ -31,7 +31,7 @@ void network:: epoll_crt()
     }
 }
 
-network:: network(int kernel_identifier, bool is_server) :  kernel_identifier(kernel_identifier), is_server(is_server)
+network:: network(int kernel_identifier, bool is_server) : is_server(is_server), kernel_identifier(kernel_identifier)
 {
 
 }

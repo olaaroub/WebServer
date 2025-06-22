@@ -1,12 +1,9 @@
 #include "request.hpp"
-
+#include <stdlib.h>
+#include <unistd.h>
 
 void Request:: is_finished()
 {
-    // if (buffer.find("\r\n\r\n") != std::string::npos)
-    //     request_ended = true;
-    // else
-    //     request_ended = false;
     if (state == 2)
         request_ended = true;
     else
@@ -54,7 +51,6 @@ void Request:: ParsBody(int socket_fd)
     body << buffer;
     if (!Headers.map["Content-Length"].empty())
     {
-        // std::cout << "Dddd\n";
         int cont = atoi(Headers.map["Content-Length"].c_str());
         cont -= buffer.size() - 1;
         if (cont - 1 == 0)
@@ -104,7 +100,7 @@ bool Request:: run_parser(int socket_fd)
     baff.append(bfr, cont);
     buffer = baff;
     std::cout << "is here\n";
-    // std::cout << buffer << std::endl;
+    std::cout << buffer << std::endl;
     StateOFParser(socket_fd);
     is_finished();
     return request_ended;

@@ -10,13 +10,6 @@ void WebServer:: add_server(network *instance)
     infos[instance->get_socket_fd()] = instance;
 }
 
-void WebServer::pars_config_file(std::string file_name)
-{
-    /*
-        here parsing
-    */
-}
-
 void WebServer:: epollEvent(int fd, int event)
 {
     infos[fd]->set_event(event);
@@ -82,8 +75,9 @@ void WebServer:: setup_servers()
 }
 
 
-void WebServer:: run_webserver()
+void WebServer:: run_webserver(std::string file_name)
 {
+    (void)file_name;
     try
     {
         std::cout << "setup servers\n";

@@ -1,5 +1,6 @@
 #include "WebServer.hpp"
 
+
 int main(int ac, char **av)
 {
     if (ac != 2)
@@ -7,6 +8,6 @@ int main(int ac, char **av)
         std::cout << "you shold entr only 2 args" << std::endl;
         return -1;
     }
-    WebServer::run_webserver();
+    WebServer::run_webserver(av[1]);
 
 }
