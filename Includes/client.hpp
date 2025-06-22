@@ -2,11 +2,13 @@
 #define CLIENT_HPP
 
 #include "network.hpp"
+#include "request.hpp"
 
 class client : public network
 {
     private:
-        char request_str[1024];
+        Request request;
+
     public:
         client();
         client(int kernel_id);

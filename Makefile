@@ -1,29 +1,50 @@
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 # CXXFLAGS += -fsanitize=address -g3
-# CXXFLAGS += -DDEBUG_MODE=1
 
-NAME = webserver
+NAME = webserv
 
-SRC = main.cpp client.cpp network.cpp \
- 		server.cpp WebServer.cpp\
-		
+SPATH = ./Sources/
+SRC = 	main.cpp \
+ 		WebServer.cpp\
+		ConfigParse/ConfigParser.cpp \
+		Connections/client.cpp \
+		Connections/network.cpp \
+		Connections/server.cpp \
+		Methods/Delete.cpp \
+		Methods/Get.cpp \
+		Methods/Methods.cpp \
+		Methods/Post.cpp \
+		Requests/Headers.cpp \
+		Requests/request.cpp \
+		Requests/RequestLine.cpp \
 
-OPATH = dependencies
+SRCS = $(addprefix $(SPATH), $(SRC))
+
+OPATH = ./dependencies/
 OBJ = $(SRC:.cpp=.o)
-OBJS = $(addprefix $(OPATH)/,$(OBJ))
+OBJS = $(addprefix $(OPATH),$(OBJ))
 DEPS = $(OBJS:.o=.d)
 
-all: $(NAME)
+INC			=	-I ./Includes/\
 
-$(NAME): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $@
-
-$(OPATH)/%.o: %.cpp | $(OPATH)
-	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
+all: $(OPATH)  $(NAME)
 
 $(OPATH):
 	mkdir -p $(OPATH)
+	mkdir -p $(OPATH)/ConfigParse
+	mkdir -p $(OPATH)/Connections
+	mkdir -p $(OPATH)/Methods
+	mkdir -p $(OPATH)/Requests
+
+
+$(OPATH)%.o:  $(SPATH)%.cpp
+	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@ $(INC)
+
+
+$(NAME): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ $(INC)
+
 
 -include $(DEPS)
 
@@ -37,3 +58,4 @@ fclean: clean
 re: fclean all
 
 .PHONY: all clean fclean re
+
