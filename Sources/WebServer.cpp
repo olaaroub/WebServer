@@ -14,6 +14,14 @@ void WebServer:: epollEvent(int fd, int event)
 {
     infos[fd]->set_event(event);
     infos[fd]->onEvent(infos);
+    if (event & (EPOLLERR | EPOLLHUP) || event & EPOLLOUT)
+    {
+        epoll_ctl(kernel_identifier , EPOLL_CTL_DEL, fd, 0);
+        delete infos[fd];
+        infos.erase(fd);
+        close(fd);
+    }
+
 }
 
 void WebServer:: lisning()

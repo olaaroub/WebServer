@@ -24,13 +24,7 @@ void client:: epoll_modify()
 void client:: onEvent(std::map<int, network *> &infos)
 {
     if (event & (EPOLLERR | EPOLLHUP))
-    {
         perror("ERROR: ");
-        delete infos[socket_fd];
-        infos.erase(socket_fd);
-        close(socket_fd);
-        epoll_ctl(kernel_identifier , EPOLL_CTL_DEL, socket_fd, 0);
-    }
     else if (event & EPOLLIN)
     {
         int is_finish = request.run_parser(socket_fd);
@@ -38,12 +32,10 @@ void client:: onEvent(std::map<int, network *> &infos)
             epoll_modify();
     }
     else if (event & EPOLLOUT)
-    {
         send(socket_fd, "thanks client\n", 14, 0);
-        epoll_ctl(kernel_identifier , EPOLL_CTL_DEL, socket_fd, 0);
-        // delete infos[socket_fd];
-        infos.erase(socket_fd);
-        close(socket_fd);
+}
 
-    }
+client:: ~client()
+{
+
 }

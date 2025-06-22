@@ -19,6 +19,8 @@ class client : public network
         {
             socket_fd = fd;
         }
+
+        ~client();
 };
 
 #endif
