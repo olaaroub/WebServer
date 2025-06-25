@@ -5,7 +5,7 @@ CXXFLAGS += -fsanitize=address -g3
 NAME = webserv
 
 SPATH = ./Sources/
-SRC = 	main.cpp \
+SRC = 	parsing.cpp \
  		WebServer.cpp\
 		ConfigParse/ConfigParser.cpp \
 		Connections/client.cpp \

@@ -13,5 +13,8 @@
 #include <algorithm>
 #include <map>
 #include <arpa/inet.h>
+#include <fstream>      
+#include <sstream>
+#include <stdexcept>
 
 #endif
