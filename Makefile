@@ -6,18 +6,19 @@ NAME = webserv
 
 SPATH = ./Sources/
 SRC = 	parsing.cpp \
- 		WebServer.cpp\
-		ConfigParse/ConfigParser.cpp \
-		Connections/client.cpp \
-		Connections/network.cpp \
-		Connections/server.cpp \
-		Methods/Delete.cpp \
-		Methods/Get.cpp \
-		Methods/Methods.cpp \
-		Methods/Post.cpp \
-		Requests/Headers.cpp \
-		Requests/request.cpp \
-		Requests/RequestLine.cpp \
+		ConfigParse/ConfigFileParser.cpp \
+		ConfigParse/ConfigFileReader.cpp\
+ 		# WebServer.cpp\
+		# Connections/client.cpp \
+		# Connections/network.cpp \
+		# Connections/server.cpp \
+		# Methods/Delete.cpp \
+		# Methods/Get.cpp \
+		# Methods/Methods.cpp \
+		# Methods/Post.cpp \
+		# Requests/Headers.cpp \
+		# Requests/request.cpp \
+		# Requests/RequestLine.cpp \
 
 SRCS = $(addprefix $(SPATH), $(SRC))
 

@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   FileReader.cpp                                     :+:      :+:    :+:   */
+/*   ConfigFileReader.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 13:42:33 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/06/25 13:58:54 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/06/28 17:21:45 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "FileReader.hpp"
+#include "ConfigFileReader.hpp"
 
 FileReader::FileReader(const std::string &path) : _confPath(path)
 {
