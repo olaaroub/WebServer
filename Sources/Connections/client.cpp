@@ -21,7 +21,7 @@ void client:: epoll_modify()
     }
 }
 
-void client:: onEvent(std::map<int, network *> &infos)
+void client:: onEvent()
 {
     if (event & (EPOLLERR | EPOLLHUP))
         perror("ERROR: ");
@@ -32,7 +32,7 @@ void client:: onEvent(std::map<int, network *> &infos)
             epoll_modify();
     }
     else if (event & EPOLLOUT)
-        send(socket_fd, "thanks client\n", 14, 0);
+        send(socket_fd, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 21\r\n\r\nChunked data received!", 95, 0);
 }
 
 client:: ~client()

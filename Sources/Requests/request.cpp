@@ -42,36 +42,92 @@ void Request:: ParsHeaders()
     else
         Headers.set_buffer(buffer);
 }
+#include <sstream>
+
+void Request:: ChunkReaContent(std::fstream &body, int socket_fd)
+{
+    while (!buffer.empty())
+    {
+        unsigned int len;
+        size_t findNewLine = buffer.find("\r\n");
+        std::cout << "'" << buffer << "'" << std::endl;
+        if (findNewLine == std::string::npos)
+            throw std::string("ERROR: structur of chunked POST not correct");
+        std::string len_str = buffer.substr(0, findNewLine);
+        std::istringstream ff(len_str);
+        ff >> std::hex >> len;
+        std::cout << "'" << len << "'" << std::endl;
+        if (!len)
+        {
+            request_ended = true;
+            return ;
+        }
+        buffer = buffer.substr(findNewLine + 2);
+        if (buffer.length() < len)
+        {
+            int cont = len - buffer.length();
+            char read_buffer[cont];
+            int readlen = read(socket_fd, &read_buffer, cont);
+            if (readlen < 0)
+                throw std::string("ERROR");
+            buffer.append(read_buffer, cont - 1);
+            body << buffer;
+            buffer = "";
+        }
+        else
+        {
+            findNewLine = buffer.find("\r\n");
+            if (findNewLine == std::string::npos)
+                throw std::string("ERROR: structur of chunked POST not correct");
+            std::string content = buffer.substr(0, findNewLine);
+            buffer = buffer.substr(findNewLine + 2);
+            std::cout << "len: " << len << " " << content.length() << std::endl;
+            if (static_cast<size_t>(len) != content.length())
+                throw std::string("Bad Request");
+            body << content;
+        }
+        
+    }
+}
+
+void Request:: ContentLenghtRead(std::fstream &body, int socket_fd)
+{
+    body << buffer;
+    int cont = atoi(Headers.map["Content-Length"].c_str());
+    cont -= buffer.size() - 1;
+    if (cont - 1 == 0)
+    {
+        request_ended = true;
+        return;
+    }
+    if (cont < 0)
+        throw std::string("ERROR: !");
+    char buf[cont];
+    int read_cont = read(socket_fd, &buf, cont - 1);
+    if (cont <= 0)
+    {
+        close(socket_fd);
+        throw std::string("ERROR: read failed");
+    }
+    buffer.append(buf, read_cont);
+    body << buffer;
+    request_ended = true;
+}
 
 void Request:: ParsBody(int socket_fd)
 {
-    std::fstream body("body.bin", std::ios::binary | std::ios::out);
+    std::stringstream ss;
+    ss << socket_fd;
+    ss >> file_name;
+    file_name += "_POST_FILE";
+    std::fstream body(file_name.c_str(), std::ios::binary | std::ios::out);
     if (!body.is_open())
         throw std::string("ERROR: file not open!");
-    body << buffer;
+    file = &body;
     if (!Headers.map["Content-Length"].empty())
-    {
-        int cont = atoi(Headers.map["Content-Length"].c_str());
-        cont -= buffer.size() - 1;
-        if (cont - 1 == 0)
-        {
-            request_ended = true;
-            return;
-        }
-        if (cont < 0)
-            throw std::string("ERROR: !");
-        char buf[cont];
-        int read_cont = read(socket_fd, &buf, cont - 1);
-        if (cont <= 0)
-        {
-            close(socket_fd);
-            throw std::string("ERROR: read failed");
-        }
-        buffer.append(buf, read_cont);
-        body << buffer;
-        request_ended = true;
-    }
-
+        ContentLenghtRead(body, socket_fd);
+    else if (!Headers.map["Transfer-Encoding"].empty() && Headers.map["Transfer-Encoding"] == "chunked")
+        ChunkReaContent(body, socket_fd);
 }
 
 void Request:: StateOFParser(int socket_fd)
@@ -99,9 +155,7 @@ bool Request:: run_parser(int socket_fd)
     }
     baff.append(bfr, cont);
     buffer = baff;
-    std::cout << "is here\n";
-    std::cout << buffer << std::endl;
+    // std::cout << "'" << buffer << "'" << std::endl;
     StateOFParser(socket_fd);
-    is_finished();
     return request_ended;
 }

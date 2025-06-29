@@ -14,7 +14,7 @@ class server : public network
     public:
         server();
         server(in_port_t port, in_addr_t ip_addres, int id);
-        void onEvent(std::map<int, network *> &infos);
+        void onEvent();
 };
 
 #endif

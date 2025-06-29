@@ -12,6 +12,7 @@ class Request
         RequestLine RequestLine;
 
         std::string buffer;
+        std::string file_name;
         short state;
         bool request_ended;
 
@@ -20,9 +21,12 @@ class Request
         void ParsHeaders();
         void ParsBody(int socket_fd);
         void StateOFParser(int socket_fd);
+        void ChunkReaContent(std::fstream &body, int socket_fd);
+        void ContentLenghtRead(std::fstream &body, int socket_fd);
     public:
         bool run_parser(int socket_fd);
 
+        std::fstream *file;
 };
 
 #endif
