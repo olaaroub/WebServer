@@ -8,6 +8,7 @@ SPATH = ./Sources/
 SRC = 	parsing.cpp \
 		ConfigParse/ConfigFileParser.cpp \
 		ConfigParse/ConfigFileReader.cpp\
+		ConfigParse/Configs.cpp
  		# WebServer.cpp\
 		# Connections/client.cpp \
 		# Connections/network.cpp \
