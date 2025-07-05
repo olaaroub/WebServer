@@ -59,7 +59,7 @@ void WebServer:: setup_servers()
     kernel_identifier = epoll_create(MAX_EPOLL);
     try
     {
-        server *instance = new server(9999, inet_addr("127.0.0.1"), kernel_identifier);
+        server *instance = new server(9991, inet_addr("127.0.0.1"), kernel_identifier);
         add_server(instance);
 
     }
@@ -69,7 +69,7 @@ void WebServer:: setup_servers()
     }
     try
     {
-        server *instance1 = new server(9991, inet_addr("127.0.0.2"), kernel_identifier);
+        server *instance1 = new server(9999, inet_addr("127.0.0.1"), kernel_identifier);
         add_server(instance1);
 
     }

@@ -2,8 +2,7 @@
 #define NETWORK_HPP
 
 #include "lib.hpp"
-#include <cstdio>
-#include <sys/socket.h>
+
 class network
 {
     protected:

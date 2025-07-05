@@ -1,6 +1,17 @@
 #ifndef LIB_HPP
 #define LIB_HPP
 
+#define ERROR_PAGES "error_page"
+#define LISTEN "listen"
+#define CLIENT_MAX_BODY_SIZE "client_max_body_size"
+#define SERVER_NAME "server_name"
+#define LOCATION "location"
+#define GET "GET"
+#define POST "POST"
+#define DELETE "DELETE"
+
+#define MAX_EPOLL 100
+
 #include <iostream>
 #include <string.h>
 #include <unistd.h>
@@ -13,5 +24,10 @@
 #include <algorithm>
 #include <map>
 #include <arpa/inet.h>
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
+#include <set>
+#include <cstdlib>
 
 #endif

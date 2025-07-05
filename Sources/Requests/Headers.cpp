@@ -18,7 +18,7 @@ void Headers:: AddToMap(std::string line)
     std::string value = line.substr(cont + 2);
     map[key] = value;
 }
-#include <stdlib.h>
+
 void Headers:: HeadersParser()
 {
     size_t cont;

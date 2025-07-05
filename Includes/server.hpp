@@ -2,6 +2,7 @@
 #define SERVER_HPP
 
 #include "network.hpp"
+#include "lib.hpp"
 
 class server : public network
 {

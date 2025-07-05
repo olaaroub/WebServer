@@ -2,7 +2,6 @@
 #define WEBSERVER_HPP
 
 #include "server.hpp"
-#define MAX_EPOLL 100
 
 class WebServer
 {

@@ -1,6 +1,4 @@
 #include "request.hpp"
-#include <stdlib.h>
-#include <unistd.h>
 
 void Request:: is_finished()
 {
@@ -47,8 +45,7 @@ void Request:: ParsHeaders()
     else
         Headers.set_buffer(buffer);
 }
-#include <sstream>
-#include <cstring>
+
 void Request:: ChunkReaContent(std::fstream &body, int socket_fd)
 {
     std::cout << "chunked" << std::endl;

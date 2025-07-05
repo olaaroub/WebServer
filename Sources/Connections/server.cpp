@@ -1,6 +1,6 @@
 #include "server.hpp"
 #include "client.hpp"
-#include "../WebServer.hpp"
+#include "WebServer.hpp"
 server:: server()
 {
     is_server = true;

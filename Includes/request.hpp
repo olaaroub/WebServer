@@ -1,10 +1,8 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
-// #include "lib.hpp"
 #include "Headers.hpp"
 #include "RequestLine.hpp"
-#include <fstream>
 class Request
 {
     private:
