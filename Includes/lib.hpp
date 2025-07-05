@@ -1,6 +1,15 @@
 #ifndef LIB_HPP
 #define LIB_HPP
 
+#define ERROR_PAGES "error_page"
+#define LISTEN "listen"
+#define CLIENT_MAX_BODY_SIZE "client_max_body_size"
+#define SERVER_NAME "server_name"
+#define LOCATION "location"
+#define GET "GET"
+#define POST "POST"
+#define DELETE "DELETE"
+
 #include <iostream>
 #include <string.h>
 #include <unistd.h>

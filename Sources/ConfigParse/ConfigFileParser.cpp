@@ -21,12 +21,10 @@ const std::vector<ServerConfigs> &ConfigParser::getServers() const { return this
 void ConfigParser::checkBraces() const
 {
 	int braces = 0;
-	for (size_t i = 0; i < _content.length(); i++)
-	{
+	for (size_t i = 0; i < _content.length(); i++){
 		if (_content[i] == '{')
 			braces++;
-		else if (_content[i] == '}')
-		{
+		else if (_content[i] == '}'){
 			if (braces == 0)
 				throw std::runtime_error("Config Error: Unmatched closing brace '}' found.");
 			braces--;
@@ -36,54 +34,56 @@ void ConfigParser::checkBraces() const
 		throw std::runtime_error("Config Error: Unmatched opening brace '{' at end of file.");
 }
 
-void ConfigParser::cleanContent(const std::string &content)
+void ConfigParser::cleanContent()
 {
 	std::string cleaned;
-	cleaned.reserve(content.length());
+	cleaned.reserve(_content.length());
 
-	for (size_t i = 0; i < content.length(); ++i)
-	{
-		char c = content[i];
-		if (c == '#')
-		{
-			while (i < content.length() && content[i] != '\n')
+	for (size_t i = 0; i < _content.length(); ++i){
+		char c = _content[i];
+		if (c == '#'){
+			while (i < _content.length() && _content[i] != '\n')
 				i++;
 			continue;
 		}
-		if (c == '{' || c == '}' || c == ';')
-		{
+		if (c == '{' || c == '}' || c == ';'){
 			if (!cleaned.empty() && cleaned[cleaned.length() - 1] != ' ')
 				cleaned += ' ';
 			cleaned += c;
 			cleaned += ' ';
 		}
-		else if (std::isspace(static_cast<unsigned char>(c)))
-		{
+		else if (std::isspace(static_cast<unsigned char>(c))){
 			if (!cleaned.empty() && cleaned[cleaned.length() - 1] != ' ')
 				cleaned += ' ';
 		}
 		else
-		{
 			cleaned += c;
-		}
 	}
 	this->_content = cleaned;
 }
 
 bool ConfigParser::isWhitespaces(const std::string &str) const
 {
-	for (size_t i = 0; i < str.length(); ++i)
-	{
+	for (size_t i = 0; i < str.length(); ++i){
 		if (!std::isspace(static_cast<unsigned char>(str[i])))
 			return false;
 	}
 	return true;
 }
 
+bool ConfigParser::isDirective(const std::string &str)const{
+	return( str == ERROR_PAGES || str == LISTEN || str == CLIENT_MAX_BODY_SIZE ||
+			 str == SERVER_NAME || str== LOCATION);
+}
+
+bool ConfigParser::isMethod(const std::string &str)const{
+	return(str == GET || str == POST || str == DELETE);
+}
+
 void ConfigParser::parse()
 {
 	this->checkBraces();
-	this->cleanContent(_content);
+	this->cleanContent();
 
 	size_t pos = 0;
 	while ((pos = this->_content.find("server", pos)) != std::string::npos)
@@ -130,20 +130,18 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
 
 	while (ss >> token)
 	{
-		if (token == "listen")
+		if (token == LISTEN)
 		{
 			if (server_conf.listen_set)
 				throw std::runtime_error("Config Error: Duplicate 'listen' directive.");
 			std::string listen_val;
 			ss >> listen_val;
 			size_t colon_pos = listen_val.find(':');
-			if (colon_pos != std::string::npos)
-			{
+			if (colon_pos != std::string::npos){
 				server_conf.host = listen_val.substr(0, colon_pos);
 				server_conf.port = std::atoi(listen_val.substr(colon_pos + 1).c_str());
 			}
-			else
-			{
+			else{
 				server_conf.port = std::atoi(listen_val.c_str());
 				server_conf.host = "0.0.0.0";
 			}
@@ -151,7 +149,7 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
 				throw std::runtime_error("Config Error: Missing ';' after 'listen' directive.");
 			server_conf.listen_set = true;
 		}
-		else if (token == "client_max_body_size")
+		else if (token == CLIENT_MAX_BODY_SIZE)
 		{
 			if (server_conf.client_max_body_size_set)
 				throw std::runtime_error("Config Error: Duplicate 'client_max_body_size' directive.");
@@ -162,16 +160,14 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
 				throw std::runtime_error("Config Error: Missing ';' after 'client_max_body_size' directive.");
 			server_conf.client_max_body_size_set = true;
 		}
-		else if (token == "server_name")
+		else if (token == SERVER_NAME)
 		{
-			while (ss >> token && token != ";")
-			{
+			while (ss >> token && !this->isDirective(token) &&token != ";" )
 				server_conf.server_names.push_back(token);
-			}
             if (token != ";")
                 throw std::runtime_error("Config Error: Missing ';' after 'server_name' directive.");
 		}
-		else if (token == "error_page")
+		else if (token == ERROR_PAGES)
 		{
 			int code;
 			std::string path;
@@ -180,7 +176,7 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
 			if (!(ss >> token) || token != ";")
 				throw std::runtime_error("Config Error: Missing ';' after 'error_page' directive.");
 		}
-		else if (token == "location")
+		else if (token == LOCATION)
 		{
 			server_conf.locations.push_back(parseLocationBlock(ss));
 		}
@@ -234,10 +230,8 @@ LocationConfigs ConfigParser::parseLocationBlock(std::stringstream &ss)
 		}
 		else if (token == "allow_methods")
 		{
-			while (ss >> token && token != ";")
-			{
+			while (ss >> token && this->isMethod(token) && token != ";")
 				location_conf.allowed_methods.push_back(token);
-			}
 			if (token != ";")
 				throw std::runtime_error("Config Error: Missing ';' after 'allow_methods' directive.");
 		}
@@ -285,38 +279,29 @@ void ConfigParser::validateServers() const
     std::map<std::string, std::set<std::string> > serverNameMap;
     std::set<std::string> defaultServers;
 
-    for (size_t i = 0; i < this->_servers.size(); ++i)
-    {
+    for (size_t i = 0; i < this->_servers.size(); ++i){
         const ServerConfigs& server = this->_servers[i];
         std::stringstream ss;
         ss << server.host << ":" << server.port;
         std::string listenKey = ss.str();
 
         std::set<std::string> locationPaths;
-        for (size_t j = 0; j < server.locations.size(); ++j)
-        {
+        for (size_t j = 0; j < server.locations.size(); ++j){
             if (!locationPaths.insert(server.locations[j].path).second)
-            {
                 throw std::runtime_error("Config Error: Duplicate location path '" + server.locations[j].path + "' in a server block.");
-            }
         }
 
         if (server.server_names.empty())
         {
             if (defaultServers.count(listenKey))
-            {
                 throw std::runtime_error("Config Error: Multiple default servers defined for " + listenKey);
-            }
             defaultServers.insert(listenKey);
         }
         else
         {
-            for (size_t j = 0; j < server.server_names.size(); ++j)
-            {
+            for (size_t j = 0; j < server.server_names.size(); ++j){
                 if (!serverNameMap[listenKey].insert(server.server_names[j]).second)
-                {
                     throw std::runtime_error("Config Error: Duplicate server_name '" + server.server_names[j] + "' for " + listenKey);
-                }
             }
         }
     }

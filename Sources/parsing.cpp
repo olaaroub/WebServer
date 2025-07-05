@@ -21,7 +21,7 @@ int main(int ac, char **av)
 
 		const std::vector<ServerConfigs> &servers = parser.getServers();
 
-		std::cout << "il y a " << servers.size() << " server configuration(s)." << std::endl;
+		std::cout << "il y a " << servers.size() << " server configurations." << std::endl;
 
 		for (size_t i = 0; i < servers.size(); ++i){
 			printServerConfig(servers[i], i + 1);

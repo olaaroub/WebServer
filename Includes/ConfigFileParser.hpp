@@ -26,9 +26,11 @@ private:
 	std::vector<ServerConfigs> _servers;
 
 	void checkBraces()const;
-	void cleanContent(const std::string& content);
+	void cleanContent();
 	void parse();
 	bool isWhitespaces(const std::string& str)const;
+	bool isDirective(const std::string& str)const;
+	bool isMethod(const std::string& str)const;
 
 	ServerConfigs parseServerBlock(const std::string& serverBlock);
     LocationConfigs parseLocationBlock(std::stringstream& ss);
