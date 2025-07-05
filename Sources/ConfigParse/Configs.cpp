@@ -19,5 +19,5 @@ LocationConfigs::LocationConfigs()
 	  upload_path_set(false), cgi_set(false) {}
 
 ServerConfigs::ServerConfigs()
-	: port(8080), host("0.0.0.0"), client_max_body_size(1048576),
-	  listen_set(false), client_max_body_size_set(false) { ; }
+	:host("0.0.0.0"), client_max_body_size(1048576),
+	  host_set(false), client_max_body_size_set(false) { ; }
