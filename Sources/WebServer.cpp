@@ -16,7 +16,7 @@ void WebServer:: epollEvent(int fd, int event)
     {  
         infos[fd]->set_event(event);
         infos[fd]->onEvent();
-        if (event & (EPOLLERR | EPOLLHUP) || event & EPOLLOUT)
+        if (event & (EPOLLERR | EPOLLHUP) || (event & EPOLLOUT))
         {
             epoll_ctl(kernel_identifier , EPOLL_CTL_DEL, fd, 0);
             delete infos[fd];

@@ -13,7 +13,6 @@ class Request
 
         std::string buffer;
         std::string file_name;
-        short state;
         bool request_ended;
 
         void is_finished();
@@ -25,7 +24,8 @@ class Request
         void ContentLenghtRead(std::fstream &body, int socket_fd);
     public:
         bool run_parser(int socket_fd);
-
+        short state;
+        
         std::fstream *file;
 };
 
