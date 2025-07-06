@@ -2,7 +2,7 @@
 #define NETWORK_HPP
 
 #include "lib.hpp"
-#include <cstdio>
+
 class network
 {
     protected:
@@ -28,7 +28,7 @@ class network
         int get_event();
 
         virtual ~network();
-        virtual void onEvent(std::map<int, network *> &infos) = 0;
+        virtual void onEvent() = 0;
 };
 
 #endif

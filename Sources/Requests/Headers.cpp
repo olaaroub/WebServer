@@ -35,5 +35,15 @@ void Headers:: HeadersParser()
     // {
     //     std::cout << "first: '" << it->first << "' second: '" << it->second << "'" << std::endl;
     // }
+    // exit(1);
     
 }
+
+/*
+
+5\r\n
+rredf\r\n
+0\r\n
+\r\n
+
+*/

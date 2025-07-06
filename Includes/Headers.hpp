@@ -1,9 +1,7 @@
 #ifndef HEADERS_HPP
 #define HEADERS_HPP
+#include "lib.hpp"
 
-#include <map>
-#include <string>
-#include "iostream"
 class Headers
 {
     private:

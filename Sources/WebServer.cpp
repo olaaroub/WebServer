@@ -12,15 +12,23 @@ void WebServer:: add_server(network *instance)
 
 void WebServer:: epollEvent(int fd, int event)
 {
-    infos[fd]->set_event(event);
-    infos[fd]->onEvent(infos);
-    if (event & (EPOLLERR | EPOLLHUP) || event & EPOLLOUT)
-    {
-        epoll_ctl(kernel_identifier , EPOLL_CTL_DEL, fd, 0);
-        delete infos[fd];
-        infos.erase(fd);
-        close(fd);
+    try
+    {  
+        infos[fd]->set_event(event);
+        infos[fd]->onEvent();
+        if (event & (EPOLLERR | EPOLLHUP) || (event & EPOLLOUT))
+        {
+            epoll_ctl(kernel_identifier , EPOLL_CTL_DEL, fd, 0);
+            delete infos[fd];
+            infos.erase(fd);
+            close(fd);
+        }
     }
+    catch(std::string error)
+    {
+        std::cout << error << std::endl; 
+    }
+    
 
 }
 
@@ -51,7 +59,7 @@ void WebServer:: setup_servers()
     kernel_identifier = epoll_create(MAX_EPOLL);
     try
     {
-        server *instance = new server(9999, inet_addr("127.0.0.1"), kernel_identifier);
+        server *instance = new server(9991, inet_addr("127.0.0.1"), kernel_identifier);
         add_server(instance);
 
     }
@@ -61,7 +69,7 @@ void WebServer:: setup_servers()
     }
     try
     {
-        server *instance1 = new server(9991, inet_addr("127.0.0.2"), kernel_identifier);
+        server *instance1 = new server(9999, inet_addr("127.0.0.1"), kernel_identifier);
         add_server(instance1);
 
     }

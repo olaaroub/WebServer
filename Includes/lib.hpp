@@ -10,6 +10,8 @@
 #define POST "POST"
 #define DELETE "DELETE"
 
+#define MAX_EPOLL 100
+
 #include <iostream>
 #include <string.h>
 #include <unistd.h>

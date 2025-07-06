@@ -1,9 +1,7 @@
 #ifndef REQUESTLINE_HPP
 #define REQUESTLINE_HPP
 
-#include <string>
-#include <vector>
-#include <iostream>
+#include "lib.hpp"
 
 class RequestLine
 {

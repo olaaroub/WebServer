@@ -14,12 +14,15 @@ class client : public network
         client(int kernel_id);
 
         void epoll_modify();
-        void onEvent(std::map<int, network *> &infos);
+        void onEvent();
         void set_fd(int fd)
         {
             socket_fd = fd;
         }
-
+        Request &get_request()
+        {
+            return request;
+        }
         ~client();
 };
 

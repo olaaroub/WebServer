@@ -1,25 +1,25 @@
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
-# CXXFLAGS += -fsanitize=address -g3
+CXXFLAGS += -fsanitize=address -g3
 
 NAME = webserv
 
 SPATH = ./Sources/
-SRC = 	parsing.cpp \
+SRC = 	main.cpp \
 		ConfigParse/ConfigFileParser.cpp \
 		ConfigParse/ConfigFileReader.cpp\
-		ConfigParse/Configs.cpp
- 		# WebServer.cpp\
-		# Connections/client.cpp \
-		# Connections/network.cpp \
-		# Connections/server.cpp \
-		# Methods/Delete.cpp \
-		# Methods/Get.cpp \
-		# Methods/Methods.cpp \
-		# Methods/Post.cpp \
-		# Requests/Headers.cpp \
-		# Requests/request.cpp \
-		# Requests/RequestLine.cpp \
+		ConfigParse/Configs.cpp\
+ 		WebServer.cpp\
+		Connections/client.cpp \
+		Connections/network.cpp \
+		Connections/server.cpp \
+		Methods/Delete.cpp \
+		Methods/Get.cpp \
+		Methods/Methods.cpp \
+		Methods/Post.cpp \
+		Requests/Headers.cpp \
+		Requests/request.cpp \
+		Requests/RequestLine.cpp \
 
 SRCS = $(addprefix $(SPATH), $(SRC))
 

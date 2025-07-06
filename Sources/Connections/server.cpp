@@ -1,6 +1,6 @@
 #include "server.hpp"
 #include "client.hpp"
-#include "../WebServer.hpp"
+#include "WebServer.hpp"
 server:: server()
 {
     is_server = true;
@@ -15,10 +15,16 @@ server::server(in_port_t port, in_addr_t ip_addres, int id) : network(id, true),
 
 void server:: bind_and_listen()
 {
+    int yes = 1;
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+    {
+        perror("setsockopt: ");
+        throw std::string("");
+    }
     if (bind(socket_fd, (sockaddr *)&network_infos, sizeof(network_infos)) < 0) 
     {
         perror("Bind: ");
-        throw std::string("the program exit !");
+        throw std::string("");
     }
     set_ToNoBlocking();
     if (listen(socket_fd, 1) < 0) 
@@ -39,7 +45,7 @@ void server:: creat_socket()
     memset(network_infos.sin_zero, 0, sizeof(network_infos.sin_zero));
 }
 
-void server:: onEvent(std::map<int, network *> &infos)
+void server:: onEvent()
 {
     sockaddr_in *clien_struct;
 
@@ -52,6 +58,6 @@ void server:: onEvent(std::map<int, network *> &infos)
         client_re->set_fd(fd);
         client_re->set_ToNoBlocking();
         client_re->epoll_crt();
-        infos[fd] = client_re;
+        WebServer::infos[fd] = client_re;
     }
 }

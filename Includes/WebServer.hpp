@@ -2,12 +2,10 @@
 #define WEBSERVER_HPP
 
 #include "server.hpp"
-#define MAX_EPOLL 100
 
 class WebServer
 {
     private:
-        static std::map<int, network *> infos;
         static struct epoll_event *evlist;
 
         static void add_server(network *instance);
@@ -17,6 +15,7 @@ class WebServer
         WebServer();
     public:
 
+        static std::map<int, network *> infos;
         static int kernel_identifier;
         static void run_webserver(std::string file_name);
 };
