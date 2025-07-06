@@ -6,7 +6,7 @@
 /*   By: ohammou- <ohammou-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 17:21:57 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/07/05 11:33:15 by ohammou-         ###   ########.fr       */
+/*   Updated: 2025/07/06 15:28:13 by ohammou-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,22 +132,54 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
 	{
 		if (token == LISTEN)
 		{
-			if (server_conf.listen_set)
-				throw std::runtime_error("Config Error: Duplicaten == LISTEN) 'listen' directive.");
 			std::string listen_val;
 			ss >> listen_val;
+
+			std::string parsed_host;
+			int parsed_port;
 			size_t colon_pos = listen_val.find(':');
 			if (colon_pos != std::string::npos){
-				server_conf.host = listen_val.substr(0, colon_pos);
-				server_conf.port = std::atoi(listen_val.substr(colon_pos + 1).c_str());
+				parsed_host = listen_val.substr(0, colon_pos);
+				// std::cout << "parsed_host: '" << parsed_host <<"'"<< std::endl;
+				// std::cout << "server_conf.host: '" << server_conf.host<<"'" << std::endl;
+				parsed_port = std::atoi(listen_val.substr(colon_pos + 1).c_str());
+				if(!server_conf.host_set)
+				{
+					server_conf.host = parsed_host;
+					server_conf.host_set = true;
+				}
+				else if(server_conf.host.compare(parsed_host) != 0)
+				{
+					// std::cout << "parsed_host: '" << parsed_host <<"'"<< std::endl;
+					// std::cout << "server_conf.host: '" << server_conf.host<<"'" << std::endl;
+					// std::cout << "listen_val: '" << listen_val <<"'"<< std::endl;
+					throw std::runtime_error("Config Error: Server block cannot have multiple host adresses.");
+				}
 			}
 			else{
-				server_conf.port = std::atoi(listen_val.c_str());
-				server_conf.host = "0.0.0.0";
+				parsed_port = std::atoi(listen_val.c_str());
+				std::cout << "parsed_host: '" << parsed_host <<"'"<< std::endl;
+				std::cout << "server_conf.host: '" << server_conf.host<<"'" << std::endl;
+				if(!server_conf.host_set)
+				{
+					server_conf.host = "0.0.0.0";
+					server_conf.host_set = true;
+				}
+				else if(server_conf.host.compare(parsed_host) != 0)
+				{
+					throw std::runtime_error("Server block cannot have multiple host adresses.");
+				}
 			}
+
+			std::vector<int>::iterator index = std::find( server_conf.ports.begin(),
+    											server_conf.ports.end(), parsed_port);
+			if(index == server_conf.ports.end())
+				server_conf.ports.push_back(parsed_port);
+
+
 			if (!(ss >> token) || token != ";")
 				throw std::runtime_error("Config Error: Missing ';' after 'listen' directive.");
-			server_conf.listen_set = true;
+			// server_conf.host_set = true;
 		}
 		else if (token == CLIENT_MAX_BODY_SIZE)
 		{
@@ -274,35 +306,45 @@ LocationConfigs ConfigParser::parseLocationBlock(std::stringstream &ss)
 	return location_conf;
 }
 
+
 void ConfigParser::validateServers() const
 {
     std::map<std::string, std::set<std::string> > serverNameMap;
     std::set<std::string> defaultServers;
+    std::set<std::string> serversHost;
 
     for (size_t i = 0; i < this->_servers.size(); ++i){
         const ServerConfigs& server = this->_servers[i];
-        std::stringstream ss;
-        ss << server.host << ":" << server.port;
-        std::string listenKey = ss.str();
-
         std::set<std::string> locationPaths;
-        for (size_t j = 0; j < server.locations.size(); ++j){
+
+        for (size_t j = 0; j < server.locations.size(); ++j)
             if (!locationPaths.insert(server.locations[j].path).second)
                 throw std::runtime_error("Config Error: Duplicate location path '" + server.locations[j].path + "' in a server block.");
+
+
+        for (size_t p = 0; p < server.ports.size(); ++p){
+            std::stringstream ss;
+            ss << server.host << ":" << server.ports[p];
+			// std::cout << "server.host + ports: '" << ss.str() <<"'"<< std::endl;
+            std::string listenKey = ss.str();
+            if (server.server_names.empty())
+            {
+                if (defaultServers.count(listenKey))
+                    throw std::runtime_error("Config Error: Multiple default servers defined for " + listenKey);
+                defaultServers.insert(listenKey);
+            }
+            else
+                for (size_t j = 0; j < server.server_names.size(); ++j)
+                    if (!serverNameMap[listenKey].insert(server.server_names[j]).second)
+                        throw std::runtime_error("Config Error: Duplicate server_name '" + server.server_names[j] + "' for " + listenKey);
         }
 
-        if (server.server_names.empty())
-        {
-            if (defaultServers.count(listenKey))
-                throw std::runtime_error("Config Error: Multiple default servers defined for " + listenKey);
-            defaultServers.insert(listenKey);
-        }
-        else
-        {
-            for (size_t j = 0; j < server.server_names.size(); ++j){
-                if (!serverNameMap[listenKey].insert(server.server_names[j]).second)
-                    throw std::runtime_error("Config Error: Duplicate server_name '" + server.server_names[j] + "' for " + listenKey);
-            }
-        }
+		if(!server.host.empty())
+		{
+			if(serversHost.count(server.host))
+				throw std::runtime_error("Config Error: Duplicate host '" + server.host + "' in server blocks.");
+			serversHost.insert(server.host);
+		}
+
     }
 }

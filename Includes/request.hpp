@@ -14,6 +14,7 @@ class Request
         bool request_ended;
 
         void is_finished();
+        void is_number(std::string string);
         void ParsRequstLine();
         void ParsHeaders();
         void ParsBody(int socket_fd);

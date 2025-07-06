@@ -1,21 +1,21 @@
 #include "client.hpp"
-
-client:: client() : network()
+#include "WebServer.hpp"
+client:: client(const ServerConfigs& server_config) : network(server_config, false)
 {
-    is_server = false;
+    // is_server = false;
     request.state = 0;
 }
 
-client:: client(int kernel_id) : network(kernel_id, false)
-{
-    request.state = 0;
-}
+// client:: client() : network(false)
+// {
+//     request.state = 0;
+// }
 
 void client:: epoll_modify()
 {
     ev.events = EPOLLOUT | EPOLLRDHUP;
     ev.data.fd = socket_fd;
-    if (epoll_ctl(kernel_identifier, EPOLL_CTL_MOD, socket_fd, &ev) < 0)
+    if (epoll_ctl(WebServer:: kernel_identifier, EPOLL_CTL_MOD, socket_fd, &ev) < 0)
     {
         perror("epoll_modify");
         throw std::string("");

@@ -2,6 +2,8 @@
 #define WEBSERVER_HPP
 
 #include "server.hpp"
+#include "network.hpp"
+#include "ConfigFileParser.hpp"
 
 class WebServer
 {
@@ -9,7 +11,7 @@ class WebServer
         static struct epoll_event *evlist;
 
         static void add_server(network *instance);
-        static void setup_servers();
+        static void setup_servers(const std::vector<ServerConfigs>& servers);
         static void lisning();
         static void epollEvent(int fd, int event);
         WebServer();
@@ -17,7 +19,7 @@ class WebServer
 
         static std::map<int, network *> infos;
         static int kernel_identifier;
-        static void run_webserver(std::string file_name);
+        static void run_webserver(const std::vector<ServerConfigs>& servers);
 };
 
 

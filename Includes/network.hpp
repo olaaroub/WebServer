@@ -2,20 +2,20 @@
 #define NETWORK_HPP
 
 #include "lib.hpp"
-
+#include "Configs.hpp"
 class network
 {
     protected:
         int socket_fd;
         bool is_server;
         sockaddr_in network_infos;
-        int kernel_identifier;
+        const ServerConfigs &server_config;
         int event;
     public:
         epoll_event ev;
 
-        network();
-        network(int kernel_identifier, bool is_server);
+        network(const ServerConfigs &server_config);
+        network(const ServerConfigs &server_config , bool is_server);
 
         int get_socket_fd();
 

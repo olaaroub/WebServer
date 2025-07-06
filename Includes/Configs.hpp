@@ -40,14 +40,14 @@ struct LocationConfigs
 struct ServerConfigs
 {
 	ServerConfigs();
-	int         port;
+	std::vector<int>         ports;
     std::string host;
     std::vector<std::string> server_names;
     long        client_max_body_size;
     std::map<int, std::string> error_pages;
     std::vector<LocationConfigs> locations;
 
-    bool listen_set;
+    bool host_set;
     bool client_max_body_size_set;
 
 };

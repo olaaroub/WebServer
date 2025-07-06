@@ -97,13 +97,25 @@ void Request:: ChunkReaContent(std::fstream &body, int socket_fd)
     }
 }
 
+void Request:: is_number(std::string string)
+{
+    for (size_t i = 0; i < string.length(); i++)
+    {
+        if (!isdigit(string[i]))
+            throw std::string("ERROR: length not number");
+    }
+}
+
 void Request:: ContentLenghtRead(std::fstream &body, int socket_fd)
 {
     int cont;
+    std::string number;
     if (!Headers.map["Content-Length"].empty())
-        cont = atoi(Headers.map["Content-Length"].c_str());
+        number = Headers.map["Content-Length"];
     else
-        cont = atoi(Headers.map["content-length"].c_str());
+        number = Headers.map["content-length"];
+    is_number(number);
+    cont = atoi(number.c_str());
     cont -= buffer.size();
     if (cont < 0)
         throw std::string("ERROR: !");
@@ -134,6 +146,8 @@ void Request:: ParsBody(int socket_fd)
         ContentLenghtRead(body, socket_fd);
     else if (!Headers.map["Transfer-Encoding"].empty() && Headers.map["Transfer-Encoding"] == "chunked")
         ChunkReaContent(body, socket_fd);
+    else
+        throw std::string("ERROR");
 }
 
 void Request:: StateOFParser(int socket_fd)
@@ -144,7 +158,6 @@ void Request:: StateOFParser(int socket_fd)
         ParsHeaders();
     if (state == 2 && RequestLine.get_method() == "POST")
         ParsBody(socket_fd);
-    // std::cout << state << std::endl;
 
 }
 

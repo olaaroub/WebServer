@@ -39,8 +39,14 @@ void printServerConfig(const ServerConfigs &server, size_t index)
 {
 	std::cout << "\n========================================" << std::endl;
 	std::cout << "     Server Block: " << index << std::endl;
-	std::cout << "Host: " << server.host << std::endl;
-	std::cout << "Port: " << server.port << std::endl;
+	std::cout << "  Host: " << server.host << std::endl;
+
+	std::cout << "  Ports: ";
+	for (size_t i = 0; i < server.ports.size(); ++i)
+	{
+		std::cout << server.ports[i] << " ";
+	}
+	std::cout << std::endl;
 	std::cout << "Body Size: " << server.client_max_body_size << std::endl;
 
 	if (!server.server_names.empty())

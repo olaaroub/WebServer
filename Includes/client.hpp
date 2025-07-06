@@ -10,8 +10,8 @@ class client : public network
         Request request;
 
     public:
-        client();
-        client(int kernel_id);
+        client(const ServerConfigs& server_config);
+        // client(int kernel_id);
 
         void epoll_modify();
         void onEvent();
