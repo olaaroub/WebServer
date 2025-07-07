@@ -10,8 +10,8 @@ class client : public network
         Request request;
 
     public:
-        client();
-        client(int kernel_id);
+        client(const ServerConfigs& server_config);
+        // client(int kernel_id);
 
         void epoll_modify();
         void onEvent();
@@ -22,6 +22,10 @@ class client : public network
         Request &get_request()
         {
             return request;
+        }
+        long get_max_body()
+        {
+            return server_config.client_max_body_size;
         }
         ~client();
 };

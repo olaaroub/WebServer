@@ -1,4 +1,5 @@
 #include "network.hpp"
+#include "WebServer.hpp"
 
 int network:: get_socket_fd()
 {
@@ -14,24 +15,23 @@ void network:: set_ToNoBlocking()
         throw std::string("Failed to set non-blocking mode\n");
 }
 
-network:: network()
+network:: network(const ServerConfigs &server_config) : server_config(server_config)
 {
 
 }
-
 
 void network:: epoll_crt()
 {
     ev.events = EPOLLIN;
     ev.data.fd = socket_fd;
-    if (epoll_ctl(kernel_identifier, EPOLL_CTL_ADD, socket_fd, &ev) < 0)
+    if (epoll_ctl(WebServer::kernel_identifier, EPOLL_CTL_ADD, socket_fd, &ev) < 0)
     {
         perror("epoll_ctl");
         throw std::string("");
     }
 }
 
-network:: network(int kernel_identifier, bool is_server) : is_server(is_server), kernel_identifier(kernel_identifier)
+network:: network(const ServerConfigs &server_config , bool is_server) : is_server(is_server), server_config(server_config)
 {
 
 }

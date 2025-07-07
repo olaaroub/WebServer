@@ -9,6 +9,13 @@ std::string Headers:: get_buffer()
     return buffer;
 }
 
+void Headers:: to_lower(std::string &string)
+{
+    std::string buf = string;
+    for(size_t i = 0;i < buf.length();i++)
+        string[i] = tolower(buf[i]);
+}
+
 void Headers:: AddToMap(std::string line)
 {
     size_t cont = line.find(":");
@@ -16,8 +23,11 @@ void Headers:: AddToMap(std::string line)
         throw std::string("ERROR: header error");
     std::string key = line.substr(0, cont);
     std::string value = line.substr(cont + 2);
-    map[key] = value;
+    to_lower(key);
+    // std::cout<< key << " " << value << std::endl;
+    map[key].push_back(value);
 }
+
 
 void Headers:: HeadersParser()
 {
@@ -31,9 +41,14 @@ void Headers:: HeadersParser()
         AddToMap(buffer.substr(0, cont));
         buffer = buffer.substr(cont + 2);
     }
-    // for (std::map<std::string, std::string>::iterator it = map.begin(); it != map.end(); it++)
+
+    if (map["host"].size() > 1 || map["content-length"].size() > 1
+        || map["content-type"].size() > 1 || map["authorization"].size() > 1
+            || map["transfer-encoding"].size() > 1)
+        throw std::string("ERROR: duplicate headers");
+    // for (std::map<std::string, std::vector<std::string> >::iterator it = map.begin(); it != map.end(); it++)
     // {
-    //     std::cout << "first: '" << it->first << "' second: '" << it->second << "'" << std::endl;
+    //     std::cout << "first: '" << it->first << "' second: '" << it->second.at(0) << "'" << std::endl;
     // }
     // exit(1);
     

@@ -54,56 +54,45 @@ void WebServer:: lisning()
 }
 
 
-void WebServer:: setup_servers()
+void WebServer:: setup_servers(const std::vector<ServerConfigs>& servers)
 {
     kernel_identifier = epoll_create(MAX_EPOLL);
-    try
+    for (std::vector<ServerConfigs>::const_iterator it = servers.begin(); it != servers.end(); it++)
     {
-        server *instance = new server(9991, inet_addr("127.0.0.1"), kernel_identifier);
-        add_server(instance);
-
-    }
-    catch(std::string error)
-    {
-        std::cerr << error << std::endl;
-    }
-    try
-    {
-        server *instance1 = new server(9999, inet_addr("127.0.0.1"), kernel_identifier);
-        add_server(instance1);
-
-    }
-    catch(std::string error)
-    {
-        std::cerr << error << std::endl;
-    }
-    try
-    {
-        server *instance2 = new server(9992, inet_addr("127.0.0.3"), kernel_identifier);
-        add_server(instance2);
-
-    }
-    catch(std::string error)
-    {
-        std::cerr << error << std::endl;
+        for (std::vector<int>::const_iterator its = it->ports.begin(); its != it->ports.end(); its++)
+        {
+            try
+            {
+                server *new_server = new server((*its), inet_addr((*it).host.c_str()), (*it));
+                add_server(new_server);  
+            }
+            catch(std::string error)
+            {
+                std::cerr << error << std::endl;
+            }
+        }
     }
 
 }
 
 
-void WebServer:: run_webserver(std::string file_name)
+void WebServer:: run_webserver(const std::vector<ServerConfigs> &servers)
 {
-    (void)file_name;
+    // (void)file_name;
     try
     {
         std::cout << "setup servers\n";
-        setup_servers();
+        setup_servers(servers);
         std::cout << "lisning ...\n";
         lisning();
     }
     catch(std::string error)
     {
         std::cerr << error << std::endl;
+    }
+    catch(std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
     }
 
 }

@@ -1,12 +1,13 @@
 #include "server.hpp"
 #include "client.hpp"
 #include "WebServer.hpp"
-server:: server()
+
+server:: server(const ServerConfigs &server_config) : network(server_config) 
 {
     is_server = true;
 }
 
-server::server(in_port_t port, in_addr_t ip_addres, int id) : network(id, true),port(port), ip_addres(ip_addres)
+server::server(in_port_t port, in_addr_t ip_addres,const ServerConfigs &server_config) : network(server_config, true),port(port), ip_addres(ip_addres)
 {
     creat_socket();
     bind_and_listen();
@@ -51,7 +52,7 @@ void server:: onEvent()
 
     if (event & EPOLLIN)
     {
-        client *client_re = new client(WebServer::kernel_identifier);
+        client *client_re = new client(server_config);
         clien_struct = client_re->get_sockaddr();
         socklen_t addr_size = sizeof(clien_struct);
         int fd = accept(socket_fd, (sockaddr *)clien_struct, &addr_size);
