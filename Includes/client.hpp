@@ -23,6 +23,10 @@ class client : public network
         {
             return request;
         }
+        long get_max_body()
+        {
+            return server_config.client_max_body_size;
+        }
         ~client();
 };
 

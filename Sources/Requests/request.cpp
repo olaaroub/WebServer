@@ -110,12 +110,12 @@ void Request:: ContentLenghtRead(std::fstream &body, int socket_fd)
 {
     int cont;
     std::string number;
-    if (!Headers.map["Content-Length"].empty())
-        number = Headers.map["Content-Length"];
-    else
-        number = Headers.map["content-length"];
+
+    number = Headers.map["content-length"].at(0);
     is_number(number);
     cont = atoi(number.c_str());
+    if (cont < 0)
+        throw std::string("ERROR:bad request");
     cont -= buffer.size();
     if (cont < 0)
         throw std::string("ERROR: !");
@@ -142,9 +142,10 @@ void Request:: ParsBody(int socket_fd)
     if (!body.is_open())
         throw std::string("ERROR: file not open!");
     file = &body;
-    if (!Headers.map["Content-Length"].empty() || !Headers.map["content-length"].empty())
+    // std::cout << Headers.map["transfer-encoding"].at(0) << std::endl;
+    if (!Headers.map["content-length"].empty() && Headers.map["transfer-encoding"].empty())
         ContentLenghtRead(body, socket_fd);
-    else if (!Headers.map["Transfer-Encoding"].empty() && Headers.map["Transfer-Encoding"] == "chunked")
+    else if (!Headers.map["transfer-encoding"].empty() && Headers.map["transfer-encoding"].at(0) == "chunked" && Headers.map["content-length"].empty())
         ChunkReaContent(body, socket_fd);
     else
         throw std::string("ERROR");
