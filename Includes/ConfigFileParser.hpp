@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigFileParser.hpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ohammou- <ohammou-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 14:21:00 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/07/01 19:35:08 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/07/06 15:34:57 by ohammou-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include "lib.hpp"
 #include "Configs.hpp"
+
 class ConfigParser
 {
 public:

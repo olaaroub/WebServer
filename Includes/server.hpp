@@ -4,6 +4,7 @@
 #include "network.hpp"
 #include "lib.hpp"
 
+// class network;
 class server : public network
 {
     private:
@@ -13,8 +14,8 @@ class server : public network
         void creat_socket();
         void bind_and_listen();
     public:
-        server();
-        server(in_port_t port, in_addr_t ip_addres, int id);
+        server(const ServerConfigs &server_config);
+        server(in_port_t port, in_addr_t ip_addres,const ServerConfigs &server_config);
         void onEvent();
 };
 

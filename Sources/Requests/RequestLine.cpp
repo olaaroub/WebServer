@@ -17,6 +17,8 @@ void RequestLine:: SeparateMethod()
         throw std::string("REQUEST ERROR: method not found");
     method = line.substr(0, cont);
     line = line.substr(++cont);
+    if (method != "POST" && method != "GET" && method != "DELETE")
+        throw std::string("ERROR: this method not allowed");
 }
 
 void RequestLine:: SeparateQuerys()
@@ -55,6 +57,8 @@ void RequestLine:: SeparateUrl()
         line = line.substr(++cont1);
     }
     HttpVerction = line;
+    if (HttpVerction != "HTTP/1.1")
+        throw std::string("ERROR: verstion of HTTP not seported");
 }
 
 void RequestLine:: ParsRequestLine()
