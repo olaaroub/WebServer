@@ -31,7 +31,7 @@ void client:: epoll_modify()
 
 int check_location(ServerConfigs serverconfigs, std::string uri)
 {
-    int max_length = -1;
+    unsigned long max_length = -1;
     int right_index = -1;
     for (unsigned long i = 0; i < serverconfigs.locations.size() ; i++)
     {
@@ -114,6 +114,7 @@ std::string get_response(struct stat file_info, std::string file_path, std::stri
     // body
     response << body;
 
+    return response.str();
 
 
 
