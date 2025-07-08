@@ -12,22 +12,6 @@ int main(int ac, char **av)
 
 	std::string configPath = (ac == 2) ? av[1] : "configs/l3robi.conf";
 
-
-	    // std::cout << "-- test --------------------------------" << std::endl;
-        // std::string name = "mo";
-        // std::string uri = "ismail";
-		// unsigned long x=  uri.find(name);
-		// if (x == std::string::npos)
-		// 	std::cout << "not found" << std::endl;
-		// else
-		// 	std::cout << "found at index : " << x << std::endl;
-        // // std::cout << uri.find(name) << std::endl;
-
-
-
-        // std::cout << " -- test --------------------------------" << std::endl;
-
-
 	try
 	{
 		FileReader reader(configPath);

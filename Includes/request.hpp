@@ -6,6 +6,9 @@
 class Request
 {
     private:
+        Headers Headers;
+        RequestLine RequestLine;
+
         std::string buffer;
         std::string file_name;
         bool request_ended;
@@ -21,12 +24,8 @@ class Request
     public:
         bool run_parser(int socket_fd);
         short state;
-        std::fstream *file;
         
-        Headers Headers;
-        RequestLine RequestLine;
-
-
+        std::fstream *file;
 };
 
 #endif

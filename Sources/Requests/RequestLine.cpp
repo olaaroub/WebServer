@@ -72,13 +72,3 @@ std::string RequestLine:: get_method()
 {
     return method;
 }
-// what ismail add !
-std::string RequestLine:: get_url()
-{
-    return url;
-}
-
-std::string RequestLine:: get_httpversion()
-{
-    return HttpVerction;
-}
