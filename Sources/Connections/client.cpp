@@ -31,14 +31,14 @@ void client:: epoll_modify()
 
 int check_location(ServerConfigs serverconfigs, std::string uri)
 {
-    unsigned long max_length = -1;
+    long max_length = -1;
     int right_index = -1;
     for (unsigned long i = 0; i < serverconfigs.locations.size() ; i++)
     {
         std::string path = serverconfigs.locations.at(i).path;
         if (uri.find(path) == 0)
         {
-            if (path.length() > max_length)
+            if ((long)path.length() > max_length)
             {
                 max_length = path.length();
                 right_index = i;
@@ -115,10 +115,6 @@ std::string get_response(struct stat file_info, std::string file_path, std::stri
     response << body;
 
     return response.str();
-
-
-
-
 }
 
 std::string get_body(std::string file_path)
@@ -130,12 +126,43 @@ std::string get_body(std::string file_path)
         return "error";
     }
 
+    std::string str;
+    std::istreambuf_iterator<char> it(file_stream);
+    std::istreambuf_iterator<char> end;
 
+    while (it != end) {
+    str += *it;
+    ++it; // Move to the next one
+    }
 
-    return "ss";
+    return str;
 
 }
 
+
+void send_response(int socket_fd, std::string response)
+{
+
+    int length = response.length();
+    int byte_sended = 0;
+    while (byte_sended < length)
+    {
+        ssize_t byte_send = send(socket_fd, response.c_str() + byte_sended, length - byte_sended, 0);
+        if (byte_send == -1)
+        {
+            // if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            // std::cout << "Socket is busy, will try again later." << std::endl;
+            // break; // Exit the loop for now
+
+            std::cout << "error !" << std::endl;
+            return ;
+        }
+        byte_sended += byte_send;
+    }
+    
+
+
+}
 
 void client:: onEvent()
 {
@@ -154,6 +181,7 @@ void client:: onEvent()
         std::cout << "------------------Part of response begin !!!--------------" << std::endl;
 
         // -(My part ) ==> GET POST DELETE - -------------------//
+
 
         int location = check_location(server_config, request.RequestLine.get_url());
         if (location == -1)
@@ -191,6 +219,7 @@ void client:: onEvent()
                     // sending the response
                     
                     std::string response = get_response(file_info, full_path , get_body(full_path));
+                    send_response(socket_fd, response);
 
                 }
             }
