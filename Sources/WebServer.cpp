@@ -32,7 +32,7 @@ void WebServer:: epollEvent(int fd, int event)
 
 }
 
-void WebServer:: lisning()
+void WebServer:: listening()
 {
     evlist = new epoll_event[infos.size()];
 
@@ -64,7 +64,7 @@ void WebServer:: setup_servers(const std::vector<ServerConfigs>& servers)
             try
             {
                 server *new_server = new server((*its), inet_addr((*it).host.c_str()), (*it));
-                add_server(new_server);  
+                add_server(new_server);
             }
             catch(std::string error)
             {
@@ -83,11 +83,12 @@ void WebServer:: run_webserver(const std::vector<ServerConfigs> &servers)
     {
         std::cout << "setup servers\n";
         setup_servers(servers);
-        std::cout << "lisning ...\n";
-        lisning();
+        std::cout << "listening ...\n";
+        listening();
     }
     catch(std::string error)
     {
+        delete evlist;
         std::cerr << error << std::endl;
     }
     catch(std::exception &e)
