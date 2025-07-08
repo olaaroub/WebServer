@@ -20,6 +20,8 @@ class RequestLine
         std::string &get_line();
         void ParsRequestLine();
         std::string get_method();
+        std::string get_url();
+        std::string get_httpversion();
 };
 
 #endif
