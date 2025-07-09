@@ -61,6 +61,7 @@ void client::onEvent()
 
                 const std::string& requestUri = normalizePath(request.RequestLine.getUrl());
 
+
                 const LocationConfigs* location = findLocation(requestUri);
                 if (location)
                 {
@@ -79,12 +80,17 @@ void client::onEvent()
                     if (location->cgi_handlers.count(extension))
                     {
                         std::cout << "CGI request. " << std::endl;
+
                         // hna ghadi nkhdm cgi
+
                     }
                     else
                     {
                         std::cout << "static file request." << std::endl;
+
                         // hna khas ndiro post get delete
+
+
                     }
                 }
                 else
@@ -107,7 +113,18 @@ void client::onEvent()
     else if (event & EPOLLOUT)
     {
         std::cout << "send output" << std::endl;
-        send(socket_fd, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 21\r\n\r\nChunked data received!", 87, 0);
+        std::ifstream file("www/index.html");
+        std::stringstream ss;
+
+        ss << file.rdbuf();
+        // std::cout << ss.rdbuf() << std::endl;
+
+        std::string holder = ss.rdbuf()->str();
+        std::stringstream len;
+        len << holder.length();
+
+        std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + len.rdbuf()->str() + "\r\n\r\n" + holder;
+        send(socket_fd, res.c_str(), res.length(), 0);
         throw std::runtime_error("finished sending response.");
     }
 }

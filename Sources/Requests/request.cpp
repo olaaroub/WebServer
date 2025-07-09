@@ -99,7 +99,7 @@ void Request:: ContentLenghtRead(std::fstream &body, int socket_fd)
     number = Headers.map["content-length"].at(0);
     is_number(number);
     cont = atol(number.c_str());
-    if (cont < 0 || cont >= max_body_size)
+    if (cont < 0)
         throw std::string("ERROR:bad request");
     cont -= buffer.size();
     if (cont < 0)
@@ -160,7 +160,7 @@ bool Request:: run_parser(int socket_fd)
     }
     buffer.append(bfr, cont);
     // buffer = baff;
-    // std::cout << "'" << buffer << "'" << std::endl;
+    std::cout << "'" << buffer << "'" << std::endl;
     StateOFParser(socket_fd);
     // std::cout << RequestLine.url << std::endl;
     return request_ended;

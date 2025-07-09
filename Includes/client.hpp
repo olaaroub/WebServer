@@ -10,6 +10,7 @@ private:
     Request request;
     const LocationConfigs *findLocation(const std::string &uri);
 
+
 public:
     client(const ServerConfigs &server_config);
 

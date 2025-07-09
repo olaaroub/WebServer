@@ -104,7 +104,6 @@ void WebServer:: setup_servers(const std::vector<ServerConfigs>& servers)
 
 void WebServer:: run_webserver(const std::vector<ServerConfigs> &servers)
 {
-    // (void)file_name;
     try
     {
         std::cout << "setup servers\n";
@@ -119,7 +118,7 @@ void WebServer:: run_webserver(const std::vector<ServerConfigs> &servers)
     }
     catch(std::exception &e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "here lllll " << e.what() << std::endl;
     }
 
 }
