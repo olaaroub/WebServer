@@ -98,15 +98,15 @@ std::string getMimeType(const std::string& filePath) {
     return "application/octet-stream";
 }
 
-std::string get_response(struct stat file_info, std::string file_path, std::string body)
+std::string get_response(long size, std::string file_path, std::string body, std::string status_line)
 {
     std::stringstream response;
 
     // Status Line
-    response << "HTTP/1.1 200 OK\r\n";
+    response << status_line;
     // Headers
-    response << "Content-Length: " << file_info.st_size << "\r\n";
-    response << "Content-Type: " << getMimeType(file_path) << "\r_n";
+    response << "Content-Length: " << size << "\r\n";
+    response << "Content-Type: " << getMimeType(file_path) << "\r\n";
 
     // Blank line separating headers from body
     response << "\r\n";
@@ -164,6 +164,29 @@ void send_response(int socket_fd, std::string response)
 
 }
 
+long getFileSize(const std::string& path) {
+    struct stat file_info;
+
+    if (stat(path.c_str(), &file_info) != 0) {
+        return -1; // Return -1 to signal an error
+    }
+
+    return file_info.st_size;
+}
+
+
+void error_response(int socket_fd, std::string error_fileName, std::string status_line)
+{
+    std::string full_path = "/home/iahamdan/Desktop/WebServer/Pages/Errors/" + error_fileName; 
+
+    std::string response = get_response(getFileSize(full_path), full_path , get_body(full_path), status_line);
+    send_response(socket_fd, response);
+    std::cout << "the error response send successfully !" << std::endl;
+
+}
+
+
+
 void client:: onEvent()
 {
     if (event & (EPOLLERR | EPOLLHUP))
@@ -185,11 +208,19 @@ void client:: onEvent()
 
         int location = check_location(server_config, request.RequestLine.get_url());
         if (location == -1)
-            std::cout << "error , there is not a location like this !! not found " << std::endl;
+        {
+            // std::cout << "error , there is not a location like this !! not found " << std::endl;
+            error_response(socket_fd, "404.html", "HTTP/1.1 404 Not Found");
+            return ;
+        }
 
         int method = check_method(request.RequestLine.get_method(), server_config.locations.at(location).allowed_methods);
         if (method == 0)
-            std::cout << "error , method not found !!" << std::endl;
+        {
+            // std::cout << "error , method not found !!" << std::endl;
+            error_response(socket_fd, "405.html", "HTTP/1.1 405 Method Not Allowed");
+            return ;
+        }
 
         // start building GET method !!
         if (request.RequestLine.get_method() == "GET")
@@ -200,39 +231,61 @@ void client:: onEvent()
             // check is this path exsist !
             struct stat file_info;
 
+            std::cout << "the full path !!!  : " << full_path << std::endl;
+
             if (stat(full_path.c_str(), &file_info) != 0)
             {
-                std::cout << "error , not found !" << std::endl;
+                std::cout << "error , the file not found !" << std::endl;
+                error_response(socket_fd, "404.html", "HTTP/1.1 404 Not Found");
+                return ;
             }
             bool is_a_file = S_ISREG(file_info.st_mode);
             bool is_a_dir = S_ISDIR(file_info.st_mode);
 
-            if (!is_a_file)
+            if (is_a_file == true)
             {
                 // check  permession !
-                if (file_info.st_mode & S_IRUSR)
+                if ((file_info.st_mode & S_IRUSR) == 0)
                 {
                     std::cout << "error, 403 Forbiden ! (there is no permession for read)" << std::endl;
+                    error_response(socket_fd, "403.html", "HTTP/1.1 403 Forbidden");
+                    return ;
                 }
                 else 
                 {
                     // sending the response
                     
-                    std::string response = get_response(file_info, full_path , get_body(full_path));
+                    std::string response = get_response(file_info.st_size, full_path , get_body(full_path), "HTTP/1.1 200 OK\r\n");
                     send_response(socket_fd, response);
-
+                    std::cout << "the response send successfully !" << std::endl;
                 }
             }
-            else if (!is_a_dir)
+            else if (is_a_dir == true)
             {
                 // check  permession !
-                if (file_info.st_mode & S_IXUSR)
+                if ((file_info.st_mode & S_IXUSR) == 0)
                 {
                     std::cout << "error, 403 Forbiden ! (there is no permession for execute the dir)" << std::endl;
+                    error_response(socket_fd, "403.html", "HTTP/1.1 403 Forbidden");
+                    return ;
+
                 }
                 else
                 {
+                    std::cout << "it is a dir , need a response" << std::endl;
+                    std::cout << "default file :  " << server_config.locations.at(location).index_file << std::endl;
+
                     // sending the response
+                    std::string default_path = full_path +  server_config.locations.at(location).index_file;
+
+                    // check that default file ! 
+                    
+
+                    // --- //
+
+                    std::string response = get_response(getFileSize(default_path), default_path , get_body(default_path), "HTTP/1.1 200 OK\r\n");
+                    send_response(socket_fd, response);
+                    std::cout << "the default response send successfully !" << std::endl;
 
 
                 }
@@ -241,7 +294,9 @@ void client:: onEvent()
 
         
         }
-        
+        // problem still in GET ! 
+        // error page in other location , there is problem of css js when the request get those files !
+        // next step : organise the code of GET
         
         
 
