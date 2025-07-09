@@ -7,7 +7,6 @@ class Request
 {
 private:
     Headers Headers;
-
     std::string buffer;
     std::string file_name;
 

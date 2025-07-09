@@ -86,11 +86,19 @@ void client::onEvent()
                     }
                     else
                     {
-                        std::cout << "static file request." << std::endl;
+                        std::string method = request.RequestLine.get_method();
 
-                        // hna khas ndiro post get delete
+                        if (method == "GET") {
 
+                        }
 
+                        else if (method == "POST") {
+
+                        }
+
+                        else if (method == "DELETE") {
+
+                        }
                     }
                 }
                 else
