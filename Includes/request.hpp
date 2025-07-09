@@ -23,7 +23,9 @@ class Request
         void ContentLenghtRead(std::fstream &body, int socket_fd);
     public:
         bool run_parser(int socket_fd);
+
         short state;
+        long max_body_size;
         
         std::fstream *file;
 };

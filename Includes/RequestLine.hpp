@@ -7,7 +7,6 @@ class RequestLine
 {
     private:
         std::string method;
-        std::string url;
         std::string HttpVerction;
         std::vector<std::string> Query_parameters;
         std::string line;
@@ -20,6 +19,7 @@ class RequestLine
         std::string &get_line();
         void ParsRequestLine();
         std::string get_method();
+        std::string url;
 };
 
 #endif

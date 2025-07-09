@@ -7,3 +7,6 @@ dependencies/
 body.bin
 webserv
 canvas.hpp
+*_POST_FILE
+nots.txt
+test

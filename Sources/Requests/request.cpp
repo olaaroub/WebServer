@@ -46,54 +46,38 @@ void Request:: ParsHeaders()
         Headers.set_buffer(buffer);
 }
 
+
 void Request:: ChunkReaContent(std::fstream &body, int socket_fd)
 {
-    std::cout << "chunked" << std::endl;
-    int is_content = 0;
-    int readlen;
+
+    static unsigned int i = 0;
     unsigned int len;
-    bool read_ended = false;
+    if (i > buffer.length())
+        return;
+     std::cout << "chunked " << socket_fd << " " << i  << " " << buffer.length() << std::endl;
     while (true)
     {
+        // std::cout << "ff\n";
         size_t findNewLine = buffer.find("\r\n");
-        while (findNewLine == std::string::npos)
-        {
-            char buf[1024];
-            readlen = read(socket_fd, &buf, 1023);
-            if (!readlen)
-            {
-                read_ended = true;
-                break;
-            }
-            if (readlen < 0)
-                throw std::string("connection ended");
-            buffer.append(buf, readlen);
-            findNewLine = buffer.find("\r\n");
-        }
         if (findNewLine == std::string::npos)
             throw std::string("ERROR: structur of chunked POST not correct");
         std::string line = buffer.substr(0, findNewLine);
-        if (is_content % 2 == 0)
+        is_number(line);
+        std::istringstream ff(line);
+        ff >> std::hex >> len;
+        i = len;
+        std::cout << "      len_line: '" << line << "'" << std::endl;
+        if (!len)
         {
-            std::istringstream ff(line);
-            ff >> std::hex >> len;
-            buffer = buffer.substr(findNewLine + 2);
-            if (!len)
-            {
-                request_ended = true;
-                return ;
-            }
-            is_content++;
+            request_ended = true;
+            return ;
         }
-        else
-        {
-            line = buffer.substr(0, len);
-            buffer = buffer.substr(len + 2);
-            body << line;
-            is_content++;
-        }
-        if (read_ended)
-            break;
+        if (buffer.length() < len + 2 + findNewLine + 2)
+            return;
+        std::string chunkData = buffer.substr(findNewLine + 2, len);
+        body.write(chunkData.c_str(), len);
+        buffer.erase(0, findNewLine + 2 + len + 2);
+
     }
 }
 
@@ -101,20 +85,21 @@ void Request:: is_number(std::string string)
 {
     for (size_t i = 0; i < string.length(); i++)
     {
-        if (!isdigit(string[i]))
+        // if (!isdigit(string[i]))
+        if (!std::isxdigit(string[i]))
             throw std::string("ERROR: length not number");
     }
 }
 
 void Request:: ContentLenghtRead(std::fstream &body, int socket_fd)
 {
-    int cont;
+    long cont;
     std::string number;
 
     number = Headers.map["content-length"].at(0);
     is_number(number);
-    cont = atoi(number.c_str());
-    if (cont < 0)
+    cont = atol(number.c_str());
+    if (cont < 0 || cont >= max_body_size)
         throw std::string("ERROR:bad request");
     cont -= buffer.size();
     if (cont < 0)
@@ -165,7 +150,7 @@ void Request:: StateOFParser(int socket_fd)
 bool Request:: run_parser(int socket_fd)
 {
     char bfr[1024];
-    std::string baff;
+    // std::string baff;
 
     int cont = read(socket_fd, &bfr, 1023);
     if (cont <= 0)
@@ -173,9 +158,10 @@ bool Request:: run_parser(int socket_fd)
         close(socket_fd);
         throw std::string("ERROR: read failed");
     }
-    baff.append(bfr, cont);
-    buffer = baff;
-    std::cout << "'" << buffer << "'" << std::endl;
+    buffer.append(bfr, cont);
+    // buffer = baff;
+    // std::cout << "'" << buffer << "'" << std::endl;
     StateOFParser(socket_fd);
+    // std::cout << RequestLine.url << std::endl;
     return request_ended;
 }

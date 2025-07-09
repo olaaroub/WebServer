@@ -12,7 +12,7 @@ class WebServer
 
         static void add_server(network *instance);
         static void setup_servers(const std::vector<ServerConfigs>& servers);
-        static void lisning();
+        static void listening();
         static void epollEvent(int fd, int event);
         WebServer();
     public:

@@ -29,6 +29,7 @@ void client:: onEvent()
     else if (event & EPOLLIN)
     {
         std::cout << "in input" << std::endl;
+        request.max_body_size = server_config.client_max_body_size;
         int is_finish = request.run_parser(socket_fd);
         if (is_finish)
             epoll_modify();
