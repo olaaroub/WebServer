@@ -10,27 +10,53 @@ void WebServer:: add_server(network *instance)
     infos[instance->get_socket_fd()] = instance;
 }
 
-void WebServer:: epollEvent(int fd, int event)
+// void WebServer:: epollEvent(int fd, int event)
+// {
+//     try
+//     {
+//         infos[fd]->set_event(event);
+//         infos[fd]->onEvent();
+//         if (event & (EPOLLERR | EPOLLHUP) || (event & EPOLLOUT))
+//         {
+//             epoll_ctl(kernel_identifier , EPOLL_CTL_DEL, fd, 0);
+//             delete infos[fd];
+//             infos.erase(fd);
+//             close(fd);
+//         }
+//     }
+//     catch(std::string error)
+//     {
+//         std::cout << error << std::endl;
+//     }
+
+
+// } // hadi tadir leaks ila sefet lia data w closa k connetion dghia. EPOLLRDHUP makantch tatcatcha
+// wmakntich tatcleani ghir tatprinti l error
+
+
+void WebServer::epollEvent(int fd, int event)
 {
     try
-    {  
+    {
+        if (infos.find(fd) == infos.end()) { return; } // l client deja tmse7
         infos[fd]->set_event(event);
         infos[fd]->onEvent();
-        if (event & (EPOLLERR | EPOLLHUP) || (event & EPOLLOUT))
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "cleaning fd " << fd << " hitach: " << e.what() << std::endl;
+
+        epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, fd, 0);
+
+        if (infos.count(fd))
         {
-            epoll_ctl(kernel_identifier , EPOLL_CTL_DEL, fd, 0);
             delete infos[fd];
             infos.erase(fd);
-            close(fd);
         }
+        close(fd);
     }
-    catch(std::string error)
-    {
-        std::cout << error << std::endl; 
-    }
-    
-
 }
+
 
 void WebServer:: listening()
 {

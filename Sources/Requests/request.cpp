@@ -21,7 +21,7 @@ void Request:: ParsRequstLine()
     }
     else
         RequestLine.set_line(buffer);
-    
+
 }
 
 void Request:: ParsHeaders()
@@ -39,7 +39,7 @@ void Request:: ParsHeaders()
             request_ended = true;
         else
             request_ended = false;
-        
+
         state++;
     }
     else
@@ -156,7 +156,7 @@ bool Request:: run_parser(int socket_fd)
     if (cont <= 0)
     {
         close(socket_fd);
-        throw std::string("ERROR: read failed");
+        throw std::runtime_error("Request parser Error: read failed!");
     }
     buffer.append(bfr, cont);
     // buffer = baff;

@@ -1,47 +1,117 @@
 #include "client.hpp"
 #include "WebServer.hpp"
-client:: client(const ServerConfigs& server_config) : network(server_config, false)
-{
-    // is_server = false;
-    request.state = 0;
-}
+#include "Utils.hpp"
+client::client(const ServerConfigs &server_config) : network(server_config, false) { request.state = 0; }
 
-// client:: client() : network(false)
-// {
-//     request.state = 0;
-// }
-
-void client:: epoll_modify()
+void client::epoll_modify()
 {
     ev.events = EPOLLOUT | EPOLLRDHUP;
     ev.data.fd = socket_fd;
-    if (epoll_ctl(WebServer:: kernel_identifier, EPOLL_CTL_MOD, socket_fd, &ev) < 0)
+    if (epoll_ctl(WebServer::kernel_identifier, EPOLL_CTL_MOD, socket_fd, &ev) < 0)
     {
         perror("epoll_modify");
         throw std::string("");
     }
 }
 
-void client:: onEvent()
+
+const LocationConfigs* client::findLocation(const std::string& uri)
 {
-    if (event & (EPOLLERR | EPOLLHUP))
-        perror("ERROR: ");
+    const LocationConfigs* bestMatch = NULL;
+    size_t len = 0;
+
+    const std::vector<LocationConfigs>& locations = this->server_config.locations;
+
+    for (std::vector<LocationConfigs>::const_iterator it = locations.begin(); it != locations.end(); ++it)
+    {
+        if (uri.rfind(it->path, 0) == 0)
+        {
+            if (it->path.length() > len)
+            {
+                len = it->path.length();
+                bestMatch = &(*it);
+            }
+        }
+    }
+    return bestMatch;
+}
+
+
+
+
+void client::onEvent()
+{
+    if (event & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
+        throw std::runtime_error("Client disconnected or socket error.");// bach process i cleani, perror does not clean
     else if (event & EPOLLIN)
     {
-        std::cout << "in input" << std::endl;
-        request.max_body_size = server_config.client_max_body_size;
-        int is_finish = request.run_parser(socket_fd);
-        if (is_finish)
+        // std::cout << "in input" << std::endl;
+        // request.max_body_size = server_config.client_max_body_size;
+        // int is_finish = request.run_parser(socket_fd);
+        // if (is_finish)
+        //     epoll_modify();
+
+        try
+        {
+            bool is_request_complete = request.run_parser(socket_fd);
+
+            if (is_request_complete)
+            {
+                // std::cout << "parsing request from fd: " << socket_fd << std::endl;
+
+                const std::string& requestUri = normalizePath(request.RequestLine.getUrl());
+
+                const LocationConfigs* location = findLocation(requestUri);
+                if (location)
+                {
+                    std::cout << "location block is '" << location->path << "'" << std::endl;
+
+                    std::string fullPath = joinPaths(location->root, requestUri);
+
+                    std::cout << "full path is '" << fullPath << "'" << std::endl;
+
+                    std::string extension = "";
+                    size_t dotPos = fullPath.rfind('.');
+                    if (dotPos != std::string::npos) {
+                        extension = fullPath.substr(dotPos);
+                    }
+
+                    if (location->cgi_handlers.count(extension))
+                    {
+                        std::cout << "CGI request. " << std::endl;
+                        // hna ghadi nkhdm cgi
+                    }
+                    else
+                    {
+                        std::cout << "static file request." << std::endl;
+                        // hna khas ndiro post get delete
+                    }
+                }
+                else
+                {
+                    std::cerr << "Error: No matching location found for URI: " << requestUri << std::endl;
+                    // hna makaynach dik location li tleb
+                    //khasna nsifto lih 404 page
+                }
+
+                epoll_modify();
+            }
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Error processing request for fd " << socket_fd << ": " << e.what() << std::endl;
+            // Khasna ndiro error 400 hna
             epoll_modify();
+        }
     }
     else if (event & EPOLLOUT)
     {
         std::cout << "send output" << std::endl;
         send(socket_fd, "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 21\r\n\r\nChunked data received!", 87, 0);
+        throw std::runtime_error("finished sending response.");
     }
 }
 
-client:: ~client()
+client::~client()
 {
-
 }
