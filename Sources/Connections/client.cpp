@@ -12,7 +12,6 @@ void client::epoll_modify()
         throw std::runtime_error("Client Error: epoll control failed!");
 }
 
-
 const LocationConfigs* client::findLocation(const std::string& uri)
 {
     const LocationConfigs* bestMatch = NULL;
@@ -34,13 +33,10 @@ const LocationConfigs* client::findLocation(const std::string& uri)
     return bestMatch;
 }
 
-
-
-
 void client::onEvent() // handlehttprequest
 {
     if (event & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
-        throw std::runtime_error("Client disconnected or socket error.");// bach process i cleani, perror does not clean
+        throw std::runtime_error("Client disconnected or socket error.");
     else if (event & EPOLLIN)
     {
        bool is_request_complete = request.run_parser(socket_fd);
@@ -50,11 +46,12 @@ void client::onEvent() // handlehttprequest
     }
     else if (event & EPOLLOUT)
     {
+        std::string fullPath;
         const std::string& requestUri = normalizePath(request.RequestLine.getUrl());
 
-        const LocationConfigs* location = findLocation(requestUri);// this finds exact match
-
-        std::string fullPath = joinPaths(location->root, requestUri);
+        const LocationConfigs* location = findLocation(requestUri);
+        if(location)
+            fullPath = joinPaths(location->root, requestUri);
 
         // Methods methods(server_config, request);
 
