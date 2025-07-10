@@ -8,10 +8,7 @@ void client::epoll_modify()
     ev.events = EPOLLOUT | EPOLLRDHUP;
     ev.data.fd = socket_fd;
     if (epoll_ctl(WebServer::kernel_identifier, EPOLL_CTL_MOD, socket_fd, &ev) < 0)
-    {
-        perror("epoll_modify");
-        throw std::string("");
-    }
+        throw std::runtime_error("Client Error: epoll control failed!");
 }
 
 

@@ -16,11 +16,11 @@ void RequestLine:: SeparateMethod()
 {
     size_t cont = line.find(" ");
     if (cont == std::string::npos)
-        throw std::string("REQUEST ERROR: method not found");
+        throw std::runtime_error("RequestLine ERROR: method not found");
     method = line.substr(0, cont);
     line = line.substr(++cont);
     if (method != "POST" && method != "GET" && method != "DELETE")
-        throw std::string("ERROR: this method not allowed");
+        throw std::runtime_error("RequestLine ERROR: this method not allowed");
 }
 
 void RequestLine:: SeparateQuerys()
@@ -46,7 +46,7 @@ void RequestLine:: SeparateUrl()
     size_t cont = line.find("?");
     size_t cont1 = line.find(" ");
     if (cont1 == std::string::npos)
-        throw std::string("REQUEST ERROR: url error");
+        throw std::runtime_error("RequestLine ERROR: url error");
     if (cont != std::string::npos)
     {
         _url = line.substr(0, cont);
@@ -60,7 +60,7 @@ void RequestLine:: SeparateUrl()
     }
     HttpVerction = line;
     if (HttpVerction != "HTTP/1.1")
-        throw std::string("ERROR: verstion of HTTP not seported");
+        throw std::runtime_error("RequestLine Error: verstion of HTTP not seported!");
 }
 
 void RequestLine:: ParsRequestLine()

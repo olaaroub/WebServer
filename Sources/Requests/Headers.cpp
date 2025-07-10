@@ -20,7 +20,7 @@ void Headers:: AddToMap(std::string line)
 {
     size_t cont = line.find(":");
     if (cont == std::string::npos)
-        throw std::string("ERROR: header error");
+        throw std::runtime_error("Headers Error: format not exist");
     std::string key = line.substr(0, cont);
     std::string value = line.substr(cont + 2);
     to_lower(key);
@@ -45,7 +45,7 @@ void Headers:: HeadersParser()
     if (map["host"].size() > 1 || map["content-length"].size() > 1
         || map["content-type"].size() > 1 || map["authorization"].size() > 1
             || map["transfer-encoding"].size() > 1)
-        throw std::string("ERROR: duplicate headers");
+        throw std::runtime_error("Headers Error: duplicate headers");
     // for (std::map<std::string, std::vector<std::string> >::iterator it = map.begin(); it != map.end(); it++)
     // {
     //     std::cout << "first: '" << it->first << "' second: '" << it->second.at(0) << "'" << std::endl;
