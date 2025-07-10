@@ -16,6 +16,8 @@ SRC = 	main.cpp \
 		Requests/Headers.cpp \
 		Requests/request.cpp \
 		Requests/RequestLine.cpp \
+		Methods/Methods.cpp \
+		Methods/response.cpp \
 
 SRCS = $(addprefix $(SPATH), $(SRC))
 

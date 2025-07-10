@@ -1,27 +1,11 @@
 #include "response.hpp"
 
 
-response::response(int socket_fd, std::string error_fileName, std::string status_line) // constructer for errors 
-{
-    std::string full_path = "/home/iahamdan/Desktop/WebServer/Pages/Errors/" + error_fileName; 
-
-    std::string response = get_response(getFileSize(full_path), full_path , get_body(full_path), status_line);
-    send_response(socket_fd, response);
-    std::cout << "the error response send successfully !" << std::endl;
-
-}
-
 response::response(int socket_fd, std::string path_file, std::string status_line) // constructer for GET
 {
     std::string response = get_response(getFileSize(path_file), path_file , get_body(path_file), status_line);
     send_response(socket_fd, response);
-    std::cout << "the response send successfully !" << std::endl;
 }
-
-
-
-
-
 
 
 
@@ -128,3 +112,5 @@ long response::getFileSize(const std::string& path) {
 
     return file_info.st_size;
 }
+
+response::~response(){}

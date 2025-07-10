@@ -227,11 +227,11 @@ void client:: onEvent()
         Methods methods(server_config, request);
         if (methods.location == -1)
         {
-            response res_error(socket_fd, "404.html", "HTTP/1.1 404 Not Found");
+            response res_error(socket_fd, "/home/iahamdan/Desktop/WebServer/Pages/Errors/404.html", "HTTP/1.1 404 Not Found");
             return ;
         }else if (methods.method == false)
         {
-            response res_error(socket_fd, "405.html", "HTTP/1.1 405 Method Not Allowed");
+            response res_error(socket_fd, "/home/iahamdan/Desktop/WebServer/Pages/Errors/405.html", "HTTP/1.1 405 Method Not Allowed");
             return ;
         }
         
@@ -248,9 +248,12 @@ void client:: onEvent()
 
             if (stat(full_path.c_str(), &file_info) != 0)
             {
-                // std::cout << "error , the file not found !" << std::endl;
+                std::cout << "error , the file not found !" << std::endl;
                 // error_response(socket_fd, "404.html", "HTTP/1.1 404 Not Found");
                 // return ;
+                response res_error(socket_fd, "/home/iahamdan/Desktop/WebServer/Pages/Errors/404.html", "HTTP/1.1 404 Not Found");
+                return ;
+
             }
             bool is_a_file = S_ISREG(file_info.st_mode);
             bool is_a_dir = S_ISDIR(file_info.st_mode);
@@ -260,9 +263,12 @@ void client:: onEvent()
                 // check  permession !
                 if ((file_info.st_mode & S_IRUSR) == 0)
                 {
-                    // std::cout << "error, 403 Forbiden ! (there is no permession for read)" << std::endl;
+                    std::cout << "error, 403 Forbiden ! (there is no permession for read)" << std::endl;
                     // error_response(socket_fd, "403.html", "HTTP/1.1 403 Forbidden");
                     // return ;
+                    response res_error(socket_fd, "/home/iahamdan/Desktop/WebServer/Pages/Errors/403.html", "HTTP/1.1 403 Forbidden");
+                    return ;
+
                 }
                 else 
                 {
@@ -270,7 +276,12 @@ void client:: onEvent()
                     
                     // std::string response = get_response(file_info.st_size, full_path , get_body(full_path), "HTTP/1.1 200 OK\r\n");
                     // send_response(socket_fd, response);
-                    // std::cout << "the response send successfully !" << std::endl;
+                    std::cout << "the response send successfully !" << std::endl;
+                    response res_success(socket_fd, full_path , "HTTP/1.1 200 OK\r\n");
+                    return ;
+
+                    
+                    
                 }
             }
             else if (is_a_dir == true)
@@ -278,15 +289,18 @@ void client:: onEvent()
                 // check  permession !
                 if ((file_info.st_mode & S_IXUSR) == 0)
                 {
-                    // std::cout << "error, 403 Forbiden ! (there is no permession for execute the dir)" << std::endl;
+                    std::cout << "error, 403 Forbiden ! (there is no permession for execute the dir)" << std::endl;
                     // error_response(socket_fd, "403.html", "HTTP/1.1 403 Forbidden");
                     // return ;
+                    response res_error(socket_fd, "/home/iahamdan/Desktop/WebServer/Pages/Errors/403.html", "HTTP/1.1 403 Forbidden");
+                    return ;
+
 
                 }
                 else
                 {
                     std::cout << "it is a dir , need a response" << std::endl;
-                    std::cout << "default file :  " << server_config.locations.at(methods.location).index_file << std::endl;
+                    // std::cout << "default file :  " << server_config.locations.at(methods.location).index_file << std::endl;
 
                     // sending the response
                     std::string default_path = full_path +  server_config.locations.at(methods.location).index_file;
@@ -301,6 +315,9 @@ void client:: onEvent()
                     // std::string response = get_response(getFileSize(default_path), default_path , get_body(default_path), "HTTP/1.1 200 OK\r\n");
                     // send_response(socket_fd, response);
                     // std::cout << "the default response send successfully !" << std::endl;
+                    response res_success(socket_fd, default_path , "HTTP/1.1 200 OK\r\n");
+                    return ;
+
 
 
                 }

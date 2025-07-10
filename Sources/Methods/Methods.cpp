@@ -41,3 +41,5 @@ Methods::Methods(ServerConfigs serverconfigs, Request request)
         return ;
 
 }
+
+Methods::~Methods(){}
