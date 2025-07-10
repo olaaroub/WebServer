@@ -3,7 +3,8 @@
 
 #include "network.hpp"
 #include "request.hpp"
-
+#include "Methods.hpp"
+#include "response.hpp"
 class client : public network
 {
 private:
