@@ -8,7 +8,7 @@
 class serverManager
 {
     private:
-        static struct epoll_event *evlist;
+        static struct epoll_event evlist;
 
         static void add_server(network *instance);
         static void listening();

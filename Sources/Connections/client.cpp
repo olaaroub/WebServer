@@ -13,10 +13,7 @@ void client::epoll_modify()
     ev.events = EPOLLOUT | EPOLLRDHUP;
     ev.data.fd = socket_fd;
     if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_MOD, socket_fd, &ev) < 0)
-    {
-        perror("epoll_modify");
-        throw std::string("");
-    }
+        throw std::runtime_error("Client Error: epoll control failed!");
 }
 
 
@@ -91,7 +88,7 @@ void client::onEvent() // handlehttprequest
                         if (std::find(allowed.begin(), allowed.end(), method) != allowed.end())
                         {
                             std::cout << "Method '" << method << "' is allowed for this CGI." << std::endl;
-                            
+
                         }
                         else
                         {

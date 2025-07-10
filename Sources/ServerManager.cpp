@@ -2,7 +2,7 @@
 
 // std::vector<network *> serverManager::servers;
 int serverManager:: kernel_identifier = 0;
-struct epoll_event *serverManager:: evlist;
+struct epoll_event serverManager:: evlist;
 std::map<int, network *> serverManager:: activeNetworks;
 
 void serverManager:: add_server(network *instance)
@@ -60,14 +60,16 @@ void serverManager::epollEvent(int fd, int event)
 
 void serverManager:: listening()
 {
-    evlist = new epoll_event[activeNetworks.size()];
+    epoll_event evlist[activeNetworks.size()];
+
+    // evlist = new epoll_event[activeNetworks.size()];
     while(true)
     {
-        int event = epoll_wait(kernel_identifier, evlist, 1, -1);
+        int event = epoll_wait(kernel_identifier, evlist, activeNetworks.size(), -1);
         if (event < 0)
         {
             perror("epoll_wait");
-            throw std::string("");
+            throw std::runtime_error("");
         }
         for (int i = 0; i < event; i++)
         {
@@ -91,9 +93,9 @@ void serverManager:: setupServers(const std::vector<ServerConfigs>& servers)
                 server *new_server = new server((*its), inet_addr((*it).host.c_str()), (*it));
                 add_server(new_server);
             }
-            catch(std::string error)
+            catch(std::exception &e)
             {
-                std::cerr << error << std::endl;
+                std::cerr << e.what() << std::endl;
             }
         }
     }
@@ -108,14 +110,10 @@ void serverManager:: startServers()
         std::cout << "listening ...\n";
         listening();
     }
-    catch(std::string error)
-    {
-        delete evlist;
-        std::cerr << error << std::endl;
-    }
     catch(std::exception &e)
     {
-        std::cerr << "here lllll " << e.what() << std::endl;
+        //  matnsach tfriyi lmap
+        std::cerr << e.what() << std::endl;
     }
 
 }
