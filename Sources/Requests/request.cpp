@@ -47,15 +47,12 @@ void Request:: ParsHeaders()
 }
 
 
-void Request:: ChunkReaContent(std::fstream &body, int socket_fd)
+void Request:: ChunkReaContent()
 {
 
     static unsigned int current_chunk_size = 0;
     static bool waiting_for_new_chunk = true;
     unsigned int len;
-    // if (i > buffer.length())
-    //     return;
-     std::cout << "chunked " << socket_fd << " current_chunk_size: " << current_chunk_size  << " buffer.length(): " << buffer.length() << std::endl;
     while (true)
     {
         if (waiting_for_new_chunk)
@@ -69,7 +66,6 @@ void Request:: ChunkReaContent(std::fstream &body, int socket_fd)
             ff >> std::hex >> len;
             current_chunk_size = len;
             buffer.erase(0, findNewLine + 2);
-            std::cout << "      len_line_in_hex: '" << line << "' len_in_dec: " << len << std::endl;
             if (!len)
             {
                 request_ended = true;
@@ -80,7 +76,7 @@ void Request:: ChunkReaContent(std::fstream &body, int socket_fd)
         if (buffer.length() < current_chunk_size + 2)
             return;
         std::string chunkData = buffer.substr(0, current_chunk_size);
-        body.write(chunkData.c_str(), current_chunk_size);
+        body_content.write(chunkData.c_str(), current_chunk_size);
         buffer.erase(0, current_chunk_size + 2);
         waiting_for_new_chunk = true;
         current_chunk_size = 0;
@@ -91,13 +87,12 @@ void Request:: is_number(std::string string)
 {
     for (size_t i = 0; i < string.length(); i++)
     {
-        // if (!isdigit(string[i]))
         if (!std::isxdigit(string[i]))
             throw std::string("ERROR: length not number");
     }
 }
 
-void Request:: ContentLenghtRead(std::fstream &body, int socket_fd)
+void Request:: ContentLenghtRead(int socket_fd)
 {
     long cont;
     std::string number;
@@ -105,11 +100,9 @@ void Request:: ContentLenghtRead(std::fstream &body, int socket_fd)
     number = Headers.map["content-length"].at(0);
     is_number(number);
     cont = atol(number.c_str());
-    if (cont < 0)
-        throw std::string("ERROR:bad request");
     cont -= buffer.size();
     if (cont < 0)
-        throw std::string("ERROR: !");
+        throw std::string("ERROR: bad request");
     else if (cont > 0)
     {
         char buf[cont];
@@ -119,7 +112,7 @@ void Request:: ContentLenghtRead(std::fstream &body, int socket_fd)
         buffer.append(buf, read_cont);
 
     }
-    body << buffer;
+    body_content << buffer;
     request_ended = true;
 }
 
@@ -129,15 +122,10 @@ void Request:: ParsBody(int socket_fd)
     ss << socket_fd;
     ss >> file_name;
     file_name += "_POST_FILE";
-    std::fstream body(file_name.c_str(), std::ios::binary | std::ios::out);
-    if (!body.is_open())
-        throw std::string("ERROR: file not open!");
-    file = &body;
-    // std::cout << Headers.map["transfer-encoding"].at(0) << std::endl;
     if (!Headers.map["content-length"].empty() && Headers.map["transfer-encoding"].empty())
-        ContentLenghtRead(body, socket_fd);
+        ContentLenghtRead(socket_fd);
     else if (!Headers.map["transfer-encoding"].empty() && Headers.map["transfer-encoding"].at(0) == "chunked" && Headers.map["content-length"].empty())
-        ChunkReaContent(body, socket_fd);
+        ChunkReaContent();
     else
         throw std::string("ERROR");
 }
@@ -157,7 +145,6 @@ bool Request:: run_parser(int socket_fd)
 {
     char bfr[1024];
     // std::string baff;
-
     int cont = read(socket_fd, &bfr, 1023);
     if (cont <= 0)
     {
