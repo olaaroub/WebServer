@@ -1,5 +1,5 @@
 #include "network.hpp"
-#include "WebServer.hpp"
+#include "ServerManager.hpp"
 
 int network:: get_socket_fd()
 {
@@ -11,7 +11,7 @@ void network:: set_ToNoBlocking()
     int flags = fcntl(socket_fd, F_GETFL, 0);
     if (flags < 0)
         throw std::string("Failed to get socket flags");
-    if (fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK) == -1) 
+    if (fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK) == -1)
         throw std::string("Failed to set non-blocking mode\n");
 }
 
@@ -24,7 +24,7 @@ void network:: epoll_crt()
 {
     ev.events = EPOLLIN;
     ev.data.fd = socket_fd;
-    if (epoll_ctl(WebServer::kernel_identifier, EPOLL_CTL_ADD, socket_fd, &ev) < 0)
+    if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_ADD, socket_fd, &ev) < 0)
     {
         perror("epoll_ctl");
         throw std::string("");

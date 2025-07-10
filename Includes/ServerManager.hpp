@@ -1,25 +1,26 @@
-#ifndef WEBSERVER_HPP
-#define WEBSERVER_HPP
+#ifndef SERVER_MANAGER_HPP
+#define SERVER_MANAGER_HPP
 
 #include "server.hpp"
 #include "network.hpp"
 #include "ConfigFileParser.hpp"
 
-class WebServer
+class serverManager
 {
     private:
         static struct epoll_event *evlist;
 
         static void add_server(network *instance);
-        static void setup_servers(const std::vector<ServerConfigs>& servers);
         static void listening();
         static void epollEvent(int fd, int event);
-        WebServer();
+        serverManager();
     public:
 
-        static std::map<int, network *> infos;
+        static std::map<int, network *> activeNetworks;
         static int kernel_identifier;
-        static void run_webserver(const std::vector<ServerConfigs>& servers);
+
+        static void setupServers(const std::vector<ServerConfigs>& servers);
+        static void startServers();
 };
 
 

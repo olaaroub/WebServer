@@ -1,26 +1,26 @@
-#include "WebServer.hpp"
+#include "ServerManager.hpp"
 
-// std::vector<network *> WebServer::servers;
-int WebServer:: kernel_identifier = 0;
-struct epoll_event *WebServer:: evlist;
-std::map<int, network *> WebServer:: infos;
+// std::vector<network *> serverManager::servers;
+int serverManager:: kernel_identifier = 0;
+struct epoll_event *serverManager:: evlist;
+std::map<int, network *> serverManager:: activeNetworks;
 
-void WebServer:: add_server(network *instance)
+void serverManager:: add_server(network *instance)
 {
-    infos[instance->get_socket_fd()] = instance;
+    activeNetworks[instance->get_socket_fd()] = instance;
 }
 
-// void WebServer:: epollEvent(int fd, int event)
+// void serverManager:: epollEvent(int fd, int event)
 // {
 //     try
 //     {
-//         infos[fd]->set_event(event);
-//         infos[fd]->onEvent();
+//         activeNetworks[fd]->set_event(event);
+//         activeNetworks[fd]->onEvent();
 //         if (event & (EPOLLERR | EPOLLHUP) || (event & EPOLLOUT))
 //         {
 //             epoll_ctl(kernel_identifier , EPOLL_CTL_DEL, fd, 0);
-//             delete infos[fd];
-//             infos.erase(fd);
+//             delete activeNetworks[fd];
+//             activeNetworks.erase(fd);
 //             close(fd);
 //         }
 //     }
@@ -34,13 +34,13 @@ void WebServer:: add_server(network *instance)
 // wmakntich tatcleani ghir tatprinti l error
 
 
-void WebServer::epollEvent(int fd, int event)
+void serverManager::epollEvent(int fd, int event)
 {
     try
     {
-        if (infos.find(fd) == infos.end()) { return; } // l client deja tmse7
-        infos[fd]->set_event(event);
-        infos[fd]->onEvent();
+        if (activeNetworks.find(fd) == activeNetworks.end()) { return; } // l client deja tmse7
+        activeNetworks[fd]->set_event(event);
+        activeNetworks[fd]->onEvent();
     }
     catch(const std::exception& e)
     {
@@ -48,20 +48,19 @@ void WebServer::epollEvent(int fd, int event)
 
         epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, fd, 0);
 
-        if (infos.count(fd))
+        if (activeNetworks.count(fd))
         {
-            delete infos[fd];
-            infos.erase(fd);
+            delete activeNetworks[fd];
+            activeNetworks.erase(fd);
         }
         close(fd);
     }
 }
 
 
-void WebServer:: listening()
+void serverManager:: listening()
 {
-    evlist = new epoll_event[infos.size()];
-
+    evlist = new epoll_event[activeNetworks.size()];
     while(true)
     {
         int event = epoll_wait(kernel_identifier, evlist, 1, -1);
@@ -80,7 +79,7 @@ void WebServer:: listening()
 }
 
 
-void WebServer:: setup_servers(const std::vector<ServerConfigs>& servers)
+void serverManager:: setupServers(const std::vector<ServerConfigs>& servers)
 {
     kernel_identifier = epoll_create(MAX_EPOLL);
     for (std::vector<ServerConfigs>::const_iterator it = servers.begin(); it != servers.end(); it++)
@@ -102,12 +101,10 @@ void WebServer:: setup_servers(const std::vector<ServerConfigs>& servers)
 }
 
 
-void WebServer:: run_webserver(const std::vector<ServerConfigs> &servers)
+void serverManager:: startServers()
 {
     try
     {
-        std::cout << "setup servers\n";
-        setup_servers(servers);
         std::cout << "listening ...\n";
         listening();
     }

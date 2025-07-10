@@ -1,13 +1,18 @@
 #include "client.hpp"
-#include "WebServer.hpp"
+#include "ServerManager.hpp"
 #include "Utils.hpp"
+
+
+//
+
+
 client::client(const ServerConfigs &server_config) : network(server_config, false) { request.state = 0; }
 
 void client::epoll_modify()
 {
     ev.events = EPOLLOUT | EPOLLRDHUP;
     ev.data.fd = socket_fd;
-    if (epoll_ctl(WebServer::kernel_identifier, EPOLL_CTL_MOD, socket_fd, &ev) < 0)
+    if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_MOD, socket_fd, &ev) < 0)
     {
         perror("epoll_modify");
         throw std::string("");
@@ -39,7 +44,7 @@ const LocationConfigs* client::findLocation(const std::string& uri)
 
 
 
-void client::onEvent()
+void client::onEvent() // handlehttprequest
 {
     if (event & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
         throw std::runtime_error("Client disconnected or socket error.");// bach process i cleani, perror does not clean
@@ -79,9 +84,20 @@ void client::onEvent()
 
                     if (location->cgi_handlers.count(extension))
                     {
-                        std::cout << "CGI request. " << std::endl;
+                        std::string method = request.RequestLine.get_method();
 
-                        // hna ghadi nkhdm cgi
+                        const std::vector<std::string>& allowed = location->allowed_methods;
+
+                        if (std::find(allowed.begin(), allowed.end(), method) != allowed.end())
+                        {
+                            std::cout << "Method '" << method << "' is allowed for this CGI." << std::endl;
+
+                        }
+                        else
+                        {
+                            std::cerr << "Error: Method '" << method << "' is not allowed for this CGI location." << std::endl;
+
+                        }
 
                     }
                     else

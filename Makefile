@@ -10,7 +10,7 @@ SRC = 	main.cpp \
 		ConfigParse/ConfigFileParser.cpp \
 		ConfigParse/ConfigFileReader.cpp\
 		ConfigParse/Configs.cpp\
- 		WebServer.cpp\
+ 		ServerManager.cpp\
 		Connections/client.cpp \
 		Connections/network.cpp \
 		Connections/server.cpp \

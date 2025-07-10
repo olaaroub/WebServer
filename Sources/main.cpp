@@ -1,4 +1,4 @@
-#include "WebServer.hpp"
+#include "ServerManager.hpp"
 #include "ConfigFileParser.hpp"
 #include "ConfigFileReader.hpp"
 
@@ -20,7 +20,9 @@ int main(int ac, char **av)
 
 		const std::vector<ServerConfigs> &servers = parser.getServers();
 
-		WebServer::run_webserver(servers);
+		serverManager::setupServers(servers);
+
+		serverManager::startServers();
 
 	}
 	catch (const std::exception &e){

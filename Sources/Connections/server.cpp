@@ -1,8 +1,8 @@
 #include "server.hpp"
 #include "client.hpp"
-#include "WebServer.hpp"
+#include "ServerManager.hpp"
 
-server:: server(const ServerConfigs &server_config) : network(server_config) 
+server:: server(const ServerConfigs &server_config) : network(server_config)
 {
     is_server = true;
 }
@@ -22,13 +22,13 @@ void server:: bind_and_listen()
         perror("setsockopt: ");
         throw std::string("");
     }
-    if (bind(socket_fd, (sockaddr *)&network_infos, sizeof(network_infos)) < 0) 
+    if (bind(socket_fd, (sockaddr *)&network_infos, sizeof(network_infos)) < 0)
     {
         perror("Bind: ");
         throw std::string("");
     }
     set_ToNoBlocking();
-    if (listen(socket_fd, 1) < 0) 
+    if (listen(socket_fd, 1) < 0)
     {
         perror("Listen");
         throw std::string("the program exit !");
@@ -59,6 +59,6 @@ void server:: onEvent()
         client_re->set_fd(fd);
         client_re->set_ToNoBlocking();
         client_re->epoll_crt();
-        WebServer::infos[fd] = client_re;
+        serverManager::activeNetworks[fd] = client_re;
     }
 }
