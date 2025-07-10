@@ -3,12 +3,13 @@
 
 #include "network.hpp"
 #include "request.hpp"
-
+#include "Methods/Methods.hpp"
+#include "Methods/response.hpp"
 class client : public network
 {
     private:
-        Request request;
 
+        Request request;
     public:
         client(const ServerConfigs& server_config);
         // client(int kernel_id);
