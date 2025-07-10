@@ -47,12 +47,6 @@ void client::onEvent() // handlehttprequest
         throw std::runtime_error("Client disconnected or socket error.");// bach process i cleani, perror does not clean
     else if (event & EPOLLIN)
     {
-        // std::cout << "in input" << std::endl;
-        // request.max_body_size = server_config.client_max_body_size;
-        // int is_finish = request.run_parser(socket_fd);
-        // if (is_finish)
-        //     epoll_modify();
-
         try
         {
             bool is_request_complete = request.run_parser(socket_fd);
@@ -64,7 +58,10 @@ void client::onEvent() // handlehttprequest
                 const std::string& requestUri = normalizePath(request.RequestLine.getUrl());
 
 
-                const LocationConfigs* location = findLocation(requestUri);
+                const LocationConfigs* location = findLocation(requestUri);// this finds exact match
+                if(!location)
+                    // location = findBestMatchLocation(requestUri);
+
                 if (location)
                 {
                     std::cout << "location block is '" << location->path << "'" << std::endl;
