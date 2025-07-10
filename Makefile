@@ -6,6 +6,7 @@ NAME = webserv
 
 SPATH = ./Sources/
 SRC = 	main.cpp \
+		Utils.cpp \
 		ConfigParse/ConfigFileParser.cpp \
 		ConfigParse/ConfigFileReader.cpp\
 		ConfigParse/Configs.cpp\

@@ -10,16 +10,17 @@ class RequestLine
         std::string HttpVerction;
         std::vector<std::string> Query_parameters;
         std::string line;
+        std::string _url;
 
         void SeparateMethod();
         void SeparateUrl();
         void SeparateQuerys();
     public:
+        void ParsRequestLine();
         void set_line(std::string line);
         std::string &get_line();
-        void ParsRequestLine();
         std::string get_method();
-        std::string url;
+        const std::string& getUrl()const;
 };
 
 #endif

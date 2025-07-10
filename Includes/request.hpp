@@ -5,29 +5,28 @@
 #include "RequestLine.hpp"
 class Request
 {
-    private:
-        Headers Headers;
-        RequestLine RequestLine;
+private:
+    Headers Headers;
+    std::string buffer;
+    std::string file_name;
 
-        std::string buffer;
-        std::string file_name;
-        bool request_ended;
+    void is_finished();
+    void is_number(std::string string);
+    void ParsRequstLine();
+    void ParsHeaders();
+    void ParsBody(int socket_fd);
+    void StateOFParser(int socket_fd);
+    void ChunkReaContent(std::fstream &body, int socket_fd);
+    void ContentLenghtRead(std::fstream &body, int socket_fd);
 
-        void is_finished();
-        void is_number(std::string string);
-        void ParsRequstLine();
-        void ParsHeaders();
-        void ParsBody(int socket_fd);
-        void StateOFParser(int socket_fd);
-        void ChunkReaContent(std::fstream &body, int socket_fd);
-        void ContentLenghtRead(std::fstream &body, int socket_fd);
-    public:
-        bool run_parser(int socket_fd);
+public:
+    bool run_parser(int socket_fd);
+    RequestLine RequestLine;
+    short state;
+    bool request_ended;
+    long max_body_size;
 
-        short state;
-        long max_body_size;
-        
-        std::fstream *file;
+    std::fstream *file;
 };
 
 #endif

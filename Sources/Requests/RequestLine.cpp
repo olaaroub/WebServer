@@ -2,13 +2,15 @@
 
 void RequestLine:: set_line(std::string line)
 {
-    this->line += line; 
+    this->line += line;
 }
 
 std::string& RequestLine:: get_line()
 {
     return line;
 }
+
+const std::string &RequestLine::getUrl()const{ return _url; }
 
 void RequestLine:: SeparateMethod()
 {
@@ -47,13 +49,13 @@ void RequestLine:: SeparateUrl()
         throw std::string("REQUEST ERROR: url error");
     if (cont != std::string::npos)
     {
-        url = line.substr(0, cont);
+        _url = line.substr(0, cont);
         line = line.substr(++cont);
         SeparateQuerys();
     }
     else
     {
-        url = line.substr(0, cont1);
+        _url = line.substr(0, cont1);
         line = line.substr(++cont1);
     }
     HttpVerction = line;
@@ -65,7 +67,7 @@ void RequestLine:: ParsRequestLine()
 {
     SeparateMethod();
     SeparateUrl();
-    // std::cout << " method: '" << method << "' url: '" << url << "' httpv: '" << HttpVerction << "'" << std::endl; 
+    // std::cout << " method: '" << method << "' url: '" << url << "' httpv: '" << HttpVerction << "'" << std::endl;
 }
 
 std::string RequestLine:: get_method()
