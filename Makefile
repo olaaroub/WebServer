@@ -14,9 +14,6 @@ SRC = 	main.cpp \
 		Connections/client.cpp \
 		Connections/network.cpp \
 		Connections/server.cpp \
-		Methods/Delete.cpp \
-		Methods/Get.cpp \
-		Methods/Post.cpp \
 		Requests/Headers.cpp \
 		Requests/request.cpp \
 		Requests/RequestLine.cpp \

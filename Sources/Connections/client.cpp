@@ -30,11 +30,14 @@ const LocationConfigs* client::findLocation(const std::string& uri)
             }
         }
     }
-    return bestMatch;
+     return bestMatch;
 }
 
 void client::onEvent() // handlehttprequest
 {
+    std::string red = "\033[31m";
+    std::string reset = "\033[0m";
+
     if (event & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
         throw std::runtime_error("Client disconnected or socket error.");
     else if (event & EPOLLIN)
@@ -53,38 +56,37 @@ void client::onEvent() // handlehttprequest
         if(location)
             fullPath = joinPaths(location->root, requestUri);
 
-        // Methods methods(server_config, request);
+        std::cout  << red << "--- full path : "<< reset << fullPath << std::endl;
 
         if (!location)
         {
             response res_error(socket_fd, "./Pages/Errors/404.html", "HTTP/1.1 404 Not Found");
             throw std::runtime_error("Response 404 sent!") ;
+            
         }
         else if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(), request.RequestLine.get_method()) == location->allowed_methods.end())
         {
-            // std::cerr << "Error: Method '" << request.RequestLine.get_method() << "' is not allowed for this location." << std::endl;
+            std::cerr << "Error: Method '" << request.RequestLine.get_method() << "' is not allowed for this location." << std::endl;
             response res_error(socket_fd, "./Pages/Errors/405.html", "HTTP/1.1 405 Method Not Allowed");
             throw std::runtime_error("Response 405 sent!") ;
+             
 
         }
 
-        std::string extension  = "wa7d";
+        // std::string extension  = "wa7d";
         // = getExtention(requestUri); .php .py .sh /// todo
 
 
-        if (location->cgi_handlers.count(extension))
-        {
-            // CgiClass obj;
+        // if (location->cgi_handlers.count(extension))
+        // {
+        //     // CgiClass obj;
 
-            // hna ankhdem cgi
+        //     // hna ankhdem cgi
 
-
-        }
-        else
-        {
 
             if (request.RequestLine.get_method() == "GET")
             {
+                std::cout  << red << "----------- PART OF METHODS GET START --------------"  << reset <<  std::endl;
                 // uri  | index_file  | root_path
                 //  build the full path to the file .
                 // check is this path exsist !
@@ -95,10 +97,10 @@ void client::onEvent() // handlehttprequest
                 if (stat(fullPath.c_str(), &file_info) != 0)
                 {
                     std::cout << "error , the file not found !" << std::endl;
-                    // error_response(socket_fd, "404.html", "HTTP/1.1 404 Not Found");
-                    // return ;
+
                     response res_error(socket_fd, "./Pages/Errors/404.html", "HTTP/1.1 404 Not Found");
                         throw std::runtime_error("Response 404 sent!");
+                         
 
                 }
                 bool is_a_file = S_ISREG(file_info.st_mode);
@@ -110,10 +112,9 @@ void client::onEvent() // handlehttprequest
                     if ((file_info.st_mode & S_IRUSR) == 0)
                     {
                         std::cout << "error, 403 Forbiden ! (there is no permession for read)" << std::endl;
-                        // error_response(socket_fd, "403.html", "HTTP/1.1 403 Forbidden");
-                        // return ;
                         response res_error(socket_fd, "./Pages/Errors/403.html", "HTTP/1.1 403 Forbidden");
                             throw std::runtime_error("Response 403 sent!");
+                             
 
 
                     }
@@ -121,11 +122,10 @@ void client::onEvent() // handlehttprequest
                     {
                         // sending the response
 
-                        // std::string response = get_response(file_info.st_size, fullPath , get_body(fullPath), "HTTP/1.1 200 OK\r\n");
-                        // send_response(socket_fd, response);
                         std::cout << "the response send successfully !" << std::endl;
                         response res_success(socket_fd, fullPath , "HTTP/1.1 200 OK\r\n");
                             throw std::runtime_error("Response  sent successfully!");
+                             
 
 
 
@@ -138,10 +138,9 @@ void client::onEvent() // handlehttprequest
                     if ((file_info.st_mode & S_IXUSR) == 0)
                     {
                         std::cout << "error, 403 Forbiden ! (there is no permession for execute the dir)" << std::endl;
-                        // error_response(socket_fd, "403.html", "HTTP/1.1 403 Forbidden");
-                        // return ;
                         response res_error(socket_fd, "./Pages/Errors/403.html", "HTTP/1.1 403 Forbidden");
                             throw std::runtime_error("Response 403 sent!");
+                             
 
 
                     }
@@ -149,13 +148,13 @@ void client::onEvent() // handlehttprequest
                     {
                         std::cout << "it is a dir , need a response" << std::endl;
 
-                        // std::string default_path = fullPath +  server_config.locations.at(methods.location).index_file;
 
                         std::string default_path = fullPath + location->index_file;
                         std::cout << "default path : " << default_path << std::endl;
 
                         response res_success(socket_fd, default_path , "HTTP/1.1 200 OK\r\n");
                             throw std::runtime_error("Response sent successfully!");
+                             
 
 
 
@@ -165,8 +164,8 @@ void client::onEvent() // handlehttprequest
 
 
             }
-        }
     }
+    
 }
 
 

@@ -89,9 +89,6 @@ void response::send_response(int socket_fd, std::string response)
         ssize_t byte_send = send(socket_fd, response.c_str() + byte_sended, length - byte_sended, 0);
         if (byte_send == -1)
         {
-            // if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            // std::cout << "Socket is busy, will try again later." << std::endl;
-            // break; // Exit the loop for now
 
             std::cout << "error !" << std::endl;
             return ;
