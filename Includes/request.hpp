@@ -16,8 +16,8 @@ private:
     void ParsHeaders();
     void ParsBody(int socket_fd);
     void StateOFParser(int socket_fd);
-    void ChunkReaContent(std::fstream &body, int socket_fd);
-    void ContentLenghtRead(std::fstream &body, int socket_fd);
+    void ChunkReaContent();
+    void ContentLenghtRead(int socket_fd);
 
 public:
     bool run_parser(int socket_fd);
@@ -26,6 +26,7 @@ public:
     bool request_ended;
     long max_body_size;
 
+    std::stringstream body_content;
     std::fstream *file;
 };
 

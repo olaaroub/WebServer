@@ -137,6 +137,7 @@ void client::onEvent() // handlehttprequest
     else if (event & EPOLLOUT)
     {
         std::cout << "send output" << std::endl;
+        std::fstream file_test("ddd", std::ios::binary | std::ios::out);
         std::ifstream file("www/index.html");
         std::stringstream ss;
 
@@ -146,6 +147,7 @@ void client::onEvent() // handlehttprequest
         std::string holder = ss.rdbuf()->str();
         std::stringstream len;
         len << holder.length();
+        file_test.write(request.body_content.rdbuf()->str().c_str(), request.body_content.rdbuf()->str().length());
 
         std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + len.rdbuf()->str() + "\r\n\r\n" + holder;
         send(socket_fd, res.c_str(), res.length(), 0);
