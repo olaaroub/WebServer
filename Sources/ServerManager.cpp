@@ -68,8 +68,8 @@ void serverManager:: listening()
         int event = epoll_wait(kernel_identifier, evlist, activeNetworks.size(), -1);
         if (event < 0)
         {
-            perror("epoll_wait");
-            throw std::runtime_error("");
+            perror("Epoll Error: ");
+            throw std::runtime_error("!");
         }
         for (int i = 0; i < event; i++)
         {
