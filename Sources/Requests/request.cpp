@@ -50,34 +50,40 @@ void Request:: ParsHeaders()
 void Request:: ChunkReaContent(std::fstream &body, int socket_fd)
 {
 
-    static unsigned int i = 0;
+    static unsigned int current_chunk_size = 0;
+    static bool waiting_for_new_chunk = true;
     unsigned int len;
-    if (i > buffer.length())
-        return;
-     std::cout << "chunked " << socket_fd << " " << i  << " " << buffer.length() << std::endl;
+    // if (i > buffer.length())
+    //     return;
+     std::cout << "chunked " << socket_fd << " current_chunk_size: " << current_chunk_size  << " buffer.length(): " << buffer.length() << std::endl;
     while (true)
     {
-        // std::cout << "ff\n";
-        size_t findNewLine = buffer.find("\r\n");
-        if (findNewLine == std::string::npos)
-            throw std::string("ERROR: structur of chunked POST not correct");
-        std::string line = buffer.substr(0, findNewLine);
-        is_number(line);
-        std::istringstream ff(line);
-        ff >> std::hex >> len;
-        i = len;
-        std::cout << "      len_line: '" << line << "'" << std::endl;
-        if (!len)
+        if (waiting_for_new_chunk)
         {
-            request_ended = true;
-            return ;
+            size_t findNewLine = buffer.find("\r\n");
+            if (findNewLine == std::string::npos)
+                throw std::string("ERROR: structur of chunked POST not correct");
+            std::string line = buffer.substr(0, findNewLine);
+            is_number(line);
+            std::istringstream ff(line);
+            ff >> std::hex >> len;
+            current_chunk_size = len;
+            buffer.erase(0, findNewLine + 2);
+            std::cout << "      len_line_in_hex: '" << line << "' len_in_dec: " << len << std::endl;
+            if (!len)
+            {
+                request_ended = true;
+                return ;
+            }
+            waiting_for_new_chunk = false;
         }
-        if (buffer.length() < len + 2 + findNewLine + 2)
+        if (buffer.length() < current_chunk_size + 2)
             return;
-        std::string chunkData = buffer.substr(findNewLine + 2, len);
-        body.write(chunkData.c_str(), len);
-        buffer.erase(0, findNewLine + 2 + len + 2);
-
+        std::string chunkData = buffer.substr(0, current_chunk_size);
+        body.write(chunkData.c_str(), current_chunk_size);
+        buffer.erase(0, current_chunk_size + 2);
+        waiting_for_new_chunk = true;
+        current_chunk_size = 0;
     }
 }
 
