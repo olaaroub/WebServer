@@ -91,7 +91,7 @@ void client::onEvent() // handlehttprequest
                         if (std::find(allowed.begin(), allowed.end(), method) != allowed.end())
                         {
                             std::cout << "Method '" << method << "' is allowed for this CGI." << std::endl;
-
+                            
                         }
                         else
                         {
