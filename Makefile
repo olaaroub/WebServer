@@ -14,13 +14,12 @@ SRC = 	main.cpp \
 		Connections/client.cpp \
 		Connections/network.cpp \
 		Connections/server.cpp \
-		Methods/Delete.cpp \
-		Methods/Get.cpp \
-		Methods/Methods.cpp \
-		Methods/Post.cpp \
 		Requests/Headers.cpp \
 		Requests/request.cpp \
 		Requests/RequestLine.cpp \
+		Methods/response.cpp \
+		# Methods/Methods.cpp \
+		# Methods/Methods.cpp \
 
 SRCS = $(addprefix $(SPATH), $(SRC))
 

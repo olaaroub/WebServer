@@ -2,10 +2,6 @@
 #include "ServerManager.hpp"
 #include "Utils.hpp"
 
-
-//
-
-
 client::client(const ServerConfigs &server_config) : network(server_config, false) { request.state = 0; }
 
 void client::epoll_modify()
@@ -15,7 +11,6 @@ void client::epoll_modify()
     if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_MOD, socket_fd, &ev) < 0)
         throw std::runtime_error("Client Error: epoll control failed!");
 }
-
 
 const LocationConfigs* client::findLocation(const std::string& uri)
 {
@@ -35,122 +30,144 @@ const LocationConfigs* client::findLocation(const std::string& uri)
             }
         }
     }
-    return bestMatch;
+     return bestMatch;
 }
-
-
-
 
 void client::onEvent() // handlehttprequest
 {
+    std::string red = "\033[31m";
+    std::string reset = "\033[0m";
+
     if (event & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
-        throw std::runtime_error("Client disconnected or socket error.");// bach process i cleani, perror does not clean
+        throw std::runtime_error("Client disconnected or socket error.");
     else if (event & EPOLLIN)
     {
-        // std::cout << "in input" << std::endl;
-        // request.max_body_size = server_config.client_max_body_size;
-        // int is_finish = request.run_parser(socket_fd);
-        // if (is_finish)
-        //     epoll_modify();
-
-        try
-        {
-            bool is_request_complete = request.run_parser(socket_fd);
+       bool is_request_complete = request.run_parser(socket_fd);
 
             if (is_request_complete)
+                epoll_modify();
+    }
+    else if (event & EPOLLOUT)
+    {
+        std::string fullPath;
+        const std::string& requestUri = normalizePath(request.RequestLine.getUrl());
+
+        const LocationConfigs* location = findLocation(requestUri);
+        if(location)
+            fullPath = joinPaths(location->root, requestUri);
+
+        std::cout  << red << "--- full path : "<< reset << fullPath << std::endl;
+
+        if (!location)
+        {
+            response res_error(socket_fd, "./Pages/Errors/404.html", "HTTP/1.1 404 Not Found");
+            throw std::runtime_error("Response 404 sent!") ;
+            
+        }
+        else if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(), request.RequestLine.get_method()) == location->allowed_methods.end())
+        {
+            std::cerr << "Error: Method '" << request.RequestLine.get_method() << "' is not allowed for this location." << std::endl;
+            response res_error(socket_fd, "./Pages/Errors/405.html", "HTTP/1.1 405 Method Not Allowed");
+            throw std::runtime_error("Response 405 sent!") ;
+             
+
+        }
+
+        // std::string extension  = "wa7d";
+        // = getExtention(requestUri); .php .py .sh /// todo
+
+
+        // if (location->cgi_handlers.count(extension))
+        // {
+        //     // CgiClass obj;
+
+        //     // hna ankhdem cgi
+
+
+            if (request.RequestLine.get_method() == "GET")
             {
-                // std::cout << "parsing request from fd: " << socket_fd << std::endl;
+                std::cout  << red << "----------- PART OF METHODS GET START --------------"  << reset <<  std::endl;
+                // uri  | index_file  | root_path
+                //  build the full path to the file .
+                // check is this path exsist !
+                struct stat file_info;
 
-                const std::string& requestUri = normalizePath(request.RequestLine.getUrl());
+                std::cout << "the full path !!!  : " << fullPath << std::endl;
 
-
-                const LocationConfigs* location = findLocation(requestUri);
-                if (location)
+                if (stat(fullPath.c_str(), &file_info) != 0)
                 {
-                    std::cout << "location block is '" << location->path << "'" << std::endl;
+                    std::cout << "error , the file not found !" << std::endl;
 
-                    std::string fullPath = joinPaths(location->root, requestUri);
+                    response res_error(socket_fd, "./Pages/Errors/404.html", "HTTP/1.1 404 Not Found");
+                        throw std::runtime_error("Response 404 sent!");
+                         
 
-                    std::cout << "full path is '" << fullPath << "'" << std::endl;
+                }
+                bool is_a_file = S_ISREG(file_info.st_mode);
+                bool is_a_dir = S_ISDIR(file_info.st_mode);
 
-                    std::string extension = "";
-                    size_t dotPos = fullPath.rfind('.');
-                    if (dotPos != std::string::npos) {
-                        extension = fullPath.substr(dotPos);
-                    }
-
-                    if (location->cgi_handlers.count(extension))
+                if (is_a_file == true)
+                {
+                    // check  permession !
+                    if ((file_info.st_mode & S_IRUSR) == 0)
                     {
-                        std::string method = request.RequestLine.get_method();
+                        std::cout << "error, 403 Forbiden ! (there is no permession for read)" << std::endl;
+                        response res_error(socket_fd, "./Pages/Errors/403.html", "HTTP/1.1 403 Forbidden");
+                            throw std::runtime_error("Response 403 sent!");
+                             
 
-                        const std::vector<std::string>& allowed = location->allowed_methods;
-
-                        if (std::find(allowed.begin(), allowed.end(), method) != allowed.end())
-                        {
-                            std::cout << "Method '" << method << "' is allowed for this CGI." << std::endl;
-
-                        }
-                        else
-                        {
-                            std::cerr << "Error: Method '" << method << "' is not allowed for this CGI location." << std::endl;
-
-                        }
 
                     }
                     else
                     {
-                        std::string method = request.RequestLine.get_method();
+                        // sending the response
 
-                        if (method == "GET") {
+                        std::cout << "the response send successfully !" << std::endl;
+                        response res_success(socket_fd, fullPath , "HTTP/1.1 200 OK\r\n");
+                            throw std::runtime_error("Response  sent successfully!");
+                             
 
-                        }
 
-                        else if (method == "POST") {
 
-                        }
 
-                        else if (method == "DELETE") {
-
-                        }
                     }
                 }
-                else
+                else if (is_a_dir == true)
                 {
-                    std::cerr << "Error: No matching location found for URI: " << requestUri << std::endl;
-                    // hna makaynach dik location li tleb
-                    //khasna nsifto lih 404 page
+                    // check  permession !
+                    if ((file_info.st_mode & S_IXUSR) == 0)
+                    {
+                        std::cout << "error, 403 Forbiden ! (there is no permession for execute the dir)" << std::endl;
+                        response res_error(socket_fd, "./Pages/Errors/403.html", "HTTP/1.1 403 Forbidden");
+                            throw std::runtime_error("Response 403 sent!");
+                             
+
+
+                    }
+                    else
+                    {
+                        std::cout << "it is a dir , need a response" << std::endl;
+
+
+                        std::string default_path = fullPath + location->index_file;
+                        std::cout << "default path : " << default_path << std::endl;
+
+                        response res_success(socket_fd, default_path , "HTTP/1.1 200 OK\r\n");
+                            throw std::runtime_error("Response sent successfully!");
+                             
+
+
+
+                    }
+
                 }
 
-                epoll_modify();
+
             }
-        }
-        catch (const std::exception& e)
-        {
-            std::cerr << "Error processing request for fd " << socket_fd << ": " << e.what() << std::endl;
-            // Khasna ndiro error 400 hna
-            epoll_modify();
-        }
     }
-    else if (event & EPOLLOUT)
-    {
-        std::cout << "send output" << std::endl;
-        std::fstream file_test("ddd", std::ios::binary | std::ios::out);
-        std::ifstream file("www/index.html");
-        std::stringstream ss;
-
-        ss << file.rdbuf();
-        // std::cout << ss.rdbuf() << std::endl;
-
-        std::string holder = ss.rdbuf()->str();
-        std::stringstream len;
-        len << holder.length();
-        file_test.write(request.body_content.rdbuf()->str().c_str(), request.body_content.rdbuf()->str().length());
-
-        std::string res = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: " + len.rdbuf()->str() + "\r\n\r\n" + holder;
-        send(socket_fd, res.c_str(), res.length(), 0);
-        throw std::runtime_error("finished sending response.");
-    }
+    
 }
+
 
 client::~client()
 {
