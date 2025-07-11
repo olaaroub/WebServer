@@ -12,6 +12,10 @@
 
 #define MAX_EPOLL 100
 
+#define red  "\033[31m"
+#define reset  "\033[0m"
+#define green "\033[32m"
+
 #include <iostream>
 #include <string.h>
 #include <unistd.h>

@@ -11,9 +11,11 @@
 class Methods
 {
     private:
-
+    const LocationConfigs* location;
     public:
-    
+    Methods();
+    Methods(const LocationConfigs* location);
+    ~Methods();
 };
 
 #endif
