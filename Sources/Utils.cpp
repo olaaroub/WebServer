@@ -53,3 +53,18 @@ std::string normalizePath(const std::string& uri) {
     }
     return result;
 }
+
+
+std::string getExtension(const std::string& path)
+{
+    size_t dot_pos = path.rfind('.');
+
+    if (dot_pos != std::string::npos)
+    {
+        size_t slash_pos = path.rfind('/');
+        if (slash_pos != std::string::npos && dot_pos < slash_pos)
+            return "";
+        return path.substr(dot_pos);
+    }
+    return "";
+}

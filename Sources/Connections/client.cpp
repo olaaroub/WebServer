@@ -12,8 +12,8 @@ void client::epoll_modify()
         throw std::runtime_error("Client Error: epoll control failed!");
 }
 
-const LocationConfigs *client::findLocation(const std::string &uri)
-{
+const LocationConfigs *client::findLocation(const std::string &uri) // i should handle the case where
+{                                                                   // /images/ or /images and the given uri uses that prefix TODO
     const LocationConfigs *bestMatch = NULL;
     size_t len = 0;
 
@@ -46,7 +46,7 @@ void client::onEvent() // handlehttprequest
     }
     else if (event & EPOLLOUT)
     {
-        std::cout << "Body :" << request.body_content.rdbuf()->str() << std::endl;
+        // std::cout << "Body :" << request.body_content.rdbuf()->str() << std::endl;
         std::string fullPath;
         const std::string &requestUri = normalizePath(request.RequestLine.getUrl());
 
@@ -56,25 +56,38 @@ void client::onEvent() // handlehttprequest
 
         if (!location)
         {
-            response res_error(socket_fd, "404", " ");
+            response res_error(socket_fd, "404", "");
             throw std::runtime_error("Response 404 sent!");
         }
         else if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(), request.RequestLine.get_method()) == location->allowed_methods.end())
         {
-            response res_error(socket_fd, "405", " ");
+            response res_error(socket_fd, "405", "");
             throw std::runtime_error("Response 405 sent!");
         }
+        std::cout << requestUri << std::endl;
 
-        // std::string extension  = "wa7d";
-        // = getExtention(requestUri); .php .py .sh /// todo
+        std::string extension  = getExtension(fullPath); // this will check for cgi extentions, it will return the extention
+        std::cout << "Extension: " << extension << std::endl;
 
-        // if (location->cgi_handlers.count(extension))
-        // {
-        //     // CgiClass obj;
+        if (location->cgi_handlers.count(extension)) // i will work here if the extention is cgi
+        {
+            // std::cout << red << "----------- PART OF METHODS CGI START --------------" << reset << std::endl;
+            // Cgi cgi(fullPath, location, request);
+            // std::string type_res = cgi.check_path();
+            // response res(socket_fd, type_res, cgi.get_final_path());
+            // throw std::runtime_error("Response" + type_res + "sent!");
 
-        //     // hna ankhdem cgi
+            std::cout << "this is a cgi request" << std::endl;
+        }
+        else
+        {
+            std::cout << "this is not a cgi request" << std::endl;
+            response res_error(socket_fd, "404", "");
+            throw std::runtime_error("Response 404 sent!");
+        }
 
-        if (request.RequestLine.get_method() == "GET")
+
+        if (request.RequestLine.get_method() == "GET") // here my teammate will work on get and post after i check that there is no cgi
         {
             std::cout << red << "----------- PART OF METHODS GET START --------------" << reset << std::endl;
             Get get(fullPath, location);
