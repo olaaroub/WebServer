@@ -29,9 +29,9 @@ void Request:: ParsHeaders()
     if (cont != std::string::npos)
     {
 
-        Headers.set_buffer(buffer.substr(0, cont + 2));
+        headers.set_buffer(buffer.substr(0, cont + 2));
         buffer = buffer.substr(cont + 4);
-        Headers.HeadersParser();
+        headers.HeadersParser();
         if (RequestLine.get_method() != "POST")
             request_ended = true;
         else
@@ -40,7 +40,7 @@ void Request:: ParsHeaders()
         state++;
     }
     else
-        Headers.set_buffer(buffer);
+        headers.set_buffer(buffer);
 }
 
 
@@ -94,7 +94,7 @@ void Request:: ContentLenghtRead(int socket_fd)
     long cont;
     std::string number;
 
-    number = Headers.map["content-length"].at(0);
+    number = headers.map["content-length"].at(0);
     is_number(number);
     cont = atol(number.c_str());
     cont -= buffer.size();
@@ -119,9 +119,9 @@ void Request:: ParsBody(int socket_fd)
     ss << socket_fd;
     ss >> file_name;
     file_name += "_POST_FILE";
-    if (!Headers.map["content-length"].empty() && Headers.map["transfer-encoding"].empty())
+    if (!headers.map["content-length"].empty() && headers.map["transfer-encoding"].empty())
         ContentLenghtRead(socket_fd);
-    else if (!Headers.map["transfer-encoding"].empty() && Headers.map["transfer-encoding"].at(0) == "chunked" && Headers.map["content-length"].empty())
+    else if (!headers.map["transfer-encoding"].empty() && headers.map["transfer-encoding"].at(0) == "chunked" && headers.map["content-length"].empty())
         ChunkReaContent();
     else
         throw std::runtime_error("Request parser Error: this method to transfer data not allowed!");
