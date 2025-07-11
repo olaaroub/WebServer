@@ -1,0 +1,26 @@
+#ifndef REQUESTLINE_HPP
+#define REQUESTLINE_HPP
+
+#include "lib.hpp"
+
+class RequestLine
+{
+    private:
+        std::string method;
+        std::string HttpVerction;
+        std::vector<std::string> Query_parameters;
+        std::string line;
+        std::string _url;
+
+        void SeparateMethod();
+        void SeparateUrl();
+        void SeparateQuerys();
+    public:
+        void ParsRequestLine();
+        void set_line(std::string line);
+        std::string &get_line();
+        std::string get_method();
+        const std::string& getUrl()const;
+};
+
+#endif

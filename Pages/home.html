@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Webserv - Home</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container">
+            <nav class="main-nav">
+                <a href="/" class="logo">Webserv</a>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">About</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Welcome to Webserv</h1>
+                <p class="subtitle">A high-performance HTTP server written in C++98.</p>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <h2>Server Features</h2>
+                <div class="feature-grid">
+                    <div class="card">
+                        <h3>Non-Blocking I/O</h3>
+                        <p>Built with epoll/kqueue for handling thousands of simultaneous connections efficiently.</p>
+                    </div>
+                    <div class="card">
+                        <h3>HTTP/1.1 Compliant</h3>
+                        <p>Handles GET, POST, and DELETE methods, along with static file serving and CGI.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Customizable</h3>
+                        <p>Fully configured through a simple and powerful configuration file, just like Nginx.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>&copy; 2025 - Your Name. Powered by a custom C++ Webserv.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
