@@ -25,20 +25,13 @@ void RequestLine:: SeparateMethod()
 
 void RequestLine:: SeparateQuerys()
 {
-    size_t cont;
-    while (true)
-    {
-        cont = line.find("&");
-        if (cont == std::string::npos)
-            break;
-        Query_parameters.push_back(line.substr(0, cont));
-        line = line.substr(++cont);
-    }
-    cont = line.find(" ");
-    Query_parameters.push_back(line.substr(0, cont));
-    line = line.substr(++cont);
-    // for(int i = 0;i < Query_parameters.size(); i++)
-    //     std::cout << Query_parameters.at(i) << std::endl;
+    size_t FindIndex;
+
+    FindIndex = line.find(" ");
+    if (FindIndex == std::string::npos)
+        throw std::runtime_error("RequestLine Error: Format not correct!");
+    Query_lien = line.substr(0, FindIndex);
+    line.erase(0, ++FindIndex);
 }
 
 void RequestLine:: SeparateUrl()
