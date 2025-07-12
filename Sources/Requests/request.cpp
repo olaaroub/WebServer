@@ -151,5 +151,6 @@ bool Request:: run_parser(int socket_fd)
     buffer.append(bfr, cont);
     std::cout << "'" << buffer << "'" << std::endl;
     StateOFParser(socket_fd);
+    std::cout << RequestLine.Query_lien << std::endl;
     return request_ended;
 }
