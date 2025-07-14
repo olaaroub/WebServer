@@ -50,6 +50,7 @@ time.sleep(1)
 print("send req3")
 sock.sendall(req3)
 
+time.sleep(5)
 response = sock.recv(4096)
 print("response:", response.decode(errors='ignore'))
 

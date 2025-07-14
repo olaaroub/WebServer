@@ -47,7 +47,9 @@ void client::onEvent() // handlehttprequest
     }
     else if (event & EPOLLOUT)
     {
-        std::cout << "Body :" << request.body_content.rdbuf()->str() << std::endl;
+        // std::cout << "Body :" << request.body_content.rdbuf()->str() << std::endl;
+        std::fstream BodyFile("tesst");
+        BodyFile.write(request.body_content.rdbuf()->str().c_str(), request.body_content.rdbuf()->str().length());
         std::string fullPath;
         const std::string &requestUri = normalizePath(request.RequestLine.getUrl());
 

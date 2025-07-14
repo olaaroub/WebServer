@@ -13,10 +13,10 @@ private:
     void is_number(std::string string);
     void ParsRequstLine();
     void ParsHeaders();
-    void ParsBody(int socket_fd);
-    void StateOFParser(int socket_fd);
+    void ParsBody();
+    void StateOFParser();
     void ChunkReaContent();
-    void ContentLenghtRead(int socket_fd);
+    void ContentLenghtRead();
     void SetMaxBodySize();
 
 public:
