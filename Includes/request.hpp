@@ -17,6 +17,7 @@ private:
     void StateOFParser(int socket_fd);
     void ChunkReaContent();
     void ContentLenghtRead(int socket_fd);
+    void SetMaxBodySize();
 
 public:
     bool run_parser(int socket_fd);
@@ -24,7 +25,7 @@ public:
     RequestLine RequestLine;
     short state;
     bool request_ended;
-    long max_body_size;
+    long long max_body_size;
 
     std::stringstream body_content;
     std::fstream *file;
