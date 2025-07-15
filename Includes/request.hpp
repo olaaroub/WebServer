@@ -13,18 +13,19 @@ private:
     void is_number(std::string string);
     void ParsRequstLine();
     void ParsHeaders();
-    void ParsBody(int socket_fd);
-    void StateOFParser(int socket_fd);
+    void ParsBody();
+    void StateOFParser();
     void ChunkReaContent();
-    void ContentLenghtRead(int socket_fd);
+    void ContentLenghtRead();
+    void SetMaxBodySize();
 
 public:
     bool run_parser(int socket_fd);
     Headers headers;
-    RequestLine RequestLine;
+    RequestLine requestLine;
     short state;
     bool request_ended;
-    long max_body_size;
+    long long max_body_size;
 
     std::stringstream body_content;
     std::fstream *file;

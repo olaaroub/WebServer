@@ -13,13 +13,11 @@ void Request:: ParsRequstLine()
     size_t cont = buffer.find("\r\n");
     if (cont != std::string::npos)
     {
-        RequestLine.set_line(buffer.substr(0, cont));
-        RequestLine.ParsRequestLine();
-        buffer = buffer.substr(cont+2);
+        requestLine.set_line(buffer.substr(0, cont));
+        requestLine.ParsRequestLine();
+        buffer.erase(0, cont+2);
         state++;
     }
-    else
-        RequestLine.set_line(buffer);
 
 }
 
@@ -32,15 +30,14 @@ void Request:: ParsHeaders()
         headers.set_buffer(buffer.substr(0, cont + 2));
         buffer = buffer.substr(cont + 4);
         headers.HeadersParser();
-        if (RequestLine.get_method() != "POST")
+        if (requestLine.get_method() != "POST")
             request_ended = true;
         else
             request_ended = false;
 
         state++;
     }
-    else
-        headers.set_buffer(buffer);
+
 }
 
 
@@ -50,6 +47,8 @@ void Request:: ChunkReaContent()
     static unsigned int current_chunk_size = 0;
     static bool waiting_for_new_chunk = true;
     unsigned int len;
+    if (buffer.empty())
+        return ;
     while (true)
     {
         if (waiting_for_new_chunk)
@@ -58,7 +57,7 @@ void Request:: ChunkReaContent()
             if (findNewLine == std::string::npos)
                 throw std::runtime_error("Request parser Error: format of chunked POST not correct");
             std::string line = buffer.substr(0, findNewLine);
-            is_number(line); 
+            is_number(line);
             std::istringstream ff(line);
             ff >> std::hex >> len;
             current_chunk_size = len;
@@ -89,52 +88,53 @@ void Request:: is_number(std::string string)
     }
 }
 
-void Request:: ContentLenghtRead(int socket_fd)
+void Request:: ContentLenghtRead()
 {
-    long cont;
+    static long cont = 0;
+    static long long ContentSize = 0;
     std::string number;
 
-    number = headers.map["content-length"].at(0);
-    is_number(number);
-    cont = atol(number.c_str());
-    cont -= buffer.size();
-    if (cont < 0)
-        throw std::runtime_error("Request parser Error:bad request!");
-    else if (cont > 0)
+    if (buffer.empty())
+        return;
+    if (!cont)
     {
-        char buf[cont];
-        int read_cont = read(socket_fd, &buf, cont - 1);
-        if (read_cont < 0)
-            throw std::runtime_error("Request parser Error: Read failed in socket: Request ended!");
-        buffer.append(buf, read_cont);
-
+        number = headers.map["content-length"].at(0);
+        is_number(number);
+        cont = atol(number.c_str());
+        if (cont < 0)
+            throw std::runtime_error("Request parser Error:bad request!");
     }
-    body_content << buffer;
-    request_ended = true;
+    if (ContentSize < cont)
+        ContentSize += buffer.size();
+    if (ContentSize > cont)
+        throw std::runtime_error("Request Error: ContentLenghtRead Error: size of content readed large of content-lenght");
+    if (ContentSize == cont)
+    {
+        std::cout << "request ended" << std::endl;
+        request_ended = true;
+    }
+    body_content.write(buffer.c_str(), buffer.length());
+    buffer.clear();
 }
 
-void Request:: ParsBody(int socket_fd)
+void Request:: ParsBody()
 {
-    std::stringstream ss;
-    ss << socket_fd;
-    ss >> file_name;
-    file_name += "_POST_FILE";
     if (!headers.map["content-length"].empty() && headers.map["transfer-encoding"].empty())
-        ContentLenghtRead(socket_fd);
+        ContentLenghtRead();
     else if (!headers.map["transfer-encoding"].empty() && headers.map["transfer-encoding"].at(0) == "chunked" && headers.map["content-length"].empty())
         ChunkReaContent();
     else
         throw std::runtime_error("Request parser Error: this method to transfer data not allowed!");
 }
 
-void Request:: StateOFParser(int socket_fd)
+void Request:: StateOFParser()
 {
     if (state == 0)
         ParsRequstLine();
     if (state == 1)
         ParsHeaders();
-    if (state == 2 && RequestLine.get_method() == "POST")
-        ParsBody(socket_fd);
+    if (state == 2 && requestLine.get_method() == "POST")
+        ParsBody();
 
 }
 
@@ -149,8 +149,7 @@ bool Request:: run_parser(int socket_fd)
         throw std::runtime_error("Request parser Error: read failed!");
     }
     buffer.append(bfr, cont);
-    std::cout << "'" << buffer << "'" << std::endl;
-    StateOFParser(socket_fd);
-    std::cout << RequestLine.Query_lien << std::endl;
+    StateOFParser();
+    std::cout << buffer << std::endl;
     return request_ended;
 }
