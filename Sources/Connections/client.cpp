@@ -71,22 +71,18 @@ void client::onEvent() // handlehttprequest
         }
         std::cout << requestUri << std::endl;
 
-        std::string extension  = getExtension(fullPath); // this will check for cgi extentions, it will return the extention
+        std::string extension  = getExtension(fullPath); 
         std::cout << "Extension: " << extension << std::endl;
 
         if (location->cgi_handlers.count(extension)) // i will work here if the extention is cgi
         {
             std::string cgi_output;
-            try {
+            try
+            {
                 CgiHandler cgi(*location, fullPath, request);
                 cgi_output = cgi.execute();
-
-                if (cgi_output.empty()) {
-                     response res_error(socket_fd, "500", ""); // Script produced no output
-                     throw std::runtime_error("Response 500 sent! CGI script output was empty.");
-                }
-
-            } catch (const std::exception& e) {
+            }
+            catch (const std::exception& e) {
                 std::cerr << red << "CGI execution failed: " << e.what() << reset << std::endl;
                 response res_error(socket_fd, "500", "");
                 throw std::runtime_error("Response 500 sent!");
@@ -94,16 +90,13 @@ void client::onEvent() // handlehttprequest
 
             std::string headers_str;
             std::string body_str;
-            // Find the separator between headers and body
             size_t separator = cgi_output.find("\r\n\r\n");
             if (separator == std::string::npos) {
-                // Fallback for scripts that use \n\n
                 separator = cgi_output.find("\n\n");
                 if (separator != std::string::npos) {
                     headers_str = cgi_output.substr(0, separator);
                     body_str = cgi_output.substr(separator + 2);
                 } else {
-                    // No headers found, assume the whole output is the body
                     body_str = cgi_output;
                 }
             } else {
@@ -111,30 +104,20 @@ void client::onEvent() // handlehttprequest
                 body_str = cgi_output.substr(separator + 4);
             }
 
-            // --- CONSTRUCT A VALID HTTP RESPONSE ---
             std::stringstream final_response;
             final_response << "HTTP/1.1 200 OK\r\n";
-            // If the script provided headers, add them.
             if (!headers_str.empty()) {
                 final_response << headers_str << "\r\n";
             }
-            // Always add/overwrite content-length to be sure it's correct.
             final_response << "Content-Length: " << body_str.length() << "\r\n";
-            final_response << "\r\n"; // The blank line separating headers from body
+            final_response << "\r\n";
             final_response << body_str;
 
             send(socket_fd, final_response.str().c_str(), final_response.str().length(), 0);
             throw std::runtime_error("CGI response sent successfully.");
         }
-        else
-        {
-            std::cout << "this is not a cgi request" << std::endl;
-            response res_error(socket_fd, "404", "");
-            throw std::runtime_error("Response 404 sent!");
-        }
 
-
-        if (request.requestLine.get_method() == "GET") // here my teammate will work on get and post after i check that there is no cgi
+        if (request.requestLine.get_method() == "GET")
         {
             std::cout << red << "----------- PART OF METHODS GET START --------------" << reset << std::endl;
             Get get(fullPath, location);
