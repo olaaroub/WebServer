@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 21:50:30 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/07/15 18:05:12 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/07/15 18:33:13 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ void CgiHandler::_setupEnvironment()
         env.push_back("CONTENT_LENGTH=" + ss.str());
     }
 
-    std::map<std::string, std::vector<std::string>>::const_iterator it;
+    std::map<std::string, std::vector<std::string> > ::const_iterator it;
     it = _headers.find("content-type");
     if (it != _headers.end() && !it->second.empty())
     {
@@ -184,7 +184,7 @@ std::string CgiHandler::execute()
     std::string output;
     char buffer[4096];
     ssize_t bytes_read;
-    
+
     while ((bytes_read = read(_pipe_out[0], buffer, sizeof(buffer) - 1)) > 0)
     {
         buffer[bytes_read] = '\0';

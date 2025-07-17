@@ -41,19 +41,18 @@ void client::onEvent() // handlehttprequest
         throw std::runtime_error("Client disconnected or socket error.");
     else if (event & EPOLLIN)
     {
-        std::cout << "I am here\n";
         bool is_request_complete = request.run_parser(socket_fd);
-
         if (is_request_complete)
             epoll_modify();
     }
     else if (event & EPOLLOUT)
     {
         // std::cout << "Body :" << request.body_content.rdbuf()->str() << std::endl;
-        std::fstream BodyFile("tesst");
-        BodyFile.write(request.body_content.rdbuf()->str().c_str(), request.body_content.rdbuf()->str().length());
+        // std::fstream BodyFile("tesst");
+        // BodyFile.write(request.body_content.rdbuf()->str().c_str(), request.body_content.rdbuf()->str().length());
         std::string fullPath;
         const std::string &requestUri = normalizePath(request.requestLine.getUrl());
+        // std::cout<< "Request URI: " << request.requestLine.getUrl() << std::endl;
 
         const LocationConfigs *location = findLocation(requestUri);
         if (location)
@@ -69,9 +68,10 @@ void client::onEvent() // handlehttprequest
             response res_error(socket_fd, "405", "");
             throw std::runtime_error("Response 405 sent!");
         }
+
         std::cout << requestUri << std::endl;
 
-        std::string extension  = getExtension(fullPath); 
+        std::string extension  = getExtension(fullPath);
         std::cout << "Extension: " << extension << std::endl;
 
         if (location->cgi_handlers.count(extension)) // i will work here if the extention is cgi
