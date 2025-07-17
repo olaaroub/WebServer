@@ -141,15 +141,13 @@ void Request:: StateOFParser()
 bool Request:: run_parser(int socket_fd)
 {
     char bfr[1024];
-    // std::string baff;
+
     int cont = read(socket_fd, &bfr, 1023);
-    if (cont <= 0)
-    {
-        close(socket_fd);
+    if (cont < 0)
         throw std::runtime_error("Request parser Error: read failed!");
-    }
+    if (cont == 0)
+        throw std::runtime_error("Request parser: Client closed connection unexpectedly");
     buffer.append(bfr, cont);
     StateOFParser();
-    std::cout << buffer << std::endl;
     return request_ended;
 }

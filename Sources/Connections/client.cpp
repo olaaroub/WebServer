@@ -39,14 +39,10 @@ void client::onEvent() // handlehttprequest
         throw std::runtime_error("Client disconnected or socket error.");
     else if (event & EPOLLIN)
     {
-        std::cout << "I am here\n";
+        std::cout << "EPOLLIN ..." << std::endl; 
         bool is_request_complete = request.run_parser(socket_fd);
-
         if (is_request_complete)
-        {
-            std::cout << request.RequestLine.getUrl() << " method: " << request.RequestLine.get_method() << " Query: " << request.RequestLine.Query_lien << std::endl;
             epoll_modify();
-        }
     }
     else if (event & EPOLLOUT)
     {
