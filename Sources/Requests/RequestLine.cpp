@@ -43,7 +43,10 @@ void RequestLine:: SeparateUrlAndQuerys(std::string buff)
 {
     size_t FindQuestionMark = buff.find("?");
     if (FindQuestionMark == std::string::npos)
+    {
+        _url = buff;
         return ;
+    }
     _url = buff.substr(0, FindQuestionMark);
     Query_lien = buff.erase(0, ++FindQuestionMark);
 
@@ -57,6 +60,7 @@ void RequestLine:: ParsRequestLine()
     str >> buff;
     SeparateUrlAndQuerys(buff);
     str >> HttpVerction;
+    std::cout << "method " << method << " HttpVerction: " << HttpVerction << " URL: "<< _url << std::endl;
     if (HttpVerction != "HTTP/1.1")
         throw std::runtime_error("RequestLine Error: verstion of HTTP not seported!");
 }

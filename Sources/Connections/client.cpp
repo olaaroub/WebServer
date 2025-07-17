@@ -43,7 +43,10 @@ void client::onEvent() // handlehttprequest
         bool is_request_complete = request.run_parser(socket_fd);
 
         if (is_request_complete)
+        {
+            std::cout << request.RequestLine.getUrl() << " method: " << request.RequestLine.get_method() << " Query: " << request.RequestLine.Query_lien << std::endl;
             epoll_modify();
+        }
     }
     else if (event & EPOLLOUT)
     {
