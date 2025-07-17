@@ -50,6 +50,7 @@ void serverManager::epollEvent(int fd, int event)
 
         if (activeNetworks.count(fd))
         {
+            std::cout << "delet Connection" << std::endl;
             delete activeNetworks[fd];
             activeNetworks.erase(fd);
         }
@@ -60,12 +61,11 @@ void serverManager::epollEvent(int fd, int event)
 
 void serverManager:: listening()
 {
-    epoll_event evlist[activeNetworks.size()];
-
-    // evlist = new epoll_event[activeNetworks.size()];
+    std::cout << "--evlist lenghet" << activeNetworks.size() << std::endl;
+    std::vector<epoll_event> evlist(1024);
     while(true)
     {
-        int event = epoll_wait(kernel_identifier, evlist, activeNetworks.size(), -1);
+        int event = epoll_wait(kernel_identifier, evlist.data(), evlist.size(), -1);
         if (event < 0)
         {
             perror("Epoll Error: ");
@@ -75,7 +75,9 @@ void serverManager:: listening()
         {
             int fd = evlist[i].data.fd;
             epollEvent(fd, evlist[i].events);
-
+            if (activeNetworks.size() >= evlist.size())
+                evlist.resize(activeNetworks.size() * 2);
+            // std::cout << "|____Servers Cont" << activeNetworks.size() << std::endl;
         }
     }
 }
