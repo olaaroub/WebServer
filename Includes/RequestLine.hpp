@@ -12,9 +12,7 @@ class RequestLine
         std::string line;
         std::string _url;
 
-        void SeparateMethod();
-        void SeparateUrlAndQuerys(std::string buff);
-        void SeparateQuerys();
+        void SeparateUrlAndQuerys(std::string buff);;
     public:
         void ParsRequestLine();
         void set_line(std::string line);
