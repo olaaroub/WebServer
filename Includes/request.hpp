@@ -22,7 +22,7 @@ private:
 public:
     bool run_parser(int socket_fd);
     Headers headers;
-    RequestLine RequestLine;
+    RequestLine requestLine;
     short state;
     bool request_ended;
     long long max_body_size;

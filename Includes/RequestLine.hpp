@@ -17,9 +17,9 @@ class RequestLine
         void ParsRequestLine();
         void set_line(std::string line);
         std::string &get_line();
-        std::string get_method();
+        const std::string& get_method() const;
         const std::string& getUrl()const;
-        std::string Query_lien;
+        std::string queryLine;
 };
 
 #endif

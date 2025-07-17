@@ -25,6 +25,7 @@ void Headers:: AddToMap(std::string line)
     std::string value = line.substr(cont + 2);
     to_lower(key);
     // std::cout<< key << " " << value << std::endl;
+    // exit(0);
     map[key].push_back(value);
 }
 
@@ -51,7 +52,7 @@ void Headers:: HeadersParser()
     //     std::cout << "first: '" << it->first << "' second: '" << it->second.at(0) << "'" << std::endl;
     // }
     // exit(1);
-    
+
 }
 
 /*

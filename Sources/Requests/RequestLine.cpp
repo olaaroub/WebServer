@@ -23,7 +23,7 @@ void RequestLine:: SeparateUrlAndQuerys(std::string buff)
         return ;
     }
     _url = buff.substr(0, FindQuestionMark);
-    Query_lien = buff.erase(0, ++FindQuestionMark);
+    queryLine = buff.erase(0, ++FindQuestionMark);
 
 }
 
@@ -41,7 +41,7 @@ void RequestLine:: ParsRequestLine()
         throw std::runtime_error("RequestLine ERROR: this method not allowed");
 }
 
-std::string RequestLine:: get_method()
+const std::string& RequestLine:: get_method() const
 {
     return method;
 }

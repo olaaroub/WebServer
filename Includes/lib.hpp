@@ -36,6 +36,7 @@
 #include <set>
 #include <cstdlib>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 
 #endif

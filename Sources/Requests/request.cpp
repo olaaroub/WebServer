@@ -16,8 +16,8 @@ void Request:: ParsRequstLine()
         throw std::runtime_error("Request parser Error: Request Line Size too Large!");
     if (cont != std::string::npos)
     {
-        RequestLine.set_line(buffer.substr(0, cont));
-        RequestLine.ParsRequestLine();
+        requestLine.set_line(buffer.substr(0, cont));
+        requestLine.ParsRequestLine();
         buffer.erase(0, cont+2);
         state++;
     }
@@ -36,7 +36,7 @@ void Request:: ParsHeaders()
         headers.set_buffer(buffer.substr(0, cont + 2));
         buffer = buffer.substr(cont + 4);
         headers.HeadersParser();
-        if (RequestLine.get_method() != "POST")
+        if (requestLine.get_method() != "POST")
             request_ended = true;
         else
             request_ended = false;
@@ -63,7 +63,8 @@ void Request:: ChunkReaContent()
             if (findNewLine == std::string::npos)
                 throw std::runtime_error("Request parser Error: format of chunked POST not correct");
             std::string line = buffer.substr(0, findNewLine);
-            is_number(line); 
+            is_number(line);
+            is_number(line);
             std::istringstream ff(line);
             ff >> std::hex >> len;
             current_chunk_size = len;
@@ -139,7 +140,7 @@ void Request:: StateOFParser()
         ParsRequstLine();
     if (state == 1)
         ParsHeaders();
-    if (state == 2 && RequestLine.get_method() == "POST")
+    if (state == 2 && requestLine.get_method() == "POST")
         ParsBody();
 
 }

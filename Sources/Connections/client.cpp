@@ -2,6 +2,8 @@
 #include "ServerManager.hpp"
 #include "Utils.hpp"
 #include "Get.hpp"
+#include "CGIHandler.hpp"
+
 client::client(const ServerConfigs &server_config) : network(server_config, false) { request.state = 0; }
 
 void client::epoll_modify()
@@ -12,8 +14,8 @@ void client::epoll_modify()
         throw std::runtime_error("Client Error: epoll control failed!");
 }
 
-const LocationConfigs *client::findLocation(const std::string &uri)
-{
+const LocationConfigs *client::findLocation(const std::string &uri) // i should handle the case where
+{                                                                   // /images/ or /images and the given uri uses that prefix TODO
     const LocationConfigs *bestMatch = NULL;
     size_t len = 0;
 
@@ -39,7 +41,6 @@ void client::onEvent() // handlehttprequest
         throw std::runtime_error("Client disconnected or socket error.");
     else if (event & EPOLLIN)
     {
-        std::cout << "EPOLLIN ..." << std::endl; 
         bool is_request_complete = request.run_parser(socket_fd);
         if (is_request_complete)
             epoll_modify();
@@ -47,10 +48,11 @@ void client::onEvent() // handlehttprequest
     else if (event & EPOLLOUT)
     {
         // std::cout << "Body :" << request.body_content.rdbuf()->str() << std::endl;
-        std::fstream BodyFile("tesst");
-        BodyFile.write(request.body_content.rdbuf()->str().c_str(), request.body_content.rdbuf()->str().length());
+        // std::fstream BodyFile("tesst");
+        // BodyFile.write(request.body_content.rdbuf()->str().c_str(), request.body_content.rdbuf()->str().length());
         std::string fullPath;
-        const std::string &requestUri = normalizePath(request.RequestLine.getUrl());
+        const std::string &requestUri = normalizePath(request.requestLine.getUrl());
+        // std::cout<< "Request URI: " << request.requestLine.getUrl() << std::endl;
 
         const LocationConfigs *location = findLocation(requestUri);
         if (location)
@@ -58,25 +60,64 @@ void client::onEvent() // handlehttprequest
 
         if (!location)
         {
-            response res_error(socket_fd, "404", " ");
+            response res_error(socket_fd, "404", "");
             throw std::runtime_error("Response 404 sent!");
         }
-        else if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(), request.RequestLine.get_method()) == location->allowed_methods.end())
+        else if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(), request.requestLine.get_method()) == location->allowed_methods.end())
         {
-            response res_error(socket_fd, "405", " ");
+            response res_error(socket_fd, "405", "");
             throw std::runtime_error("Response 405 sent!");
         }
 
-        // std::string extension  = "wa7d";
-        // = getExtention(requestUri); .php .py .sh /// todo
+        std::cout << requestUri << std::endl;
 
-        // if (location->cgi_handlers.count(extension))
-        // {
-        //     // CgiClass obj;
+        std::string extension  = getExtension(fullPath);
+        std::cout << "Extension: " << extension << std::endl;
 
-        //     // hna ankhdem cgi
+        if (location->cgi_handlers.count(extension)) // i will work here if the extention is cgi
+        {
+            std::string cgi_output;
+            try
+            {
+                CgiHandler cgi(*location, fullPath, request);
+                cgi_output = cgi.execute();
+            }
+            catch (const std::exception& e) {
+                std::cerr << red << "CGI execution failed: " << e.what() << reset << std::endl;
+                response res_error(socket_fd, "500", "");
+                throw std::runtime_error("Response 500 sent!");
+            }
 
-        if (request.RequestLine.get_method() == "GET")
+            std::string headers_str;
+            std::string body_str;
+            size_t separator = cgi_output.find("\r\n\r\n");
+            if (separator == std::string::npos) {
+                separator = cgi_output.find("\n\n");
+                if (separator != std::string::npos) {
+                    headers_str = cgi_output.substr(0, separator);
+                    body_str = cgi_output.substr(separator + 2);
+                } else {
+                    body_str = cgi_output;
+                }
+            } else {
+                headers_str = cgi_output.substr(0, separator);
+                body_str = cgi_output.substr(separator + 4);
+            }
+
+            std::stringstream final_response;
+            final_response << "HTTP/1.1 200 OK\r\n";
+            if (!headers_str.empty()) {
+                final_response << headers_str << "\r\n";
+            }
+            final_response << "Content-Length: " << body_str.length() << "\r\n";
+            final_response << "\r\n";
+            final_response << body_str;
+
+            send(socket_fd, final_response.str().c_str(), final_response.str().length(), 0);
+            throw std::runtime_error("CGI response sent successfully.");
+        }
+
+        if (request.requestLine.get_method() == "GET")
         {
             std::cout << red << "----------- PART OF METHODS GET START --------------" << reset << std::endl;
             Get get(fullPath, location);
