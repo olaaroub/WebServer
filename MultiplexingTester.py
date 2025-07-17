@@ -59,14 +59,10 @@ async def fast_client(name, body):
 
 
 async def main():
-    tasks = [
-        slow_client("slow2", 0.2, "hello slow2")
-    ]
+    tasks = [fast_client("fast1", "hello fast1") for _ in range(10018)]
     await asyncio.gather(*tasks)
+
+
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-# slow_client("slow2", 0.2, "hello slow2"),
-        # fast_client("fast1", "hello fast1"),
-        # fast_client("fast2", "hello fast2"),

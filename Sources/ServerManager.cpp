@@ -77,7 +77,6 @@ void serverManager:: listening()
             epollEvent(fd, evlist[i].events);
             if (activeNetworks.size() >= evlist.size())
                 evlist.resize(activeNetworks.size() * 2);
-            // std::cout << "|____Servers Cont" << activeNetworks.size() << std::endl;
         }
     }
 }
@@ -85,7 +84,7 @@ void serverManager:: listening()
 
 void serverManager:: setupServers(const std::vector<ServerConfigs>& servers)
 {
-    kernel_identifier = epoll_create(MAX_EPOLL);
+    kernel_identifier = epoll_create(1024);
     for (std::vector<ServerConfigs>::const_iterator it = servers.begin(); it != servers.end(); it++)
     {
         for (std::vector<int>::const_iterator its = it->ports.begin(); its != it->ports.end(); its++)

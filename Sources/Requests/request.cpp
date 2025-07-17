@@ -11,6 +11,9 @@ void Request:: is_finished()
 void Request:: ParsRequstLine()
 {
     size_t cont = buffer.find("\r\n");
+
+    if (buffer.size() > MAX_REQUESTLINE_SIZE)
+        throw std::runtime_error("Request parser Error: Request Line Size too Large!");
     if (cont != std::string::npos)
     {
         RequestLine.set_line(buffer.substr(0, cont));
@@ -24,6 +27,9 @@ void Request:: ParsRequstLine()
 void Request:: ParsHeaders()
 {
     size_t cont = buffer.find("\r\n\r\n");
+
+    if (buffer.size() > MAX_HEADERS_SIZE)
+        throw std::runtime_error("Request parser Error: Headers Size too Large!");
     if (cont != std::string::npos)
     {
 
