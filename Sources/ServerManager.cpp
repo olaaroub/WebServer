@@ -4,6 +4,7 @@
 int serverManager:: kernel_identifier = 0;
 struct epoll_event serverManager:: evlist;
 std::map<int, network *> serverManager:: activeNetworks;
+const int serverManager:: request_timeout =  10; // seconds
 
 void serverManager:: add_server(network *instance)
 {
@@ -63,9 +64,11 @@ void serverManager:: listening()
 {
     std::cout << "--evlist lenghet" << activeNetworks.size() << std::endl;
     std::vector<epoll_event> evlist(1024);
+    const int timeout_ms = 600000; // 10 minutes in milliseconds
     while(true)
     {
-        int event = epoll_wait(kernel_identifier, evlist.data(), evlist.size(), -1);
+        int event = epoll_wait(kernel_identifier, evlist.data(), evlist.size(), timeout_ms);
+        time_t current_time = time(NULL);
         if (event < 0)
         {
             perror("Epoll Error: ");
@@ -77,6 +80,22 @@ void serverManager:: listening()
             epollEvent(fd, evlist[i].events);
             if (activeNetworks.size() >= evlist.size())
                 evlist.resize(activeNetworks.size() * 2);
+        }
+        for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
+        {
+            if (it->second->if_server() == false && (current_time - it->second->get_time()) > request_timeout)
+            {
+                std::cout << "Client timeout, closing connection." << std::endl;
+                close(it->first);
+                epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, it->first, 0);
+                delete it->second;
+                std::map<int, network *>::iterator to_erase = it;
+                ++it;
+                activeNetworks.erase(to_erase);
+                // khasni nsift response 408 Request Timeout
+            }
+            else
+                ++it;
         }
     }
 }
@@ -114,6 +133,8 @@ void serverManager:: startServers()
     catch(std::exception &e)
     {
         //  matnsach tfriyi lmap
+        for(std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); it++)
+            delete it->second;
         std::cerr << e.what() << std::endl;
     }
 

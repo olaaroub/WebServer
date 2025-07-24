@@ -29,6 +29,13 @@ public:
 
     std::stringstream body_content;
     std::fstream *file;
+    Request() : state(0), request_ended(false) {}
+    ~Request()
+    {
+        // if (file)
+        //     file->close();
+        // delete file;
+    }
 };
 
 #endif

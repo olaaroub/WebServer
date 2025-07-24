@@ -10,6 +10,7 @@ class client : public network
 {
 private:
     Request request;
+    time_t lastActivity;
     const LocationConfigs *findLocation(const std::string &uri);
 
 
@@ -18,6 +19,7 @@ public:
 
     void epoll_modify();
     void onEvent();
+
     void set_fd(int fd)
     {
         socket_fd = fd;

@@ -4,7 +4,7 @@
 #include "Get.hpp"
 #include "CGIHandler.hpp"
 
-client::client(const ServerConfigs &server_config) : network(server_config, false) { request.state = 0; }
+client::client(const ServerConfigs &server_config) : network(server_config, false) {}
 
 void client::epoll_modify()
 {
@@ -37,13 +37,17 @@ const LocationConfigs *client::findLocation(const std::string &uri) // i should 
 
 void client::onEvent() // handlehttprequest
 {
+    lastActivity = time(NULL); // set the last activity time for the client
     if (event & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
         throw std::runtime_error("Client disconnected or socket error.");
     else if (event & EPOLLIN)
     {
         bool is_request_complete = request.run_parser(socket_fd);
         if (is_request_complete)
+        {
             epoll_modify();
+            std::cout << "Request parsed successfully." << std::endl;
+        }
     }
     else if (event & EPOLLOUT)
     {

@@ -29,7 +29,7 @@ time.sleep(1)
 
 print("send RequestLineBuf3")
 sock.sendall(RequestLineBuf3)
-time.sleep(1)
+time.sleep(10)
 
 print("send HeadersBuff1")
 sock.sendall(HeadersBuff1)

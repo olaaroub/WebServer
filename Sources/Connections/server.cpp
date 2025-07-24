@@ -64,6 +64,7 @@ void server:: onEvent()
         client_re->set_fd(fd);
         client_re->set_ToNoBlocking();
         client_re->epoll_crt();
+        client_re->set_time(time(NULL));
         serverManager::activeNetworks[fd] = client_re;
     }
 }
