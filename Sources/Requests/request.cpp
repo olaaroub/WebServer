@@ -46,43 +46,41 @@ void Request:: ParsHeaders()
 
 }
 
-
 void Request:: ChunkReaContent()
 {
-
-    static unsigned int current_chunk_size = 0;
-    static bool waiting_for_new_chunk = true;
     unsigned int len;
-    if (buffer.empty())
-        return ;
     while (true)
     {
-        if (waiting_for_new_chunk)
+        if (buffer.empty())
+            return ;
+        if (_waiting_for_new_chunk)
         {
             size_t findNewLine = buffer.find("\r\n");
             if (findNewLine == std::string::npos)
                 throw std::runtime_error("Request parser Error: format of chunked POST not correct");
             std::string line = buffer.substr(0, findNewLine);
             is_number(line);
-            is_number(line);
             std::istringstream ff(line);
             ff >> std::hex >> len;
-            current_chunk_size = len;
+            _chunkSize = len;
             buffer.erase(0, findNewLine + 2);
             if (!len)
             {
                 request_ended = true;
                 return ;
             }
-            waiting_for_new_chunk = false;
+            _waiting_for_new_chunk = false;
         }
-        if (buffer.length() < current_chunk_size + 2)
+        if (buffer.length() < _chunkSize + 2)
             return;
-        std::string chunkData = buffer.substr(0, current_chunk_size);
-        body_content.write(chunkData.c_str(), current_chunk_size);
-        buffer.erase(0, current_chunk_size + 2);
-        waiting_for_new_chunk = true;
-        current_chunk_size = 0;
+        std::string chunkData = buffer.substr(0, _chunkSize);
+        if (_chunkSize > max_body_size)
+            throw std::runtime_error("ERROR: Request: Body too large!");
+        max_body_size -= _chunkSize;
+        body_content.write(chunkData.c_str(), _chunkSize);
+        buffer.erase(0, _chunkSize + 2);
+        _waiting_for_new_chunk = true;
+        _chunkSize = 0;
     }
 }
 
@@ -97,25 +95,26 @@ void Request:: is_number(std::string string)
 
 void Request:: ContentLenghtRead()
 {
-    static long cont = 0;
-    static long long ContentSize = 0;
+    // static long long ContentSize = 0;
     std::string number;
 
     if (buffer.empty())
         return;
-    if (!cont)
+    if (!_chunkSize)
     {
         number = headers.map["content-length"].at(0);
         is_number(number);
-        cont = atol(number.c_str());
-        if (cont < 0)
+        _chunkSize = atol(number.c_str());
+        if (_chunkSize < 0)
             throw std::runtime_error("Request parser Error:bad request!");
+        if (_chunkSize > max_body_size)
+            throw std::runtime_error("Request parser Error: the content lenght too large!");
     }
-    if (ContentSize < cont)
-        ContentSize += buffer.size();
-    if (ContentSize > cont)
+    if (_contentSize < _chunkSize)
+        _contentSize += buffer.size();
+    if (_contentSize > _chunkSize)
         throw std::runtime_error("Request Error: ContentLenghtRead Error: size of content readed large of content-lenght");
-    if (ContentSize == cont)
+    if (_contentSize == _chunkSize)
     {
         std::cout << "request ended" << std::endl;
         request_ended = true;
@@ -155,6 +154,7 @@ bool Request:: run_parser(int socket_fd)
     if (cont == 0)
         throw std::runtime_error("Request parser: Client closed connection unexpectedly");
     buffer.append(bfr, cont);
+    std::cout << buffer << std::endl;
     StateOFParser();
     return request_ended;
 }

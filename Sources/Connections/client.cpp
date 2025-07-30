@@ -4,7 +4,7 @@
 #include "Get.hpp"
 #include "CGIHandler.hpp"
 
-client::client(const ServerConfigs &server_config) : network(server_config, false) {}
+client::client(const ServerConfigs &server_config) : network(server_config, false) {_convertMaxBodySize();}
 
 void client::epoll_modify()
 {
@@ -33,6 +33,11 @@ const LocationConfigs *client::findLocation(const std::string &uri) // i should 
         }
     }
     return bestMatch;
+}
+
+void client:: _convertMaxBodySize()
+{
+    request.max_body_size = get_max_body() * 1024 * 1024;
 }
 
 void client::onEvent() // handlehttprequest

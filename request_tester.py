@@ -29,7 +29,7 @@ time.sleep(1)
 
 print("send RequestLineBuf3")
 sock.sendall(RequestLineBuf3)
-time.sleep(10)
+time.sleep(1)
 
 print("send HeadersBuff1")
 sock.sendall(HeadersBuff1)
@@ -50,7 +50,7 @@ time.sleep(1)
 print("send req3")
 sock.sendall(req3)
 
-time.sleep(5)
+# time.sleep(5)
 response = sock.recv(4096)
 print("response:", response.decode(errors='ignore'))
 

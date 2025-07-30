@@ -11,8 +11,10 @@ class client : public network
 private:
     Request request;
     time_t lastActivity;
+    // unsigned long long _maxBodyBytes;
     const LocationConfigs *findLocation(const std::string &uri);
 
+    void _convertMaxBodySize();
 
 public:
     client(const ServerConfigs &server_config);
