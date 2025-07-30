@@ -4,13 +4,54 @@ response::response(int socket_fd, std::string type_res, std::string final_path) 
 {
     std::string response;
     if (type_res == "success")
-        response = get_response(getFileSize(final_path), final_path, get_body(final_path), get_statusLine(type_res));
+    {
+        send_fullresponse(socket_fd , getFileSize(final_path), final_path, get_statusLine(type_res));
+    }
     else
     {
         std::string path_error = create_path_error(type_res);
-        response = get_response(getFileSize(path_error), path_error, get_body(path_error), get_statusLine(type_res));
+        send_fullresponse(socket_fd , getFileSize(path_error), path_error, get_statusLine(type_res));
     }
-    send_response(socket_fd, response);
+}
+
+void response::send_fullresponse(int socket_fd, long size, std::string file_path, std::string status_line)
+{
+    send_header(socket_fd, size, file_path, status_line);
+    send_body(socket_fd, file_path);
+}
+
+void response::send_body(int socket_fd, std::string file_path)
+{
+    std::ifstream file_stream(file_path.c_str(), std::ios::binary);
+    if (!file_stream) { return ; }
+
+    char buffer[4096]; // 4KB buffer
+    while (file_stream.read(buffer, sizeof(buffer))) {
+        send_chunk(socket_fd, buffer, sizeof(buffer));
+    }
+    //  check if there is a final, smaller chunk left to send
+    if (file_stream.gcount() > 0)
+    {
+        send_chunk(socket_fd, buffer, file_stream.gcount());
+    }
+ 
+}
+
+void response::send_header(int socket_fd , long size, std::string file_path, std::string status_line)
+{
+    std::stringstream response;
+
+    // Status Line
+    response << status_line;
+    // Headers
+    response << "Content-Length: " << size << "\r\n";
+    response << "Content-Type: " << getMimeType(file_path) << "\r\n";
+
+    // Blank line separating headers from body
+    response << "\r\n";
+
+    send_string(socket_fd, response.str());
+
 }
 
 // ------------------------ HELPER FUNCTIONS ------------------ //
@@ -65,49 +106,24 @@ std::string response::getMimeType(const std::string &filePath)
     return "application/octet-stream";
 }
 
-std::string response::get_response(long size, std::string file_path, std::string body, std::string status_line)
+
+void response::send_chunk(int socket_fd, const char* data, size_t length)
 {
-    std::stringstream response;
-
-    // Status Line
-    response << status_line;
-    // Headers
-    response << "Content-Length: " << size << "\r\n";
-    response << "Content-Type: " << getMimeType(file_path) << "\r\n";
-
-    // Blank line separating headers from body
-    response << "\r\n";
-
-    // body
-    response << body;
-
-    return response.str();
+    size_t total_bytes_sent = 0;
+    while (total_bytes_sent < length)
+    {
+        ssize_t bytes_sent = send(socket_fd, data + total_bytes_sent, length - total_bytes_sent, 0);
+        if (bytes_sent == -1)
+        {
+            std::cerr << "Error sending chunk!" << std::endl;
+            return;
+        }
+        total_bytes_sent += bytes_sent;
+    }
 }
 
-std::string response::get_body(std::string file_path)
-{
-    std::ifstream file_stream(file_path.c_str(), std::ios::binary);
 
-    if (!file_stream)
-    {
-        // Handle error: could not open file
-        return "error";
-    }
-
-    std::string str;
-    std::istreambuf_iterator<char> it(file_stream);
-    std::istreambuf_iterator<char> end;
-
-    while (it != end)
-    {
-        str += *it;
-        ++it; // Move to the next one
-    }
-
-    return str;
-}
-
-void response::send_response(int socket_fd, std::string response)
+void response::send_string(int socket_fd, std::string response)
 {
 
     int length = response.length();
