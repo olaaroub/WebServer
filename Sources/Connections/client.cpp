@@ -3,6 +3,7 @@
 #include "Utils.hpp"
 #include "Get.hpp"
 #include "CGIHandler.hpp"
+#include "HttpResponse.hpp"
 
 client::client(const ServerConfigs &server_config) : network(server_config, false) { request.state = 0; }
 
@@ -33,6 +34,35 @@ const LocationConfigs *client::findLocation(const std::string &uri) // i should 
         }
     }
     return bestMatch;
+}
+
+void client::sendErrorResponse(int statusCode, const std::string &reasonPhrase) // hadi tatsifet ghir error pages safi.
+{
+    HttpResponse errorResponse;
+    errorResponse.setStatus(statusCode, reasonPhrase);
+    errorResponse.addHeader("Content-Type", "text/html");
+
+    std::string errorBody;
+    if (this->server_config.error_pages.count(statusCode))
+    {
+        std::string errorPageUri = this->server_config.error_pages.at(statusCode);
+        const LocationConfigs *errorLocation = findLocation(errorPageUri);
+        if (errorLocation)
+        {
+            std::string errorPagePath = joinPaths(errorLocation->root, errorPageUri);
+            errorBody = getFileContents(errorPagePath);
+        }
+    }
+
+    if (errorBody.empty())
+    {
+        std::stringstream ss;
+        ss << "<html><body><h1>" << statusCode << " - " << reasonPhrase << "</h1></body></html>";
+        errorBody = ss.str();
+    }
+
+    errorResponse.setBody(errorBody);
+    errorResponse.sendResponse(socket_fd);
 }
 
 void client::onEvent() // handlehttprequest
@@ -71,49 +101,55 @@ void client::onEvent() // handlehttprequest
 
         std::cout << requestUri << std::endl;
 
-        std::string extension  = getExtension(fullPath);
+        std::string extension = getExtension(fullPath);
         std::cout << "Extension: " << extension << std::endl;
 
-        if (location->cgi_handlers.count(extension)) // i will work here if the extention is cgi
+        if (location->cgi_handlers.count(extension))
         {
             std::string cgi_output;
+            struct stat script_stat;
+            if (stat(fullPath.c_str(), &script_stat) != 0)
+            {
+                sendErrorResponse(404, "Not Found"); // had function tatkhdem ghir m3a error pages li fl config file
+                                                     // khasna nkhdmo biha 7itach error pages khsna nhzohom mn config file
+                                                     // machi nb9aw n7to path dialhom fl funtion l9dima
+                throw std::runtime_error("Response 404 sent for non-existent CGI script!");
+            }
+            if (!(script_stat.st_mode & S_IRUSR))
+            {
+                sendErrorResponse(403, "Forbidden");
+                throw std::runtime_error("Response 403 sent for unreadable CGI script!");
+            }
             try
             {
-                CgiHandler cgi(*location, fullPath, request);
-                cgi_output = cgi.execute();
-            }
-            catch (const std::exception& e) {
-                std::cerr << red << "CGI execution failed: " << e.what() << reset << std::endl;
-                response res_error(socket_fd, "500", "");
-                throw std::runtime_error("Response 500 sent!");
-            }
+                CgiHandler cgi(*location, fullPath, request, this->server_config);
+                std::string cgi_output = cgi.execute();
 
-            std::string headers_str;
-            std::string body_str;
-            size_t separator = cgi_output.find("\r\n\r\n");
-            if (separator == std::string::npos) {
-                separator = cgi_output.find("\n\n");
-                if (separator != std::string::npos) {
-                    headers_str = cgi_output.substr(0, separator);
-                    body_str = cgi_output.substr(separator + 2);
-                } else {
-                    body_str = cgi_output;
-                }
-            } else {
-                headers_str = cgi_output.substr(0, separator);
-                body_str = cgi_output.substr(separator + 4);
-            }
+                // std::cout << "ALOOOOOOOO : " << cgi_output << std::endl;
 
-            std::stringstream final_response;
-            final_response << "HTTP/1.1 200 OK\r\n";
-            if (!headers_str.empty()) {
-                final_response << headers_str << "\r\n";
-            }
-            final_response << "Content-Length: " << body_str.length() << "\r\n";
-            final_response << "\r\n";
-            final_response << body_str;
+                if (cgi_output.find("Content-Type:") == std::string::npos && cgi_output.find("content-type:") == std::string::npos &&
+                    cgi_output.find("Content-type:") == std::string::npos) // php wld l97ba howa li khlani nzid had check kaml
+                    throw CgiScriptException("Script response missing Content-Type header.");
 
-            send(socket_fd, final_response.str().c_str(), final_response.str().length(), 0);
+                HttpResponse cgiResponse;
+                cgiResponse.setFromCgiOutput(cgi_output);
+                cgiResponse.sendResponse(socket_fd);
+            }
+            catch (const CgiScriptException &e)
+            {
+                std::cerr << red << "CGI Script Error: " << e.what() << reset << std::endl;
+                sendErrorResponse(502, "Bad Gateway");
+            }
+            catch (const CgiScriptTimeoutException &e)
+            {
+                std::cerr << red << "CGI Script Error: " << e.what() << reset << std::endl;
+                sendErrorResponse(504, "Gateway Timeout");
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << red << "An unexpected error occurred: " << e.what() << reset << std::endl;
+                sendErrorResponse(500, "Internal Server Error");
+            }
             throw std::runtime_error("CGI response sent successfully.");
         }
 

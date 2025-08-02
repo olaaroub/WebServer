@@ -11,6 +11,7 @@ class client : public network
 private:
     Request request;
     const LocationConfigs *findLocation(const std::string &uri);
+    void sendErrorResponse(int statusCode, const std::string& reasonPhrase);
 
 
 public:

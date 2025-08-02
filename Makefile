@@ -8,6 +8,7 @@ SPATH = ./Sources/
 SRC = 	main.cpp \
 		Utils.cpp \
 		CGIHandler.cpp \
+		HttpResponse.cpp \
 		ConfigParse/ConfigFileParser.cpp \
 		ConfigParse/ConfigFileReader.cpp\
 		ConfigParse/Configs.cpp\

@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <string.h>
+#include <cstring>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -37,6 +38,7 @@
 #include <cstdlib>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <limits.h>
 
 
 #endif

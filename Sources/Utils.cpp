@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/07/09 14:55:28 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/02 16:37:32 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,4 +67,26 @@ std::string getExtension(const std::string& path)
         return path.substr(dot_pos);
     }
     return "";
+}
+
+
+std::string getFileContents(const std::string& filePath) {
+    std::ifstream fileStream(filePath.c_str());
+    if (!fileStream.is_open()) {
+        return ""; 
+    }
+    std::stringstream buffer;
+    buffer << fileStream.rdbuf();
+    return buffer.str();
+}
+
+ std::string trimWhitespace(const std::string& s)
+{
+    const std::string WHITESPACE = " \t\r\n";
+    size_t first = s.find_first_not_of(WHITESPACE);
+    if (std::string::npos == first) {
+        return s;
+    }
+    size_t last = s.find_last_not_of(WHITESPACE);
+    return s.substr(first, (last - first + 1));
 }
