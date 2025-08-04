@@ -39,6 +39,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <limits.h>
+#include <ctime>
 
 
 #endif

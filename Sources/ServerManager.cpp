@@ -1,9 +1,13 @@
 #include "ServerManager.hpp"
+#include "CgiExecutor.hpp"
+#include "client.hpp"
 
 // std::vector<network *> serverManager::servers;
 int serverManager:: kernel_identifier = 0;
 struct epoll_event serverManager:: evlist;
 std::map<int, network *> serverManager:: activeNetworks;
+std::map<int, CgiExecutor *> serverManager::activeCgi;
+
 
 void serverManager:: add_server(network *instance)
 {
@@ -54,10 +58,50 @@ void serverManager::epollEvent(int fd, int event)
             delete activeNetworks[fd];
             activeNetworks.erase(fd);
         }
-        close(fd);
+        // close(fd);
+        if (activeNetworks.find(fd) == activeNetworks.end() || !activeNetworks[fd]->isCgi()) {
+             close(fd);
+        }
     }
 }
 
+
+void serverManager::checkCgiTimeouts()
+{
+    const int CGI_TIMEOUT_SECONDS = 5;
+
+    for (std::map<int, network*>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
+    {
+        if (it->second && it->second->isCgi())
+        {
+            CgiExecutor* executor = static_cast<CgiExecutor*>(it->second);
+            bool should_delete = false;
+
+            if (executor->getState() == CgiExecutor::CGI_DONE || executor->getState() == CgiExecutor::CGI_ERROR) {
+                should_delete = true;
+            }
+            else if (time(NULL) - executor->getStartTime() > CGI_TIMEOUT_SECONDS)
+            {
+                std::cerr << red << "CGI script with PID " << executor->getPid() << " timed out. Terminating." << reset << std::endl;
+                kill(executor->getPid(), SIGKILL);
+                waitpid(executor->getPid(), NULL, 0);
+                executor->getClient()->sendErrorResponse(504, "Gateway Timeout");
+                should_delete = true;
+            }
+
+            if (should_delete) {
+                int fd = it->first;
+                delete executor; // Destructor closes pipes and handles epoll_del
+                activeNetworks.erase(it++);
+                (void)fd; // To suppress unused variable warning if not used elsewhere
+            } else {
+                ++it;
+            }
+        } else {
+            ++it;
+        }
+    }
+}
 
 void serverManager:: listening()
 {
@@ -65,7 +109,7 @@ void serverManager:: listening()
     std::vector<epoll_event> evlist(1024);
     while(true)
     {
-        int event = epoll_wait(kernel_identifier, evlist.data(), evlist.size(), -1);
+        int event = epoll_wait(kernel_identifier, evlist.data(), evlist.size(), 1000);
         if (event < 0)
         {
             perror("Epoll Error: ");
@@ -78,6 +122,8 @@ void serverManager:: listening()
             if (activeNetworks.size() >= evlist.size())
                 evlist.resize(activeNetworks.size() * 2);
         }
+        checkCgiTimeouts();
+
     }
 }
 
@@ -111,10 +157,19 @@ void serverManager:: startServers()
         std::cout << "listening ...\n";
         listening();
     }
-    catch(std::exception &e)
-    {
-        //  matnsach tfriyi lmap
-        std::cerr << e.what() << std::endl;
+    // catch(std::exception &e)
+    // {
+    //     //  matnsach tfriyi lmap
+    //     std::cerr << e.what() << std::endl;
+    // }
+    catch(std::exception &e) {
+        std::cerr << "Server shutting down: " << e.what() << std::endl;
+        // Cleanup map
+        for (std::map<int, network*>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); ++it) {
+            delete it->second;
+        }
+        activeNetworks.clear();
+        close(kernel_identifier);
     }
 
 }

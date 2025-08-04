@@ -18,7 +18,8 @@ ob_flush();
 
 // 3. Enter an infinite loop to simulate the script hanging.
 while (true) {
-    sleep(1); // sleep(1) is used to prevent this script from using 100% CPU.
+    sleep(10);
+    exit(10); // sleep(1) is used to prevent this script from using 100% CPU.
 }
 
 // The following lines will never be reached.

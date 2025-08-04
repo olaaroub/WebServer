@@ -3,6 +3,7 @@
 #include "Utils.hpp"
 #include "Get.hpp"
 #include "CGIHandler.hpp"
+#include "CgiExecutor.hpp"
 #include "HttpResponse.hpp"
 
 client::client(const ServerConfigs &server_config) : network(server_config, false) { request.state = 0; }
@@ -104,54 +105,73 @@ void client::onEvent() // handlehttprequest
         std::string extension = getExtension(fullPath);
         std::cout << "Extension: " << extension << std::endl;
 
+        // if (location->cgi_handlers.count(extension))
+        // {
+        //     std::string cgi_output;
+        //     struct stat script_stat;
+        //     if (stat(fullPath.c_str(), &script_stat) != 0)
+        //     {
+        //         sendErrorResponse(404, "Not Found"); // had function tatkhdem ghir m3a error pages li fl config file
+        //                                              // khasna nkhdmo biha 7itach error pages khsna nhzohom mn config file
+        //                                              // machi nb9aw n7to path dialhom fl funtion l9dima
+        //         throw std::runtime_error("Response 404 sent for non-existent CGI script!");
+        //     }
+        //     if (!(script_stat.st_mode & S_IRUSR))
+        //     {
+        //         sendErrorResponse(403, "Forbidden");
+        //         throw std::runtime_error("Response 403 sent for unreadable CGI script!");
+        //     }
+        //     try
+        //     {
+        //         CgiHandler cgi(*location, fullPath, request, this->server_config);
+        //         std::string cgi_output = cgi.execute();
+
+        //         // std::cout << "ALOOOOOOOO : " << cgi_output << std::endl;
+
+        //         if (cgi_output.find("Content-Type:") == std::string::npos && cgi_output.find("content-type:") == std::string::npos &&
+        //             cgi_output.find("Content-type:") == std::string::npos) // php wld l97ba howa li khlani nzid had check kaml
+        //             throw CgiScriptException("Script response missing Content-Type header.");
+
+        //         HttpResponse cgiResponse;
+        //         cgiResponse.setFromCgiOutput(cgi_output);
+        //         cgiResponse.sendResponse(socket_fd);
+        //     }
+        //     catch (const CgiScriptException &e)
+        //     {
+        //         std::cerr << red << "CGI Script Error: " << e.what() << reset << std::endl;
+        //         sendErrorResponse(502, "Bad Gateway");
+        //     }
+        //     catch (const CgiScriptTimeoutException &e)
+        //     {
+        //         std::cerr << red << "CGI Script Error: " << e.what() << reset << std::endl;
+        //         sendErrorResponse(504, "Gateway Timeout");
+        //     }
+        //     catch (const std::exception &e)
+        //     {
+        //         std::cerr << red << "An unexpected error occurred: " << e.what() << reset << std::endl;
+        //         sendErrorResponse(500, "Internal Server Error");
+        //     }
+        //     throw std::runtime_error("CGI response sent successfully.");
+        // }
+
         if (location->cgi_handlers.count(extension))
         {
-            std::string cgi_output;
-            struct stat script_stat;
-            if (stat(fullPath.c_str(), &script_stat) != 0)
-            {
-                sendErrorResponse(404, "Not Found"); // had function tatkhdem ghir m3a error pages li fl config file
-                                                     // khasna nkhdmo biha 7itach error pages khsna nhzohom mn config file
-                                                     // machi nb9aw n7to path dialhom fl funtion l9dima
-                throw std::runtime_error("Response 404 sent for non-existent CGI script!");
-            }
-            if (!(script_stat.st_mode & S_IRUSR))
-            {
-                sendErrorResponse(403, "Forbidden");
-                throw std::runtime_error("Response 403 sent for unreadable CGI script!");
-            }
-            try
-            {
-                CgiHandler cgi(*location, fullPath, request, this->server_config);
-                std::string cgi_output = cgi.execute();
+            try {
 
-                // std::cout << "ALOOOOOOOO : " << cgi_output << std::endl;
+                serverManager::activeNetworks.erase(this->socket_fd);
+                epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, this->socket_fd, 0);
 
-                if (cgi_output.find("Content-Type:") == std::string::npos && cgi_output.find("content-type:") == std::string::npos &&
-                    cgi_output.find("Content-type:") == std::string::npos) // php wld l97ba howa li khlani nzid had check kaml
-                    throw CgiScriptException("Script response missing Content-Type header.");
+                new CgiExecutor(this->server_config, *location, request, this, fullPath);
 
-                HttpResponse cgiResponse;
-                cgiResponse.setFromCgiOutput(cgi_output);
-                cgiResponse.sendResponse(socket_fd);
-            }
-            catch (const CgiScriptException &e)
-            {
-                std::cerr << red << "CGI Script Error: " << e.what() << reset << std::endl;
-                sendErrorResponse(502, "Bad Gateway");
-            }
-            catch (const CgiScriptTimeoutException &e)
-            {
-                std::cerr << red << "CGI Script Error: " << e.what() << reset << std::endl;
-                sendErrorResponse(504, "Gateway Timeout");
-            }
-            catch (const std::exception &e)
-            {
-                std::cerr << red << "An unexpected error occurred: " << e.what() << reset << std::endl;
+            } catch (const std::exception& e) {
+                std::cerr << red << "Failed to launch CGI: " << e.what() << reset << std::endl;
                 sendErrorResponse(500, "Internal Server Error");
+                delete this;
             }
-            throw std::runtime_error("CGI response sent successfully.");
+            return;
         }
+
+
 
         if (request.requestLine.get_method() == "GET")
         {
@@ -166,4 +186,8 @@ void client::onEvent() // handlehttprequest
 
 client::~client()
 {
+    if (this->socket_fd != -1)
+    {
+        close(this->socket_fd);
+    }
 }

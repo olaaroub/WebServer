@@ -11,10 +11,10 @@ class client : public network
 private:
     Request request;
     const LocationConfigs *findLocation(const std::string &uri);
+
+
+    public:
     void sendErrorResponse(int statusCode, const std::string& reasonPhrase);
-
-
-public:
     client(const ServerConfigs &server_config);
 
     void epoll_modify();
