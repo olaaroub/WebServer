@@ -168,6 +168,19 @@ void client::onEvent() // handlehttprequest
         // std::cout << red << "------------ : " + request.requestLine.get_method() << reset << std::endl;
         if (location->cgi_handlers.count(extension)) // i will work here if the extention is cgi
         {
+            struct stat script_stat;
+            if (stat(fullPath.c_str(), &script_stat) != 0)
+            {
+                sendErrorResponse(404, "Not Found"); // had function tatkhdem ghir m3a error pages li fl config file
+                                                     // khasna nkhdmo biha 7itach error pages khsna nhzohom mn config file
+                                                     // machi nb9aw n7to path dialhom fl funtion l9dima
+                throw std::runtime_error("Response 404 sent for non-existent CGI script!");
+            }
+            if (!(script_stat.st_mode & S_IRUSR))
+            {
+                sendErrorResponse(403, "Forbidden");
+                throw std::runtime_error("Response 403 sent for unreadable CGI script!");
+            }
             try {
 
                 serverManager::activeNetworks.erase(this->socket_fd);

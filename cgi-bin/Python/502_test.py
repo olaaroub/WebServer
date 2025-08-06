@@ -22,5 +22,5 @@
 # =================================e=============================================
 
 # print("Content-Type: text/html") # <--- The crucial header is commented out.
-print()
-print("<html><body><h1>This should not be displayed</h1></body></html>")
+# print()
+print("This should not be displayed")

@@ -72,9 +72,7 @@ void serverManager::reapChildProcesses()
     pid_t pid;
 
     while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
-    {
         std::cout << "kill zombie process with PID " << pid << std::endl;
-    }
 }
 
 void serverManager::checkCgiTimeouts()

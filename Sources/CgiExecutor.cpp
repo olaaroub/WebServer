@@ -13,17 +13,13 @@ CgiExecutor::CgiExecutor(const ServerConfigs &serverConf, const LocationConfigs 
 	{
 		std::string extension = getExtension(path);
 		if (!loc.cgi_handlers.count(extension))
-		{
 			throw CgiExecutorException("No valid CGI handler for script extension.");
-		}
 		_setupEnvironment(req, loc, path);
 		_setupArguments(loc.cgi_handlers.at(extension), path);
 
 		int cgi_pipe_in[2], cgi_pipe_out[2];
 		if (pipe(cgi_pipe_in) < 0 || pipe(cgi_pipe_out) < 0)
-		{
 			throw CgiExecutorException("pipe() failed.");
-		}
 		_pipe_in_fd = cgi_pipe_in[1];
 		_pipe_out_fd = cgi_pipe_out[0];
 
@@ -39,14 +35,14 @@ CgiExecutor::CgiExecutor(const ServerConfigs &serverConf, const LocationConfigs 
 
 		if (_pid == 0)
 		{
-			close(cgi_pipe_in[1]);
-			close(cgi_pipe_out[0]);
+			close(cgi_pipe_in[1]), close(cgi_pipe_out[0]);
 			dup2(cgi_pipe_in[0], STDIN_FILENO);
 			dup2(cgi_pipe_out[1], STDOUT_FILENO);
-			close(cgi_pipe_in[0]);
-			close(cgi_pipe_out[1]);
+			close(cgi_pipe_in[0]), close(cgi_pipe_out[1]);
 
 			std::string scriptDir = path.substr(0, path.find_last_of("/"));
+			// std::cerr << "CGI script directory: " << scriptDir << std::endl;
+
 			if (chdir(scriptDir.c_str()) != 0)
 			{
 				std::cerr << "CGI Error: chdir failed." << std::endl;
@@ -57,10 +53,9 @@ CgiExecutor::CgiExecutor(const ServerConfigs &serverConf, const LocationConfigs 
 			exit(EXIT_FAILURE);
 		}
 
-		close(cgi_pipe_in[0]);
-		close(cgi_pipe_out[1]);
-		fcntl(_pipe_in_fd, F_SETFL, O_NONBLOCK);
-		fcntl(_pipe_out_fd, F_SETFL, O_NONBLOCK);
+		close(cgi_pipe_in[0]), close(cgi_pipe_out[1]);
+		if(fcntl(_pipe_in_fd, F_SETFL, O_NONBLOCK) < 0 || fcntl(_pipe_out_fd, F_SETFL, O_NONBLOCK) < 0)
+			throw CgiExecutorException("fcntl() failed");
 
 		if (!_requestBody.empty())
 		{
@@ -147,38 +142,30 @@ void CgiExecutor::onEvent()
 	// 	_handleRead();
 	// }
 
-if (_state == CGI_WRITING && (event & EPOLLOUT))
-    {
+	if (_state == CGI_WRITING && (event & EPOLLOUT))
         _handleWrite();
-    }
-    // Handle read events if the state is reading
     else if (_state == CGI_READING && (event & EPOLLIN))
-    {
         _handleRead();
-    }
 
-    // After any potential read, check for hangup or error.
-    // This is the definitive signal that the child process is done.
     if (event & (EPOLLHUP | EPOLLERR))
     {
         // The child has exited, which triggered the HUP signal.
         // We must perform one final read to drain any data that was
         // left in the pipe buffer before the process terminated.
         _handleRead();
-
-        // Now we can finalize the transaction.
         _state = CGI_DONE;
         int status;
         waitpid(_pid, &status, 0); // Blocking wait is safe now, we know it's terminated.
 
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
-        {
             _client->sendErrorResponse(502, "Bad Gateway");
-        }
         else
         {
-            HttpResponse cgiResponse;
-            cgiResponse.setFromCgiOutput(_responseBuffer);
+			if (_responseBuffer.find("Content-Type:") == std::string::npos && _responseBuffer.find("content-type:") == std::string::npos &&
+            	_responseBuffer.find("Content-type:") == std::string::npos) // php wld l97ba howa li khlani nzid had check kaml
+				_client->sendErrorResponse(502, "Bad Gateway");
+			HttpResponse cgiResponse;
+			cgiResponse.setFromCgiOutput(_responseBuffer);
             cgiResponse.sendResponse(_client->get_socket_fd());
         }
     }
@@ -190,11 +177,8 @@ void CgiExecutor::_handleWrite()
 	ssize_t bytes = write(_pipe_in_fd, _requestBody.c_str() + _bytesWritten, _requestBody.length() - _bytesWritten);
 
     if (bytes > 0)
-    {
         _bytesWritten += bytes;
-    }
 
-    // If writing is done or failed, switch to reading
     if (_bytesWritten >= _requestBody.length() || bytes <= 0)
     {
         serverManager::activeNetworks.erase(this->socket_fd);
@@ -238,22 +222,15 @@ void CgiExecutor::_handleRead()
 	// 	cgiResponse.sendResponse(_client->get_socket_fd());
 	// }
 
-
 	 while (true)
     {
         char buffer[4096];
         ssize_t bytes_read = read(_pipe_out_fd, buffer, sizeof(buffer));
 
         if (bytes_read > 0)
-        {
             _responseBuffer.append(buffer, bytes_read);
-        }
         else
-        {
-            // If read returns 0 (EOF) or -1, the pipe is
-            // either closed or temporarily empty. We stop reading.
             break;
-        }
     }
 }
 
@@ -309,14 +286,21 @@ void CgiExecutor::_setupEnvironment(const Request &req, const LocationConfigs &l
 		if (it->first == "content-length" || it->first == "content-type")
 			continue;
 
+		// std::string header_name = "HTTP_";
+		// for (size_t i = 0; i < it->first.length(); ++i)
+		// {
+		// 	if (it->first[i] == '-')
+		// 		header_name += '_';
+		// 	else
+		// 		header_name += toupper(it->first[i]);
+		// }
+
 		std::string header_name = "HTTP_";
-		for (size_t i = 0; i < it->first.length(); ++i)
-		{
-			if (it->first[i] == '-')
-				header_name += '_';
-			else
-				header_name += toupper(it->first[i]);
-		}
+        std::string key = it->first;
+        std::transform(key.begin(), key.end(), key.begin(), ::toupper);
+        std::replace(key.begin(), key.end(), '-', '_');
+        header_name += key;
+
 		if (!it->second.empty())
 			env.push_back(header_name + "=" + it->second[0]);
 	}
@@ -331,6 +315,9 @@ void CgiExecutor::_setupArguments(const std::string &cgi_path, const std::string
 {
 	_argv = new char *[3];
 	_argv[0] = strdup(cgi_path.c_str());
+	// std::cout << "script_path: " << script_path << std::endl;
 	_argv[1] = strdup(script_path.substr(script_path.find_last_of("/") + 1).c_str());
+	// std::cout << "argv[1]: " << _argv[1] << std::endl;
+	// exit(0);
 	_argv[2] = NULL;
 }
