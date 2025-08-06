@@ -18,6 +18,7 @@ class serverManager
     public:
 
         static std::map<int, network *> activeNetworks;
+        // <int,
         static int kernel_identifier;
 
         static void setupServers(const std::vector<ServerConfigs>& servers);
