@@ -3,6 +3,7 @@
 
 #include "Headers.hpp"
 #include "RequestLine.hpp"
+
 class Request
 {
 private:
@@ -17,7 +18,10 @@ private:
     void StateOFParser();
     void ChunkReaContent();
     void ContentLenghtRead();
-    void SetMaxBodySize();
+
+    unsigned long _chunkSize;
+    unsigned long _contentSize;
+    bool _waiting_for_new_chunk;
 
 public:
     bool run_parser(int socket_fd);
@@ -25,10 +29,12 @@ public:
     RequestLine requestLine;
     short state;
     bool request_ended;
-    long long max_body_size;
+    unsigned long long max_body_size;
 
     std::stringstream body_content;
     std::fstream *file;
+    Request() : _chunkSize(0), _contentSize(0),  _waiting_for_new_chunk(true),  state(0),request_ended(false) {}
+    ~Request() {}
 };
 
 #endif

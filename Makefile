@@ -22,6 +22,7 @@ SRC = 	main.cpp \
 		Methods/response.cpp \
 		Methods/Get.cpp \
 		Methods/Methods.cpp \
+		Methods/Post.cpp \
 		# Methods/Methods.cpp \
 
 SRCS = $(addprefix $(SPATH), $(SRC))

@@ -5,8 +5,9 @@
 #include "CGIHandler.hpp"
 #include "CgiExecutor.hpp"
 #include "HttpResponse.hpp"
+#include "Post.hpp"
 
-client::client(const ServerConfigs &server_config) : network(server_config, false) { request.state = 0; }
+client::client(const ServerConfigs &server_config) : network(server_config, false) {_convertMaxBodySize();}
 
 void client::epoll_modify()
 {
@@ -66,15 +67,24 @@ void client::sendErrorResponse(int statusCode, const std::string &reasonPhrase) 
     errorResponse.sendResponse(socket_fd);
 }
 
+void client:: _convertMaxBodySize()
+{
+    request.max_body_size = get_max_body() * 1024 * 1024;
+}
+
 void client::onEvent() // handlehttprequest
 {
+    lastActivity = time(NULL); // set the last activity time for the client
     if (event & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
         throw std::runtime_error("Client disconnected or socket error.");
     else if (event & EPOLLIN)
     {
         bool is_request_complete = request.run_parser(socket_fd);
         if (is_request_complete)
+        {
             epoll_modify();
+            std::cout << "Request parsed successfully." << std::endl;
+        }
     }
     else if (event & EPOLLOUT)
     {
@@ -94,11 +104,11 @@ void client::onEvent() // handlehttprequest
             response res_error(socket_fd, "404", "");
             throw std::runtime_error("Response 404 sent!");
         }
-        else if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(), request.requestLine.get_method()) == location->allowed_methods.end())
-        {
-            response res_error(socket_fd, "405", "");
-            throw std::runtime_error("Response 405 sent!");
-        }
+        // else if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(), request.requestLine.get_method()) == location->allowed_methods.end())
+        // {
+        //     response res_error(socket_fd, "405", "");
+        //     throw std::runtime_error("Response 405 sent!");
+        // }
 
         std::cout << requestUri << std::endl;
 
@@ -155,6 +165,8 @@ void client::onEvent() // handlehttprequest
         // }
 
         if (location->cgi_handlers.count(extension))
+        std::cout << red << "------------ : " + request.requestLine.get_method() << reset << std::endl;
+        if (location->cgi_handlers.count(extension)) // i will work here if the extention is cgi
         {
             try {
 
@@ -180,6 +192,25 @@ void client::onEvent() // handlehttprequest
             std::string type_res = get.check_path();
             response res(socket_fd, type_res, get.get_final_path());
             throw std::runtime_error("Response" + type_res + "sent!");
+        }
+        else if (request.requestLine.get_method() == "POST")
+        {
+            Post post(location->root);
+            if (request.requestLine.queryLine.empty())
+                post.path_savedFile = joinPaths(post.get_locationFiles(), generateUniqueFilename());
+            else
+                post.path_savedFile = joinPaths(post.get_locationFiles(), post.extractfileName(request.requestLine.queryLine));
+            std::cout << green << "path : " << post.path_savedFile << reset << std::endl;
+            std::ofstream savefile(post.path_savedFile.c_str(), std::ios::binary);
+            savefile.write(request.body_content.str().c_str() , request.body_content.str().length());
+            savefile.close();
+            // sendErrorResponse(404, "not found");
+            response res(socket_fd, post.path_savedFile);
+            throw std::runtime_error("Response sent successfully!");
+        }
+        else if (request.requestLine.get_method() == "DELETE")
+        {
+
         }
     }
 }

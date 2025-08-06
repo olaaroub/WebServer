@@ -8,6 +8,8 @@ struct epoll_event serverManager::evlist;
 std::map<int, network *> serverManager::activeNetworks;
 std::map<int, CgiExecutor *> serverManager::activeCgi;
 
+const int serverManager:: request_timeout =  10; // seconds
+
 void serverManager::add_server(network *instance)
 {
     activeNetworks[instance->get_socket_fd()] = instance;
@@ -118,6 +120,8 @@ void serverManager::listening()
     while (true)
     {
         int event = epoll_wait(kernel_identifier, evlist.data(), evlist.size(), 1000);
+
+        time_t current_time = time(NULL);
         if (event < 0)
         {
             perror("Epoll Error: ");
@@ -130,8 +134,26 @@ void serverManager::listening()
             if (activeNetworks.size() >= evlist.size())
                 evlist.resize(activeNetworks.size() * 2);
         }
+
         checkCgiTimeouts();
         reapChildProcesses();
+
+        for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
+        {
+            if (it->second->if_server() == false && (current_time - it->second->get_time()) > request_timeout)
+            {
+                std::cout << "Client timeout, closing connection." << std::endl;
+                close(it->first);
+                epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, it->first, 0);
+                delete it->second;
+                std::map<int, network *>::iterator to_erase = it;
+                ++it;
+                activeNetworks.erase(to_erase);
+                // khasni nsift response 408 Request Timeout
+            }
+            else
+                ++it;
+        }
     }
 }
 
@@ -177,5 +199,6 @@ void serverManager::startServers()
         }
         activeNetworks.clear();
         close(kernel_identifier);
+
     }
 }

@@ -9,3 +9,5 @@ canvas.hpp
 *_POST_FILE
 nots.txt
 test
+*.ser
+

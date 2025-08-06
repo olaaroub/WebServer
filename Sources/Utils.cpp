@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/02 16:37:32 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/06 22:17:08 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ std::string getExtension(const std::string& path)
 std::string getFileContents(const std::string& filePath) {
     std::ifstream fileStream(filePath.c_str());
     if (!fileStream.is_open()) {
-        return ""; 
+        return "";
     }
     std::stringstream buffer;
     buffer << fileStream.rdbuf();
@@ -90,3 +90,15 @@ std::string getFileContents(const std::string& filePath) {
     size_t last = s.find_last_not_of(WHITESPACE);
     return s.substr(first, (last - first + 1));
 }
+std::string generateUniqueFilename() {
+    // Get the current time as a number (seconds since 1970).
+    time_t currentTime = time(NULL);
+
+    std::stringstream ss;
+    ss << currentTime;
+
+    // 3. Add a file extension.
+    return ss.str() + ".ser";
+}
+
+

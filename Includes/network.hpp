@@ -10,6 +10,7 @@ class network
         bool is_server;
         sockaddr_in network_infos;
         const ServerConfigs &server_config;
+         time_t lastActivity;
         int event;
     public:
         epoll_event ev;
@@ -30,7 +31,10 @@ class network
 
         virtual ~network();
         virtual void onEvent() = 0;
-        virtual bool isCgi() const { return false; } 
+        time_t get_time();
+         void set_time(time_t new_time);
+
+        virtual bool isCgi() const { return false; }
 
 };
 

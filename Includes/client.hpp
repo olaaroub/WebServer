@@ -5,13 +5,15 @@
 #include "request.hpp"
 #include "Methods.hpp"
 #include "response.hpp"
-
 class client : public network
 {
 private:
     Request request;
+    time_t lastActivity;
+    // unsigned long long _maxBodyBytes;
     const LocationConfigs *findLocation(const std::string &uri);
 
+    void _convertMaxBodySize();
 
     public:
     void sendErrorResponse(int statusCode, const std::string& reasonPhrase);
@@ -19,6 +21,7 @@ private:
 
     void epoll_modify();
     void onEvent();
+
     void set_fd(int fd)
     {
         socket_fd = fd;

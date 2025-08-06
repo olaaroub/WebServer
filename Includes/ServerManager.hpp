@@ -12,6 +12,7 @@ class serverManager
     private:
         static struct epoll_event evlist;
 
+        static const int request_timeout;
         static void add_server(network *instance);
         static void listening();
         static void epollEvent(int fd, int event);
