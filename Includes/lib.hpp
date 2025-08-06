@@ -37,6 +37,7 @@
 #include <cstdlib>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <ctime>     // Required for time()
 
 
 #endif

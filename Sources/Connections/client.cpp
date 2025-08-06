@@ -3,6 +3,8 @@
 #include "Utils.hpp"
 #include "Get.hpp"
 #include "CGIHandler.hpp"
+#include <fstream>
+#include "Post.hpp"
 
 client::client(const ServerConfigs &server_config) : network(server_config, false) {_convertMaxBodySize();}
 
@@ -72,16 +74,19 @@ void client::onEvent() // handlehttprequest
             response res_error(socket_fd, "404", "");
             throw std::runtime_error("Response 404 sent!");
         }
-        else if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(), request.requestLine.get_method()) == location->allowed_methods.end())
-        {
-            response res_error(socket_fd, "405", "");
-            throw std::runtime_error("Response 405 sent!");
-        }
+        // else if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(), request.requestLine.get_method()) == location->allowed_methods.end())
+        // {
+        //     response res_error(socket_fd, "405", "");
+        //     throw std::runtime_error("Response 405 sent!");
+        // }
 
         std::cout << requestUri << std::endl;
 
         std::string extension  = getExtension(fullPath);
         std::cout << "Extension: " << extension << std::endl;
+
+
+        std::cout << red << "------------ : " + request.requestLine.get_method() << reset << std::endl;
 
         if (location->cgi_handlers.count(extension)) // i will work here if the extention is cgi
         {
@@ -134,9 +139,30 @@ void client::onEvent() // handlehttprequest
             response res(socket_fd, type_res, get.get_final_path());
             throw std::runtime_error("Response" + type_res + "sent!");
         }
+        else if (request.requestLine.get_method() == "POST")
+        {
+            Post post(location->root);
+            if (request.requestLine.queryLine.empty())
+                post.path_savedFile = joinPaths(post.get_locationFiles(), generateUniqueFilename());
+            else
+                post.path_savedFile = joinPaths(post.get_locationFiles(), post.extractfileName(request.requestLine.queryLine));
+            std::cout << green << "path : " << post.path_savedFile << reset << std::endl;
+            std::ofstream savefile(post.path_savedFile.c_str(), std::ios::binary);
+            savefile.write(request.body_content.str().c_str() , request.body_content.str().length());
+            savefile.close();
+            response res(socket_fd, post.path_savedFile);
+            throw std::runtime_error("Response sent successfully!");
+        }
+        else if (request.requestLine.get_method() == "DELETE")
+        {
+            
+        }
     }
 }
 
-client::~client()
-{
-}
+// -- //
+
+
+
+// -- //
+client::~client(){}

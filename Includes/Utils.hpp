@@ -18,3 +18,4 @@
 std::string joinPaths(const std::string& p1, const std::string& p2);
 std::string normalizePath(const std::string& uri);
 std::string getExtension(const std::string& path);
+std::string generateUniqueFilename();

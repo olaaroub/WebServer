@@ -68,3 +68,17 @@ std::string getExtension(const std::string& path)
     }
     return "";
 }
+
+
+std::string generateUniqueFilename() {
+    // Get the current time as a number (seconds since 1970).
+    time_t currentTime = time(NULL);
+
+    std::stringstream ss;
+    ss << currentTime;
+    
+    // 3. Add a file extension.
+    return ss.str() + ".ser";
+}
+
+
