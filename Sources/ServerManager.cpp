@@ -3,13 +3,12 @@
 #include "client.hpp"
 
 // std::vector<network *> serverManager::servers;
-int serverManager:: kernel_identifier = 0;
-struct epoll_event serverManager:: evlist;
-std::map<int, network *> serverManager:: activeNetworks;
+int serverManager::kernel_identifier = 0;
+struct epoll_event serverManager::evlist;
+std::map<int, network *> serverManager::activeNetworks;
 std::map<int, CgiExecutor *> serverManager::activeCgi;
 
-
-void serverManager:: add_server(network *instance)
+void serverManager::add_server(network *instance)
 {
     activeNetworks[instance->get_socket_fd()] = instance;
 }
@@ -33,81 +32,90 @@ void serverManager:: add_server(network *instance)
 //         std::cout << error << std::endl;
 //     }
 
-
 // } // hadi tadir leaks ila sefet lia data w closa k connetion dghia. EPOLLRDHUP makantch tatcatcha
 // wmakntich tatcleani ghir tatprinti l error
-
 
 void serverManager::epollEvent(int fd, int event)
 {
     try
     {
-        if (activeNetworks.find(fd) == activeNetworks.end()) { return; } // l client deja tmse7
+        if (activeNetworks.find(fd) == activeNetworks.end())
+            return;
         activeNetworks[fd]->set_event(event);
         activeNetworks[fd]->onEvent();
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
-        std::cerr << "cleaning fd " << fd << " hitach: " << e.what() << std::endl;
+        std::cerr << "cleaning fd " << fd << " 7itach: " << e.what() << std::endl;
+        bool is_cgi = false;
+        if (activeNetworks.count(fd))
+            is_cgi = activeNetworks[fd]->isCgi();
 
         epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, fd, 0);
 
         if (activeNetworks.count(fd))
         {
-            std::cout << "delet Connection" << std::endl;
             delete activeNetworks[fd];
             activeNetworks.erase(fd);
         }
-        // close(fd);
-        if (activeNetworks.find(fd) == activeNetworks.end() || !activeNetworks[fd]->isCgi()) {
-             close(fd);
-        }
+
+        if (!is_cgi)
+            close(fd);
     }
 }
 
+void serverManager::reapChildProcesses()
+{
+    int status;
+    pid_t pid;
+
+    while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
+    {
+        std::cout << "kill zombie process with PID " << pid << std::endl;
+    }
+}
 
 void serverManager::checkCgiTimeouts()
 {
-    const int CGI_TIMEOUT_SECONDS = 5;
+    const int CGI_TIMEOUT_SECONDS = 10;
+    std::map<int, network *>::iterator it;
 
-    for (std::map<int, network*>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
+    for (it = activeNetworks.begin(); it != activeNetworks.end();)
     {
         if (it->second && it->second->isCgi())
         {
-            CgiExecutor* executor = static_cast<CgiExecutor*>(it->second);
+            CgiExecutor *executor = static_cast<CgiExecutor *>(it->second);
             bool should_delete = false;
 
-            if (executor->getState() == CgiExecutor::CGI_DONE || executor->getState() == CgiExecutor::CGI_ERROR) {
+            if (executor->getState() == CgiExecutor::CGI_DONE || executor->getState() == CgiExecutor::CGI_ERROR)
                 should_delete = true;
-            }
             else if (time(NULL) - executor->getStartTime() > CGI_TIMEOUT_SECONDS)
             {
                 std::cerr << red << "CGI script with PID " << executor->getPid() << " timed out. Terminating." << reset << std::endl;
                 kill(executor->getPid(), SIGKILL);
-                waitpid(executor->getPid(), NULL, 0);
+                // waitpid(executor->getPid(), NULL, 0);
                 executor->getClient()->sendErrorResponse(504, "Gateway Timeout");
                 should_delete = true;
             }
 
-            if (should_delete) {
-                int fd = it->first;
-                delete executor; // Destructor closes pipes and handles epoll_del
+            if (should_delete)
+            {
+                delete executor;
                 activeNetworks.erase(it++);
-                (void)fd; // To suppress unused variable warning if not used elsewhere
-            } else {
-                ++it;
             }
-        } else {
-            ++it;
+            else
+                ++it;
         }
+        else
+            ++it;
     }
 }
 
-void serverManager:: listening()
+void serverManager::listening()
 {
     std::cout << "--evlist lenghet" << activeNetworks.size() << std::endl;
     std::vector<epoll_event> evlist(1024);
-    while(true)
+    while (true)
     {
         int event = epoll_wait(kernel_identifier, evlist.data(), evlist.size(), 1000);
         if (event < 0)
@@ -123,12 +131,11 @@ void serverManager:: listening()
                 evlist.resize(activeNetworks.size() * 2);
         }
         checkCgiTimeouts();
-
+        reapChildProcesses();
     }
 }
 
-
-void serverManager:: setupServers(const std::vector<ServerConfigs>& servers)
+void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
 {
     kernel_identifier = epoll_create(1024);
     for (std::vector<ServerConfigs>::const_iterator it = servers.begin(); it != servers.end(); it++)
@@ -140,17 +147,15 @@ void serverManager:: setupServers(const std::vector<ServerConfigs>& servers)
                 server *new_server = new server((*its), inet_addr((*it).host.c_str()), (*it));
                 add_server(new_server);
             }
-            catch(std::exception &e)
+            catch (std::exception &e)
             {
                 std::cerr << e.what() << std::endl;
             }
         }
     }
-
 }
 
-
-void serverManager:: startServers()
+void serverManager::startServers()
 {
     try
     {
@@ -162,14 +167,15 @@ void serverManager:: startServers()
     //     //  matnsach tfriyi lmap
     //     std::cerr << e.what() << std::endl;
     // }
-    catch(std::exception &e) {
+    catch (std::exception &e)
+    {
         std::cerr << "Server shutting down: " << e.what() << std::endl;
         // Cleanup map
-        for (std::map<int, network*>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); ++it) {
+        for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); ++it)
+        {
             delete it->second;
         }
         activeNetworks.clear();
         close(kernel_identifier);
     }
-
 }

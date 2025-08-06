@@ -30,7 +30,7 @@ class network
 
         virtual ~network();
         virtual void onEvent() = 0;
-        virtual bool isCgi() const { return false; } // New virtual function
+        virtual bool isCgi() const { return false; } 
 
 };
 

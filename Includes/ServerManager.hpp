@@ -15,7 +15,8 @@ class serverManager
         static void add_server(network *instance);
         static void listening();
         static void epollEvent(int fd, int event);
-    static void checkCgiTimeouts(); // New timeout checker
+        static void checkCgiTimeouts();
+        static void reapChildProcesses();
 
         serverManager();
     public:
@@ -27,9 +28,7 @@ class serverManager
 
         static void setupServers(const std::vector<ServerConfigs>& servers);
         static void startServers();
-        static void epoll_add(int fd, CgiExecutor* exec, uint32_t events);
-    static void epoll_del(int fd);
-    static void epoll_mod(int fd, CgiExecutor* exec, uint32_t events);
+
 };
 
 
