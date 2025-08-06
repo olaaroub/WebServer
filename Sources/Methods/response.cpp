@@ -14,6 +14,26 @@ response::response(int socket_fd, std::string type_res, std::string final_path) 
     }
 }
 
+response::response(int socket_fd, std::string location_file) // constructer for POST
+{
+    std::stringstream response;
+    std::string location_responsefile = "./Pages/response.html"; // the file i will sent !
+    // // Status Line
+    response << "HTTP/1.1 201 Created";
+    // // Headers
+    response << "Content-Length: " << getFileSize(location_responsefile) << "\r\n";
+    response << "Content-Type: " << "text/html" << "\r\n";
+    response << "Location: " << location_file << "\r\n";
+
+    // // Blank line separating headers from body
+    response << "\r\n";
+    send_string(socket_fd, response.str());
+    send_body(socket_fd, location_responsefile);
+    
+
+}
+
+
 void response::send_fullresponse(int socket_fd, long size, std::string file_path, std::string status_line)
 {
     send_header(socket_fd, size, file_path, status_line);

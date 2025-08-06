@@ -21,9 +21,11 @@ private:
     long getFileSize(const std::string &path);
     std::string get_statusLine(std::string type_res);
     std::string create_path_error(std::string type_error);
-
+    
 public:
     response(int socket_fd, std::string type_res, std::string final_path); // Get
+    response(int socket_fd, std::string location_file); // constructer for POST
+
     ~response();
 };
 

@@ -154,7 +154,6 @@ bool Request:: run_parser(int socket_fd)
     if (cont == 0)
         throw std::runtime_error("Request parser: Client closed connection unexpectedly");
     buffer.append(bfr, cont);
-    std::cout << buffer << std::endl;
     StateOFParser();
     return request_ended;
 }
