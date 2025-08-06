@@ -164,8 +164,8 @@ void client::onEvent() // handlehttprequest
         //     throw std::runtime_error("CGI response sent successfully.");
         // }
 
-        if (location->cgi_handlers.count(extension))
-        std::cout << red << "------------ : " + request.requestLine.get_method() << reset << std::endl;
+        // if (location->cgi_handlers.count(extension))
+        // std::cout << red << "------------ : " + request.requestLine.get_method() << reset << std::endl;
         if (location->cgi_handlers.count(extension)) // i will work here if the extention is cgi
         {
             try {

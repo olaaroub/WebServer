@@ -140,7 +140,7 @@ void serverManager::listening()
 
         for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
         {
-            if (it->second->if_server() == false && (current_time - it->second->get_time()) > request_timeout)
+            if (!it->second->isCgi() && (it->second->if_server() == false && (current_time - it->second->get_time()) > request_timeout))
             {
                 std::cout << "Client timeout, closing connection." << std::endl;
                 close(it->first);
