@@ -14,7 +14,6 @@ class network
         int event;
     public:
         epoll_event ev;
-
         network(const ServerConfigs &server_config);
         network(const ServerConfigs &server_config , bool is_server);
 

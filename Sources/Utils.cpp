@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Utils.hpp"
+#include "response.hpp"
 
 std::string joinPaths(const std::string& p1, const std::string& p2) {
 
@@ -101,4 +102,23 @@ std::string generateUniqueFilename() {
     return ss.str() + ".ser";
 }
 
+const LocationConfigs *findLocation(const std::string &uri, const ServerConfigs &server_config) // i should handle the case where
+{                                                                   // /images/ or /images and the given uri uses that prefix TODO
+    const LocationConfigs *bestMatch = NULL;
+    size_t len = 0;
 
+    const std::vector<LocationConfigs> &locations = server_config.locations;
+
+    for (std::vector<LocationConfigs>::const_iterator it = locations.begin(); it != locations.end(); ++it)
+    {
+        if (uri.rfind(it->path, 0) == 0)
+        {
+            if (it->path.length() > len)
+            {
+                len = it->path.length();
+                bestMatch = &(*it);
+            }
+        }
+    }
+    return bestMatch;
+}

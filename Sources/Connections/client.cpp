@@ -6,8 +6,9 @@
 #include "CgiExecutor.hpp"
 #include "HttpResponse.hpp"
 #include "Post.hpp"
+#include "Delete.hpp"
 
-client::client(const ServerConfigs &server_config) : network(server_config, false) {_convertMaxBodySize();}
+client::client(const ServerConfigs &server_config) : network(server_config, false) { _convertMaxBodySize(); }
 
 void client::epoll_modify()
 {
@@ -17,26 +18,27 @@ void client::epoll_modify()
         throw std::runtime_error("Client Error: epoll control failed!");
 }
 
-const LocationConfigs *client::findLocation(const std::string &uri) // i should handle the case where
-{                                                                   // /images/ or /images and the given uri uses that prefix TODO
-    const LocationConfigs *bestMatch = NULL;
-    size_t len = 0;
+// const LocationConfigs *client::findLocation(const std::string &uri) // i should handle the case where
+// {                                                                   // /images/ or /images and the given uri uses that prefix TODO
+//     const LocationConfigs *bestMatch = NULL;
+//     size_t len = 0;
 
-    const std::vector<LocationConfigs> &locations = this->server_config.locations;
+//     const std::vector<LocationConfigs> &locations = this->server_config.locations;
 
-    for (std::vector<LocationConfigs>::const_iterator it = locations.begin(); it != locations.end(); ++it)
-    {
-        if (uri.rfind(it->path, 0) == 0)
-        {
-            if (it->path.length() > len)
-            {
-                len = it->path.length();
-                bestMatch = &(*it);
-            }
-        }
-    }
-    return bestMatch;
-}
+//     for (std::vector<LocationConfigs>::const_iterator it = locations.begin(); it != locations.end(); ++it)
+//     {
+//         if (uri.rfind(it->path, 0) == 0)
+//         {
+//             if (it->path.length() > len)
+//             {
+//                 len = it->path.length();
+//                 bestMatch = &(*it);
+//             }
+//         }
+//     }
+//     return bestMatch;
+// }
+// -------------- //
 
 void client::sendErrorResponse(int statusCode, const std::string &reasonPhrase) // hadi tatsifet ghir error pages safi.
 {
@@ -48,7 +50,7 @@ void client::sendErrorResponse(int statusCode, const std::string &reasonPhrase) 
     if (this->server_config.error_pages.count(statusCode))
     {
         std::string errorPageUri = this->server_config.error_pages.at(statusCode);
-        const LocationConfigs *errorLocation = findLocation(errorPageUri);
+        const LocationConfigs *errorLocation = findLocation(errorPageUri, this->server_config);
         if (errorLocation)
         {
             std::string errorPagePath = joinPaths(errorLocation->root, errorPageUri);
@@ -67,7 +69,9 @@ void client::sendErrorResponse(int statusCode, const std::string &reasonPhrase) 
     errorResponse.sendResponse(socket_fd);
 }
 
-void client:: _convertMaxBodySize()
+// ------------ //
+
+void client::_convertMaxBodySize()
 {
     request.max_body_size = get_max_body() * 1024 * 1024;
 }
@@ -88,6 +92,7 @@ void client::onEvent() // handlehttprequest
     }
     else if (event & EPOLLOUT)
     {
+        response SendResponse(socket_fd, this->server_config);
         // std::cout << "Body :" << request.body_content.rdbuf()->str() << std::endl;
         // std::fstream BodyFile("tesst");
         // BodyFile.write(request.body_content.rdbuf()->str().c_str(), request.body_content.rdbuf()->str().length());
@@ -95,20 +100,14 @@ void client::onEvent() // handlehttprequest
         const std::string &requestUri = normalizePath(request.requestLine.getUrl());
         // std::cout<< "Request URI: " << request.requestLine.getUrl() << std::endl;
 
-        const LocationConfigs *location = findLocation(requestUri);
+        const LocationConfigs *location = findLocation(requestUri, this->server_config);
         if (location)
             fullPath = joinPaths(location->root, requestUri);
 
         if (!location)
-        {
-            response res_error(socket_fd, "404", "");
-            throw std::runtime_error("Response 404 sent!");
-        }
+            SendResponse.error_response(404);
         // else if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(), request.requestLine.get_method()) == location->allowed_methods.end())
-        // {
-        //     response res_error(socket_fd, "405", "");
-        //     throw std::runtime_error("Response 405 sent!");
-        // }
+        //     SendResponse.error_response(405);
 
         std::cout << requestUri << std::endl;
 
@@ -183,12 +182,14 @@ void client::onEvent() // handlehttprequest
             }
             try {
 
+
                 serverManager::activeNetworks.erase(this->socket_fd);
                 epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, this->socket_fd, 0);
 
                 new CgiExecutor(this->server_config, *location, request, this, fullPath);
-
-            } catch (const std::exception& e) {
+            }
+            catch (const std::exception &e)
+            {
                 std::cerr << red << "Failed to launch CGI: " << e.what() << reset << std::endl;
                 sendErrorResponse(500, "Internal Server Error");
                 delete this;
@@ -196,15 +197,15 @@ void client::onEvent() // handlehttprequest
             return;
         }
 
-
-
         if (request.requestLine.get_method() == "GET")
         {
             std::cout << red << "----------- PART OF METHODS GET START --------------" << reset << std::endl;
             Get get(fullPath, location);
-            std::string type_res = get.check_path();
-            response res(socket_fd, type_res, get.get_final_path());
-            throw std::runtime_error("Response" + type_res + "sent!");
+            int type_res = get.check_path();
+            if (type_res == 1)
+                SendResponse.get_response(get.get_final_path());
+            else
+                SendResponse.error_response(type_res);
         }
         else if (request.requestLine.get_method() == "POST")
         {
@@ -213,17 +214,29 @@ void client::onEvent() // handlehttprequest
                 post.path_savedFile = joinPaths(post.get_locationFiles(), generateUniqueFilename());
             else
                 post.path_savedFile = joinPaths(post.get_locationFiles(), post.extractfileName(request.requestLine.queryLine));
-            std::cout << green << "path : " << post.path_savedFile << reset << std::endl;
             std::ofstream savefile(post.path_savedFile.c_str(), std::ios::binary);
-            savefile.write(request.body_content.str().c_str() , request.body_content.str().length());
+            savefile.write(request.body_content.str().c_str(), request.body_content.str().length());
             savefile.close();
-            // sendErrorResponse(404, "not found");
-            response res(socket_fd, post.path_savedFile);
-            throw std::runtime_error("Response sent successfully!");
+            SendResponse.post_response(post.path_savedFile);
         }
         else if (request.requestLine.get_method() == "DELETE")
         {
-
+            Delete del(fullPath, location);
+            int type_res = del.check_path();
+            if (type_res != 1)
+                SendResponse.error_response(type_res);
+            if (del.is_a_file == true)
+            {
+                int code = del.delete_file();
+                if (code == 1)
+                    SendResponse.delete_response();
+                else
+                    SendResponse.error_response(code);
+            }
+            else
+            {
+                // handle the dirctory!
+            }
         }
     }
 }
@@ -235,3 +248,14 @@ client::~client()
         close(this->socket_fd);
     }
 }
+
+/* tasks need to do !
+
+2_ handle autoindex in get method
+
+
+4_ handle multipart in Post method .
+
+5_ handle the while of send the response 4kB.
+6_ handle the delete of directory in DELETE method .
+*/

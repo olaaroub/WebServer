@@ -5,6 +5,7 @@
 // #include "request.hpp"
 // #include "client.hpp"
 #include "lib.hpp"
+#include "network.hpp"
 
 class response
 {
@@ -21,11 +22,21 @@ private:
     long getFileSize(const std::string &path);
     std::string get_statusLine(std::string type_res);
     std::string create_path_error(std::string type_error);
-    
-public:
-    response(int socket_fd, std::string type_res, std::string final_path); // Get
-    response(int socket_fd, std::string location_file); // constructer for POST
 
+
+    int socket_fd;
+    const ServerConfigs &server_config;
+public:
+
+    void get_response(std::string path_file);
+    void post_response(std::string location_file);
+    void delete_response();
+    void error_response(int type_error);
+
+
+
+
+    response(int socket_fd, const ServerConfigs &server_config);
     ~response();
 };
 
