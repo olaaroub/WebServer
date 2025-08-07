@@ -58,6 +58,21 @@
 		"text_encoding": "cpp",
 		"cinttypes": "cpp",
 		"typeinfo": "cpp",
-		"variant": "cpp"
+		"variant": "cpp",
+		"socket": "cpp",
+		"condition_variable": "cpp",
+		"forward_list": "cpp",
+		"list": "cpp",
+		"buffer": "cpp",
+		"executor": "cpp",
+		"internet": "cpp",
+		"io_context": "cpp",
+		"netfwd": "cpp",
+		"timer": "cpp",
+		"future": "cpp",
+		"mutex": "cpp",
+		"semaphore": "cpp",
+		"stop_token": "cpp",
+		"thread": "cpp"
 	}
 }

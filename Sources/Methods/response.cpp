@@ -1,20 +1,65 @@
 #include "response.hpp"
+#include "Utils.hpp"
+// #include "client.hpp"
 
-response::response(int socket_fd, std::string type_res, std::string final_path) // constructer for GET
+response::response(int socket_fd, const ServerConfigs &save_server_config) : server_config(save_server_config)
 {
-    std::string response;
-    if (type_res == "success")
-    {
-        send_fullresponse(socket_fd , getFileSize(final_path), final_path, get_statusLine(type_res));
-    }
-    else
-    {
-        std::string path_error = create_path_error(type_res);
-        send_fullresponse(socket_fd , getFileSize(path_error), path_error, get_statusLine(type_res));
-    }
+    this->socket_fd = socket_fd;
 }
 
-response::response(int socket_fd, std::string location_file) // constructer for POST
+// response::response(int socket_fd, std::string type_res, std::string final_path) // constructer for GET
+// {
+//     std::string response;
+//     if (type_res == "success")
+//     {
+//         send_fullresponse(socket_fd , getFileSize(final_path), final_path, get_statusLine(type_res));
+//     }
+//     else
+//     {
+//         std::string path_error = create_path_error(type_res);
+//         send_fullresponse(socket_fd , getFileSize(path_error), path_error, get_statusLine(type_res));
+//     }
+// }
+
+// response::response(int socket_fd, c) // constructer for POST
+// {
+//     std::stringstream response;
+//     std::string location_responsefile = "./Pages/response.html"; // the file i will sent !
+//     // // Status Line
+//     response << "HTTP/1.1 201 Created";
+//     // // Headers
+//     response << "Content-Length: " << getFileSize(location_responsefile) << "\r\n";
+//     response << "Content-Type: " << "text/html" << "\r\n";
+//     response << "Location: " << location_file << "\r\n";
+
+//     // // Blank line separating headers from body
+//     response << "\r\n";
+//     send_string(socket_fd, response.str());
+//     send_body(socket_fd, location_responsefile);
+
+// }
+
+// void response::send_response_sucess(int socket_fd)
+// {
+//     std::stringstream response;
+//     // // Status Line
+//     response << "HTTP/1.1 204 No Content";
+//     // // Blank line separating headers from body
+//     response << "\r\n";
+
+//     send_string(socket_fd, response.str());
+
+// }
+
+// --- THE NEW FUNCTION :
+
+void response::get_response(std::string path_file)
+{
+    send_fullresponse(socket_fd, getFileSize(path_file), path_file, "HTTP/1.1 200 OK\r\n");
+    throw std::runtime_error("Response Get sucess sent!");
+}
+
+void response::post_response(std::string location_file)
 {
     std::stringstream response;
     std::string location_responsefile = "./Pages/response.html"; // the file i will sent !
@@ -29,10 +74,45 @@ response::response(int socket_fd, std::string location_file) // constructer for 
     response << "\r\n";
     send_string(socket_fd, response.str());
     send_body(socket_fd, location_responsefile);
-    
-
+    throw std::runtime_error("Response Post sucess sent!");
 }
 
+void response::delete_response()
+{
+    std::stringstream response;
+    // // Status Line
+    response << "HTTP/1.1 204 No Content";
+    // // Blank line separating headers from body
+    response << "\r\n";
+
+    send_string(socket_fd, response.str());
+    throw std::runtime_error("Response delete sucess sent!");
+}
+
+void response::error_response(int type_error)
+{
+    std::string path_file;
+
+    if (this->server_config.error_pages.count(type_error))
+    {
+        std::string errorPageUri = this->server_config.error_pages.at(type_error);
+        const LocationConfigs *errorLocation = findLocation(errorPageUri, this->server_config);
+        if (errorLocation)
+            path_file = joinPaths(errorLocation->root, errorPageUri);
+        else
+        {
+            std::cout << red << "error in error_response function ! " << reset << std::endl;
+        }
+    }
+    else
+        path_file = "./Errors/default.html";
+    std::stringstream type_res;
+    type_res << type_error;
+    send_fullresponse(socket_fd, getFileSize(path_file), path_file, get_statusLine(type_res.str()));
+    throw std::runtime_error("Response " + type_res.str() + " sent!");
+}
+
+// _________________________________________ //
 
 void response::send_fullresponse(int socket_fd, long size, std::string file_path, std::string status_line)
 {
@@ -43,10 +123,14 @@ void response::send_fullresponse(int socket_fd, long size, std::string file_path
 void response::send_body(int socket_fd, std::string file_path)
 {
     std::ifstream file_stream(file_path.c_str(), std::ios::binary);
-    if (!file_stream) { return ; }
+    if (!file_stream)
+    {
+        return;
+    }
 
     char buffer[4096]; // 4KB buffer
-    while (file_stream.read(buffer, sizeof(buffer))) {
+    while (file_stream.read(buffer, sizeof(buffer)))
+    {
         send_chunk(socket_fd, buffer, sizeof(buffer));
     }
     //  check if there is a final, smaller chunk left to send
@@ -54,10 +138,9 @@ void response::send_body(int socket_fd, std::string file_path)
     {
         send_chunk(socket_fd, buffer, file_stream.gcount());
     }
- 
 }
 
-void response::send_header(int socket_fd , long size, std::string file_path, std::string status_line)
+void response::send_header(int socket_fd, long size, std::string file_path, std::string status_line)
 {
     std::stringstream response;
 
@@ -71,7 +154,6 @@ void response::send_header(int socket_fd , long size, std::string file_path, std
     response << "\r\n";
 
     send_string(socket_fd, response.str());
-
 }
 
 // ------------------------ HELPER FUNCTIONS ------------------ //
@@ -89,6 +171,12 @@ std::string response::get_statusLine(std::string type_res)
         return "HTTP/1.1 404 Not Found";
     else if (type_res == "405")
         return "HTTP/1.1 405 Method Not Allowed";
+    else if (type_res == "500")
+        return "Internal Server Error";
+    else if (type_res == "502")
+        return "Bad Gateway";
+    else if (type_res == "504")
+        return "Gateway Timeout";
     return "HTTP/1.1 200 OK\r\n";
 }
 
@@ -126,8 +214,7 @@ std::string response::getMimeType(const std::string &filePath)
     return "application/octet-stream";
 }
 
-
-void response::send_chunk(int socket_fd, const char* data, size_t length)
+void response::send_chunk(int socket_fd, const char *data, size_t length)
 {
     size_t total_bytes_sent = 0;
     while (total_bytes_sent < length)
@@ -141,7 +228,6 @@ void response::send_chunk(int socket_fd, const char* data, size_t length)
         total_bytes_sent += bytes_sent;
     }
 }
-
 
 void response::send_string(int socket_fd, std::string response)
 {
