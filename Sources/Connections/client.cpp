@@ -2,9 +2,8 @@
 #include "ServerManager.hpp"
 #include "Utils.hpp"
 #include "Get.hpp"
-#include "CGIHandler.hpp"
 #include "CgiExecutor.hpp"
-#include "HttpResponse2.hpp"
+#include "HttpResponse.hpp"
 #include "Post.hpp"
 #include "Delete.hpp"
 
@@ -133,13 +132,8 @@ void client::onEvent() // handlehttprequest
     else if (event & EPOLLOUT)
     {
         response SendResponse(socket_fd, this->server_config);
-        // std::cout << "Body :" << request.body_content.rdbuf()->str() << std::endl;
-        // std::fstream BodyFile("tesst");
-        // BodyFile.write(request.body_content.rdbuf()->str().c_str(), request.body_content.rdbuf()->str().length());
         std::string fullPath;
         const std::string &requestUri = normalizePath(request.requestLine.getUrl());
-        // std::cout<< "Request URI: " << request.requestLine.getUrl() << std::endl;
-
         const LocationConfigs *location = findLocation(requestUri, this->server_config);
         if (location)
             fullPath = joinPaths(location->root, requestUri);
@@ -150,26 +144,10 @@ void client::onEvent() // handlehttprequest
         //     SendResponse.error_response(405);
 
         std::cout << requestUri << std::endl;
-
         std::string extension = getExtension(fullPath);
         std::cout << "Extension: " << extension << std::endl;
 
-        // if (location->cgi_handlers.count(extension))
-        // {
-        //     std::string cgi_output;
-        //     struct stat script_stat;
-        //     if (stat(fullPath.c_str(), &script_stat) != 0)
-        //     {
-        //         sendErrorResponse(404, "Not Found"); // had function tatkhdem ghir m3a error pages li fl config file
-        //                                              // khasna nkhdmo biha 7itach error pages khsna nhzohom mn config file
-        //                                              // machi nb9aw n7to path dialhom fl funtion l9dima
-        //         throw std::runtime_error("Response 404 sent for non-existent CGI script!");
-        //     }
-        //     if (!(script_stat.st_mode & S_IRUSR))
-        //     {
-        //         sendErrorResponse(403, "Forbidden");
-        //         throw std::runtime_error("Response 403 sent for unreadable CGI script!");
-        //     }
+
         //     try
         //     {
         //         CgiHandler cgi(*location, fullPath, request, this->server_config);
@@ -203,8 +181,6 @@ void client::onEvent() // handlehttprequest
         //     throw std::runtime_error("CGI response sent successfully.");
         // }
 
-        // if (location->cgi_handlers.count(extension))
-        // std::cout << red << "------------ : " + request.requestLine.get_method() << reset << std::endl;
         if (location->cgi_handlers.count(extension))
         {
             struct stat script_stat;
