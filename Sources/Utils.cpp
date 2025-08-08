@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/06 22:17:08 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/08 19:29:50 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,4 +121,19 @@ const LocationConfigs *findLocation(const std::string &uri, const ServerConfigs 
         }
     }
     return bestMatch;
+}
+
+
+const char* getReasonPhrase(int code) {
+    switch (code) {
+        case 200: return "OK";
+        case 403: return "Forbidden";
+        case 404: return "Not Found";
+        case 405: return "Method Not Allowed";
+        case 500: return "Internal Server Error";
+        case 501: return "Not Implemented";
+        case 502: return "Bad Gateway";
+        case 504: return "Gateway Timeout";
+        default: return "Unknown Status";
+    }
 }

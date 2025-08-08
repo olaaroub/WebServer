@@ -4,7 +4,7 @@
 #include "Get.hpp"
 #include "CGIHandler.hpp"
 #include "CgiExecutor.hpp"
-#include "HttpResponse.hpp"
+#include "HttpResponse2.hpp"
 #include "Post.hpp"
 #include "Delete.hpp"
 
@@ -38,42 +38,82 @@ void client::epoll_modify()
 //     }
 //     return bestMatch;
 // }
-// -------------- //
 
-void client::sendErrorResponse(int statusCode, const std::string &reasonPhrase) // hadi tatsifet ghir error pages safi.
-{
-    HttpResponse errorResponse;
-    errorResponse.setStatus(statusCode, reasonPhrase);
-    errorResponse.addHeader("Content-Type", "text/html");
+// void client::sendErrorResponse(int statusCode, const std::string &reasonPhrase) // hadi tatsifet ghir error pages safi.
+// {
+//     HttpResponse errorResponse;
+//     errorResponse.setStatus(statusCode, reasonPhrase);
+//     errorResponse.addHeader("Content-Type", "text/html");
 
-    std::string errorBody;
-    if (this->server_config.error_pages.count(statusCode))
-    {
-        std::string errorPageUri = this->server_config.error_pages.at(statusCode);
-        const LocationConfigs *errorLocation = findLocation(errorPageUri, this->server_config);
-        if (errorLocation)
-        {
-            std::string errorPagePath = joinPaths(errorLocation->root, errorPageUri);
-            errorBody = getFileContents(errorPagePath);
-        }
-    }
+//     std::string errorBody;
+//     if (this->server_config.error_pages.count(statusCode))
+//     {
+//         std::string errorPageUri = this->server_config.error_pages.at(statusCode);
+//         const LocationConfigs *errorLocation = findLocation(errorPageUri, this->server_config);
+//         if (errorLocation)
+//         {
+//             std::string errorPagePath = joinPaths(errorLocation->root, errorPageUri);
+//             errorBody = getFileContents(errorPagePath);
+//         }
+//     }
 
-    if (errorBody.empty())
-    {
-        std::stringstream ss;
-        ss << "<html><body><h1>" << statusCode << " - " << reasonPhrase << "</h1></body></html>";
-        errorBody = ss.str();
-    }
+//     if (errorBody.empty())
+//     {
+//         std::stringstream ss;
+//         ss << "<html><body><h1>" << statusCode << " - " << reasonPhrase << "</h1></body></html>";
+//         errorBody = ss.str();
+//     }
 
-    errorResponse.setBody(errorBody);
-    errorResponse.sendResponse(socket_fd);
-}
+//     errorResponse.setBody(errorBody);
+//     errorResponse.sendResponse(socket_fd);
+// }
 
-// ------------ //
 
 void client::_convertMaxBodySize()
 {
     request.max_body_size = get_max_body() * 1024 * 1024;
+}
+
+void client::sendResponseString(const std::string& response) {
+    ssize_t bytes_sent = send(this->socket_fd, response.c_str(), response.length(), 0);
+    if (bytes_sent < 0 || static_cast<size_t>(bytes_sent) < response.length()) {
+        throw std::runtime_error("Send Error: Failed to send full response to client.");
+    }
+}
+
+void client::handleHttpError(int statusCode) {
+    HttpResponse responseBuilder;
+    responseBuilder.setStatus(statusCode);
+    responseBuilder.addHeader("Content-Type", "text/html");
+
+    std::string body;
+    bool customPageFound = false;
+
+    if (this->server_config.error_pages.count(statusCode)) {
+
+        std::string error_page_uri = this->server_config.error_pages.at(statusCode);
+        const LocationConfigs* error_loc = findLocation(error_page_uri, this->server_config);
+        if (error_loc) {
+            std::string full_path = joinPaths(error_loc->root, error_page_uri);
+            body = getFileContents(full_path);
+            if (!body.empty()) {
+                customPageFound = true;
+            }
+        }
+    }
+
+    if (!customPageFound) {
+        std::stringstream default_body_ss;
+        const char* reasonPhrase = getReasonPhrase(statusCode);
+        default_body_ss << "<html>\r\n<head><title>Error " << statusCode
+                        << "</title></head>\r\n<body>\r\n<h1>" << statusCode << " | "
+                        << reasonPhrase
+                        << "</h1>\r\n</body>\r\n</html>";
+        body = default_body_ss.str();
+    }
+
+    responseBuilder.setBody(body);
+    sendResponseString(responseBuilder.toString());
 }
 
 void client::onEvent() // handlehttprequest
@@ -165,19 +205,17 @@ void client::onEvent() // handlehttprequest
 
         // if (location->cgi_handlers.count(extension))
         // std::cout << red << "------------ : " + request.requestLine.get_method() << reset << std::endl;
-        if (location->cgi_handlers.count(extension)) // i will work here if the extention is cgi
+        if (location->cgi_handlers.count(extension))
         {
             struct stat script_stat;
             if (stat(fullPath.c_str(), &script_stat) != 0)
             {
-                sendErrorResponse(404, "Not Found"); // had function tatkhdem ghir m3a error pages li fl config file
-                                                     // khasna nkhdmo biha 7itach error pages khsna nhzohom mn config file
-                                                     // machi nb9aw n7to path dialhom fl funtion l9dima
+               handleHttpError(404);
                 throw std::runtime_error("Response 404 sent for non-existent CGI script!");
             }
             if (!(script_stat.st_mode & S_IRUSR))
             {
-                sendErrorResponse(403, "Forbidden");
+                handleHttpError(403);
                 throw std::runtime_error("Response 403 sent for unreadable CGI script!");
             }
             try {
@@ -191,7 +229,7 @@ void client::onEvent() // handlehttprequest
             catch (const std::exception &e)
             {
                 std::cerr << red << "Failed to launch CGI: " << e.what() << reset << std::endl;
-                sendErrorResponse(500, "Internal Server Error");
+                handleHttpError(500);
                 delete this;
             }
             return;

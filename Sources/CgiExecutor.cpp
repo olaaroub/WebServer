@@ -161,13 +161,22 @@ void CgiExecutor::onEvent()
             _client->sendErrorResponse(502, "Bad Gateway");
         else
         {
-			if (_responseBuffer.find("Content-Type:") == std::string::npos && _responseBuffer.find("content-type:") == std::string::npos &&
-            	_responseBuffer.find("Content-type:") == std::string::npos) // php wld l97ba howa li khlani nzid had check kaml
-				_client->sendErrorResponse(502, "Bad Gateway");
-			HttpResponse cgiResponse;
-			cgiResponse.setFromCgiOutput(_responseBuffer);
-            cgiResponse.sendResponse(_client->get_socket_fd());
+            // The script succeeded. Now, let's process its output.
+            // A valid CGI response must include a Content-Type header.
+            if (_responseBuffer.find("Content-Type:") == std::string::npos &&
+                _responseBuffer.find("content-type:") == std::string::npos &&
+                _responseBuffer.find("Content-type:") == std::string::npos)
+            {
+                _client->handleHttpError(502);
+            }
+            else
+            {
+                HttpResponse cgiResponseBuilder;
+                cgiResponseBuilder.setFromCgiOutput(_responseBuffer);
+                _client->sendResponseString(cgiResponseBuilder.toString());
+            }
         }
+		throw std::runtime_error("CGI execution finished.");
     }
 
 }
