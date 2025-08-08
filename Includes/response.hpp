@@ -29,7 +29,7 @@ private:
 public:
 
     void get_response(std::string path_file);
-    void post_response(std::string location_file);
+    void post_response();
     void delete_response();
     void error_response(int type_error);
 

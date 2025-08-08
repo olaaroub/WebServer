@@ -12,6 +12,17 @@ int Get::check_dir(struct stat file_info)
     if ((file_info.st_mode & S_IXUSR) == 0)
         return 403;
 
+    // auto index handle !
+    // std::cout <<  red << "----------  " << reset << std::endl;
+    // if (location->index_file.empty()) // mean the index file is not found
+    // {
+    //     if (location->autoindex == true)
+    //     {
+
+    //     }
+    // }else
+    // {
+    // }
     std::string default_path = path + location->index_file;
     this->path = default_path;
     struct stat new_file_info;
