@@ -19,8 +19,8 @@ int Delete::check_dir(struct stat file_info)
     // if (stat(this->path.c_str(), &new_file_info) != 0)
     //     return "404";
     // return check_file(new_file_info);
-    std::cout << red << "you try to delete a dirctory !! " << reset << std::endl;
-    std::cout << red << "path of the dir : " << this->path << reset << std::endl;
+    // std::cout << red << "you try to delete a dirctory !! " << reset << std::endl;
+    // std::cout << red << "path of the dir : " << this->path << reset << std::endl;
     return 1;
 }
 

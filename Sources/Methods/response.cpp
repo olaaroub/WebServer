@@ -7,53 +7,6 @@ response::response(int socket_fd, const ServerConfigs &save_server_config) : ser
     this->socket_fd = socket_fd;
 }
 
-// response::response(int socket_fd, std::string type_res, std::string final_path) // constructer for GET
-// {
-//     std::string response;
-//     if (type_res == "success")
-//     {
-//         send_fullresponse(socket_fd , getFileSize(final_path), final_path, get_statusLine(type_res));
-//     }
-//     else
-//     {
-//         std::string path_error = create_path_error(type_res);
-//         send_fullresponse(socket_fd , getFileSize(path_error), path_error, get_statusLine(type_res));
-//     }
-// }
-
-// response::response(int socket_fd, c) // constructer for POST
-// {
-//     std::stringstream response;
-//     std::string location_responsefile = "./Pages/response.html"; // the file i will sent !
-//     // // Status Line
-//     response << "HTTP/1.1 201 Created";
-//     // // Headers
-//     response << "Content-Length: " << getFileSize(location_responsefile) << "\r\n";
-//     response << "Content-Type: " << "text/html" << "\r\n";
-//     response << "Location: " << location_file << "\r\n";
-
-//     // // Blank line separating headers from body
-//     response << "\r\n";
-//     send_string(socket_fd, response.str());
-//     send_body(socket_fd, location_responsefile);
-
-// }
-
-// void response::send_response_sucess(int socket_fd)
-// {
-//     std::stringstream response;
-//     // // Status Line
-//     response << "HTTP/1.1 204 No Content";
-//     // // Blank line separating headers from body
-//     response << "\r\n";
-
-//     send_string(socket_fd, response.str());
-
-// }
-
-// --- THE NEW FUNCTION :
-
-
 
 void response::send_res_autoindexFile(std::string file_content)
 {

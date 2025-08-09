@@ -137,3 +137,51 @@ const char* getReasonPhrase(int code) {
         default: return "Unknown Status";
     }
 }
+
+std::string getMimeType(const std::string &filePath)
+{
+    // Find the position of the last dot
+    size_t dot_pos = filePath.rfind('.');
+    if (dot_pos == std::string::npos)
+    {
+        // No extension found, return the default
+        return "application/octet-stream";
+    }
+
+    // Get the extension substring
+    std::string extension = filePath.substr(dot_pos);
+
+    // Look up the extension
+    if (extension == ".html" || extension == ".htm")
+        return "text/html";
+    if (extension == ".css")
+        return "text/css";
+    if (extension == ".js")
+        return "application/javascript";
+    if (extension == ".jpg" || extension == ".jpeg")
+        return "image/jpeg";
+    if (extension == ".png")
+        return "image/png";
+    if (extension == ".gif")
+        return "image/gif";
+    if (extension == ".txt")
+        return "text/plain";
+
+    // Return the default for unknown extensions
+    return "application/octet-stream";
+}
+
+std::string generate_body_FromFile(std::string pathFIle)
+{
+    std::ifstream file_stream(pathFIle.c_str(), std::ios::binary);
+    if (!file_stream)
+    {
+        throw "open file failed !";
+    }
+    std::stringstream body;
+
+    body << file_stream.rdbuf();
+
+    return body.str();
+}
+

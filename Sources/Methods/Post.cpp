@@ -51,7 +51,7 @@ int Post::post_multipartFormData(std::string content_type, std::string body_cont
         unsigned long contentDis_pos = header.find("Content-Disposition");
         if (contentDis_pos == std::string::npos)
         {
-            return 40;
+            return 400;
         }
         std::string file_name = extract_nameFile(header);
 

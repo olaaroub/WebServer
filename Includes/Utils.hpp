@@ -23,4 +23,5 @@ std::string getFileContents(const std::string& filePath);
  std::string generateUniqueFilename();
  const LocationConfigs *findLocation(const std::string &uri, const ServerConfigs &server_config);
     const char* getReasonPhrase(int code);
-
+   std::string getMimeType(const std::string &filePath);
+std::string generate_body_FromFile(std::string pathFIle);

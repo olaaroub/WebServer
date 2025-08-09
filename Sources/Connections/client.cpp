@@ -67,20 +67,22 @@ void client::epoll_modify()
 //     errorResponse.sendResponse(socket_fd);
 // }
 
-
 void client::_convertMaxBodySize()
 {
     request.max_body_size = get_max_body() * 1024 * 1024;
 }
 
-void client::sendResponseString(const std::string& response) {
+void client::sendResponseString(const std::string &response)
+{
     ssize_t bytes_sent = send(this->socket_fd, response.c_str(), response.length(), 0);
-    if (bytes_sent < 0 || static_cast<size_t>(bytes_sent) < response.length()) {
+    if (bytes_sent < 0 || static_cast<size_t>(bytes_sent) < response.length())
+    {
         throw std::runtime_error("Send Error: Failed to send full response to client.");
     }
 }
 
-void client::handleHttpError(int statusCode) {
+void client::handleHttpError(int statusCode)
+{
     HttpResponse responseBuilder;
     responseBuilder.setStatus(statusCode);
     responseBuilder.addHeader("Content-Type", "text/html");
@@ -88,22 +90,26 @@ void client::handleHttpError(int statusCode) {
     std::string body;
     bool customPageFound = false;
 
-    if (this->server_config.error_pages.count(statusCode)) {
+    if (this->server_config.error_pages.count(statusCode))
+    {
 
         std::string error_page_uri = this->server_config.error_pages.at(statusCode);
-        const LocationConfigs* error_loc = findLocation(error_page_uri, this->server_config);
-        if (error_loc) {
+        const LocationConfigs *error_loc = findLocation(error_page_uri, this->server_config);
+        if (error_loc)
+        {
             std::string full_path = joinPaths(error_loc->root, error_page_uri);
             body = getFileContents(full_path);
-            if (!body.empty()) {
+            if (!body.empty())
+            {
                 customPageFound = true;
             }
         }
     }
 
-    if (!customPageFound) {
+    if (!customPageFound)
+    {
         std::stringstream default_body_ss;
-        const char* reasonPhrase = getReasonPhrase(statusCode);
+        const char *reasonPhrase = getReasonPhrase(statusCode);
         default_body_ss << "<html>\r\n<head><title>Error " << statusCode
                         << "</title></head>\r\n<body>\r\n<h1>" << statusCode << " | "
                         << reasonPhrase
@@ -131,7 +137,7 @@ void client::onEvent() // handlehttprequest
     }
     else if (event & EPOLLOUT)
     {
-        response SendResponse(socket_fd, this->server_config);
+        // response SendResponse(socket_fd, this->server_config);
         std::string fullPath;
         const std::string &requestUri = normalizePath(request.requestLine.getUrl());
         const LocationConfigs *location = findLocation(requestUri, this->server_config);
@@ -139,14 +145,17 @@ void client::onEvent() // handlehttprequest
             fullPath = joinPaths(location->root, requestUri);
 
         if (!location)
-            SendResponse.error_response(404);
+        {
+            handleHttpError(404);
+            throw std::runtime_error("Response error sucess !");
+        }
+
         // else if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(), request.requestLine.get_method()) == location->allowed_methods.end())
         //     SendResponse.error_response(405);
 
         std::cout << requestUri << std::endl;
         std::string extension = getExtension(fullPath);
         std::cout << "Extension: " << extension << std::endl;
-
 
         //     try
         //     {
@@ -186,7 +195,7 @@ void client::onEvent() // handlehttprequest
             struct stat script_stat;
             if (stat(fullPath.c_str(), &script_stat) != 0)
             {
-               handleHttpError(404);
+                handleHttpError(404);
                 throw std::runtime_error("Response 404 sent for non-existent CGI script!");
             }
             if (!(script_stat.st_mode & S_IRUSR))
@@ -194,8 +203,8 @@ void client::onEvent() // handlehttprequest
                 handleHttpError(403);
                 throw std::runtime_error("Response 403 sent for unreadable CGI script!");
             }
-            try {
-
+            try
+            {
 
                 serverManager::activeNetworks.erase(this->socket_fd);
                 epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, this->socket_fd, 0);
@@ -214,56 +223,125 @@ void client::onEvent() // handlehttprequest
         if (request.requestLine.get_method() == "GET")
         {
             std::cout << red << "----------- PART OF METHODS GET START --------------" << reset << std::endl;
-            Get get(fullPath, location);
-            int type_res = get.check_path();
-            std::cout << green << "type result : " << type_res << reset << std::endl;
-            if (type_res == 0) // mean autoindex is on . !
-                SendResponse.get_response(get.generate_Fileautoindex(), true);
-            else if (type_res == 1)
-                SendResponse.get_response(get.get_final_path(), false);
-            else
-                SendResponse.error_response(type_res);
+            HttpResponse SendResp;
+            try
+            {
+                Get get(fullPath, location);
+                int type_res = get.check_path();
+                if (type_res == 0) // mean autoindex is on . !
+                {
+                    SendResp.setStatus(201);
+                    SendResp.addHeader("Content-Type", "text/html");
+                    SendResp.setBody(get.generate_Fileautoindex());
+                    SendResp.toString();
+                    throw std::runtime_error("Response Get sent sucess !");
+                    // SendResponse.get_response(get.generate_Fileautoindex(), true);
+                }
+                else if (type_res == 1)
+                {
+                    SendResp.setStatus(201);
+                    SendResp.addHeader("Content-Type", getMimeType(get.get_final_path()));
+                    SendResp.setBody(generate_body_FromFile(get.get_final_path()));
+                    SendResp.toString();
+                    throw std::runtime_error("Response Get sent sucess !");
+                    // SendResponse.get_response(get.get_final_path(), false);
+                }
+                else
+                {
+                    handleHttpError(type_res);
+                    throw std::runtime_error("Response error sucess !");
+                }
+            }
+            catch (std::string error)
+            {
+                throw std::runtime_error("Response " + error + " sent!");
+            }
         }
         else if (request.requestLine.get_method() == "POST")
         {
-            Post post(location->root);
-            std::map<std::string, std::vector<std::string> >::const_iterator it;
-            it = request.headers.map.find("content-type");
-            if (it == request.headers.map.end()) // it not found the content-type correctly !
-                SendResponse.error_response(400);
-
-            std::string content_type = request.headers.map["content-type"].at(0);
-
-            unsigned long check_multipartFOrmData = content_type.find("multipart/form-data");
-            if (check_multipartFOrmData != std::string::npos)
+            HttpResponse SendResp;
+            try
             {
-                int type_res = post.post_multipartFormData(content_type, request.body_content.str());
-                if (type_res != 1)
-                    SendResponse.error_response(type_res);
-            }
-            else
-                post.post_Query(request.requestLine.queryLine, request.body_content.str());
+                Post post(location->root);
+                std::map<std::string, std::vector<std::string> >::const_iterator it;
+                it = request.headers.map.find("content-type");
+                if (it == request.headers.map.end()) // it not found the content-type correctly !
+                {
+                    handleHttpError(400);
+                    throw std::runtime_error("Response error sucess !");
+                }
 
-            SendResponse.post_response();
+                std::string content_type = request.headers.map["content-type"].at(0);
+
+                unsigned long check_multipartFOrmData = content_type.find("multipart/form-data");
+                if (check_multipartFOrmData != std::string::npos)
+                {
+                    int type_res = post.post_multipartFormData(content_type, request.body_content.str());
+                    if (type_res != 1)
+                    {
+                        handleHttpError(type_res);
+                        throw std::runtime_error("Response error sucess !");
+                    }
+                }
+                else
+                    post.post_Query(request.requestLine.queryLine, request.body_content.str());
+
+                SendResp.setStatus(201);
+                SendResp.addHeader("Content-Type", "text/html");
+                SendResp.setBody(generate_body_FromFile("./Pages/response.html"));
+                SendResp.toString();
+                throw std::runtime_error("Response Post sent sucess !");
+            }
+            catch (std::string error)
+            {
+                throw std::runtime_error("Response " + error + " sent!");
+            }
+
+            // SendResponse.post_response();
 
             // --- //
         }
         else if (request.requestLine.get_method() == "DELETE")
         {
-            Delete del(fullPath, location);
-            int type_res = del.check_path();
-            if (type_res != 1)
-                SendResponse.error_response(type_res);
-            if (del.is_a_file == true)
+            HttpResponse SendResp;
+            try
             {
-                int code = del.delete_file();
-                if (code == 1)
-                    SendResponse.delete_response();
+                Delete del(fullPath, location);
+                int type_res = del.check_path();
+                if (type_res != 1)
+                {
+                    handleHttpError(type_res);
+                    throw std::runtime_error("Response error sucess !");
+                }
+                if (del.is_a_file == true)
+                {
+                    int code = del.delete_file();
+                    if (code == 1)
+                    {
+                        SendResp.setStatus(204);
+                        SendResp.addHeader("Content-Type", "text/html");
+                        // SendResp.setBody(generate_body_FromFile("./Pages/response.html"));
+                        SendResp.toString();
+                        throw std::runtime_error("Response Delete sent sucess !");
+
+                        // SendResponse.delete_response();
+                    }
+                    else
+                    {
+                        handleHttpError(code);
+                        throw std::runtime_error("Response error sucess !");
+                    }
+                }
                 else
-                    SendResponse.error_response(code);
+                {
+                    handleHttpError(403);
+                    throw std::runtime_error("Response error sucess !");
+                }
             }
-            else
-               SendResponse.error_response(403);
+            catch (std::string error)
+            {
+                throw std::runtime_error("Response " + error + " sent!");
+            }
         }
     }
 }
@@ -275,12 +353,3 @@ client::~client()
         close(this->socket_fd);
     }
 }
-
-/* tasks need to do !
-
-2_ handle autoindex in get method
-
-
-
-
-*/
