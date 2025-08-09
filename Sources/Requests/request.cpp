@@ -88,7 +88,7 @@ void Request:: is_number(std::string string)
 {
     for (size_t i = 0; i < string.length(); i++)
     {
-        if (!std::isxdigit(string[i]))
+        if (!std::isxdigit(string[i]) || string[i] == '-')
             throw std::runtime_error("Request parser Error: size of data passed does not  number!");
     }
 }
