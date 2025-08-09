@@ -17,55 +17,26 @@ void client::epoll_modify()
         throw std::runtime_error("Client Error: epoll control failed!");
 }
 
-// const LocationConfigs *client::findLocation(const std::string &uri) // i should handle the case where
-// {                                                                   // /images/ or /images and the given uri uses that prefix TODO
-//     const LocationConfigs *bestMatch = NULL;
-//     size_t len = 0;
+const LocationConfigs *client::findLocation(const std::string &uri) // i should handle the case where
+{                                                                   // /images/ or /images and the given uri uses that prefix TODO
+    const LocationConfigs *bestMatch = NULL;
+    size_t len = 0;
 
-//     const std::vector<LocationConfigs> &locations = this->server_config.locations;
+    const std::vector<LocationConfigs> &locations = this->server_config.locations;
 
-//     for (std::vector<LocationConfigs>::const_iterator it = locations.begin(); it != locations.end(); ++it)
-//     {
-//         if (uri.rfind(it->path, 0) == 0)
-//         {
-//             if (it->path.length() > len)
-//             {
-//                 len = it->path.length();
-//                 bestMatch = &(*it);
-//             }
-//         }
-//     }
-//     return bestMatch;
-// }
-
-// void client::sendErrorResponse(int statusCode, const std::string &reasonPhrase) // hadi tatsifet ghir error pages safi.
-// {
-//     HttpResponse errorResponse;
-//     errorResponse.setStatus(statusCode, reasonPhrase);
-//     errorResponse.addHeader("Content-Type", "text/html");
-
-//     std::string errorBody;
-//     if (this->server_config.error_pages.count(statusCode))
-//     {
-//         std::string errorPageUri = this->server_config.error_pages.at(statusCode);
-//         const LocationConfigs *errorLocation = findLocation(errorPageUri, this->server_config);
-//         if (errorLocation)
-//         {
-//             std::string errorPagePath = joinPaths(errorLocation->root, errorPageUri);
-//             errorBody = getFileContents(errorPagePath);
-//         }
-//     }
-
-//     if (errorBody.empty())
-//     {
-//         std::stringstream ss;
-//         ss << "<html><body><h1>" << statusCode << " - " << reasonPhrase << "</h1></body></html>";
-//         errorBody = ss.str();
-//     }
-
-//     errorResponse.setBody(errorBody);
-//     errorResponse.sendResponse(socket_fd);
-// }
+    for (std::vector<LocationConfigs>::const_iterator it = locations.begin(); it != locations.end(); ++it)
+    {
+        if (uri.rfind(it->path, 0) == 0)
+        {
+            if (it->path.length() > len)
+            {
+                len = it->path.length();
+                bestMatch = &(*it);
+            }
+        }
+    }
+    return bestMatch;
+}
 
 void client::_convertMaxBodySize()
 {
@@ -76,9 +47,7 @@ void client::sendResponseString(const std::string &response)
 {
     ssize_t bytes_sent = send(this->socket_fd, response.c_str(), response.length(), 0);
     if (bytes_sent < 0 || static_cast<size_t>(bytes_sent) < response.length())
-    {
         throw std::runtime_error("Send Error: Failed to send full response to client.");
-    }
 }
 
 void client::handleHttpError(int statusCode)
@@ -94,15 +63,13 @@ void client::handleHttpError(int statusCode)
     {
 
         std::string error_page_uri = this->server_config.error_pages.at(statusCode);
-        const LocationConfigs *error_loc = findLocation(error_page_uri, this->server_config);
+        const LocationConfigs *error_loc = findLocation(error_page_uri);
         if (error_loc)
         {
             std::string full_path = joinPaths(error_loc->root, error_page_uri);
             body = getFileContents(full_path);
             if (!body.empty())
-            {
                 customPageFound = true;
-            }
         }
     }
 
@@ -137,10 +104,9 @@ void client::onEvent() // handlehttprequest
     }
     else if (event & EPOLLOUT)
     {
-        // response SendResponse(socket_fd, this->server_config);
         std::string fullPath;
         const std::string &requestUri = normalizePath(request.requestLine.getUrl());
-        const LocationConfigs *location = findLocation(requestUri, this->server_config);
+        const LocationConfigs *location = findLocation(requestUri);
         if (location)
             fullPath = joinPaths(location->root, requestUri);
 
@@ -149,9 +115,6 @@ void client::onEvent() // handlehttprequest
             handleHttpError(404);
             throw std::runtime_error("Response error sucess !");
         }
-
-        // else if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(), request.requestLine.get_method()) == location->allowed_methods.end())
-        //     SendResponse.error_response(405);
 
         std::cout << requestUri << std::endl;
         std::string extension = getExtension(fullPath);
@@ -193,6 +156,12 @@ void client::onEvent() // handlehttprequest
         if (location->cgi_handlers.count(extension))
         {
             struct stat script_stat;
+            if (request.requestLine.get_method() == "DELETE" || (std::find(location->allowed_methods.begin(), location->allowed_methods.end(),
+             request.requestLine.get_method()) == location->allowed_methods.end()))//  check if method is allowed
+        {
+            handleHttpError(405);
+            throw std::runtime_error("Method Not Allowed");
+        }
             if (stat(fullPath.c_str(), &script_stat) != 0)
             {
                 handleHttpError(404);
@@ -220,6 +189,13 @@ void client::onEvent() // handlehttprequest
             return;
         }
 
+        if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(),
+             request.requestLine.get_method()) == location->allowed_methods.end())//  check if method is allowed
+        {
+            handleHttpError(405);
+            throw std::runtime_error("Method Not Allowed");
+        }
+
         if (request.requestLine.get_method() == "GET")
         {
             std::cout << red << "----------- PART OF METHODS GET START --------------" << reset << std::endl;
@@ -233,18 +209,16 @@ void client::onEvent() // handlehttprequest
                     SendResp.setStatus(201);
                     SendResp.addHeader("Content-Type", "text/html");
                     SendResp.setBody(get.generate_Fileautoindex());
-                    SendResp.toString();
-                    throw std::runtime_error("Response Get sent sucess !");
-                    // SendResponse.get_response(get.generate_Fileautoindex(), true);
+                    sendResponseString(SendResp.toString());
+                    throw std::runtime_error("Response Get sent sucess auto index !");
                 }
                 else if (type_res == 1)
                 {
                     SendResp.setStatus(201);
                     SendResp.addHeader("Content-Type", getMimeType(get.get_final_path()));
                     SendResp.setBody(generate_body_FromFile(get.get_final_path()));
-                    SendResp.toString();
+                    sendResponseString(SendResp.toString());
                     throw std::runtime_error("Response Get sent sucess !");
-                    // SendResponse.get_response(get.get_final_path(), false);
                 }
                 else
                 {
@@ -252,9 +226,10 @@ void client::onEvent() // handlehttprequest
                     throw std::runtime_error("Response error sucess !");
                 }
             }
-            catch (std::string error)
+            catch (const std::exception &e)
             {
-                throw std::runtime_error("Response " + error + " sent!");
+                std::cerr << "Response  sent!: " << std::endl;
+                throw std::runtime_error(e.what());
             }
         }
         else if (request.requestLine.get_method() == "POST")
@@ -289,17 +264,15 @@ void client::onEvent() // handlehttprequest
                 SendResp.setStatus(201);
                 SendResp.addHeader("Content-Type", "text/html");
                 SendResp.setBody(generate_body_FromFile("./Pages/response.html"));
-                SendResp.toString();
+                sendResponseString(SendResp.toString());
                 throw std::runtime_error("Response Post sent sucess !");
             }
-            catch (std::string error)
+            catch (const std::exception &e)
             {
-                throw std::runtime_error("Response " + error + " sent!");
+                std::cerr << "Response  sent!: " << std::endl;
+                throw std::runtime_error(e.what());
             }
 
-            // SendResponse.post_response();
-
-            // --- //
         }
         else if (request.requestLine.get_method() == "DELETE")
         {
@@ -321,7 +294,7 @@ void client::onEvent() // handlehttprequest
                         SendResp.setStatus(204);
                         SendResp.addHeader("Content-Type", "text/html");
                         // SendResp.setBody(generate_body_FromFile("./Pages/response.html"));
-                        SendResp.toString();
+                        sendResponseString(SendResp.toString());
                         throw std::runtime_error("Response Delete sent sucess !");
 
                         // SendResponse.delete_response();
@@ -338,9 +311,10 @@ void client::onEvent() // handlehttprequest
                     throw std::runtime_error("Response error sucess !");
                 }
             }
-            catch (std::string error)
+            catch (const std::exception &e)
             {
-                throw std::runtime_error("Response " + error + " sent!");
+                std::cerr << "Response  sent!: " << std::endl;
+                throw std::runtime_error(e.what());
             }
         }
     }

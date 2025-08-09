@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/08 19:29:50 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/09 22:30:51 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,37 +102,47 @@ std::string generateUniqueFilename() {
     return ss.str() + ".ser";
 }
 
-const LocationConfigs *findLocation(const std::string &uri, const ServerConfigs &server_config) // i should handle the case where
-{                                                                   // /images/ or /images and the given uri uses that prefix TODO
-    const LocationConfigs *bestMatch = NULL;
-    size_t len = 0;
+// const LocationConfigs *findLocation(const std::string &uri, const ServerConfigs &server_config) // i should handle the case where
+// {                                                                   // /images/ or /images and the given uri uses that prefix TODO
+//     const LocationConfigs *bestMatch = NULL;
+//     size_t len = 0;
 
-    const std::vector<LocationConfigs> &locations = server_config.locations;
+//     const std::vector<LocationConfigs> &locations = server_config.locations;
 
-    for (std::vector<LocationConfigs>::const_iterator it = locations.begin(); it != locations.end(); ++it)
-    {
-        if (uri.rfind(it->path, 0) == 0)
-        {
-            if (it->path.length() > len)
-            {
-                len = it->path.length();
-                bestMatch = &(*it);
-            }
-        }
-    }
-    return bestMatch;
-}
+//     for (std::vector<LocationConfigs>::const_iterator it = locations.begin(); it != locations.end(); ++it)
+//     {
+//         if (uri.rfind(it->path, 0) == 0)
+//         {
+//             if (it->path.length() > len)
+//             {
+//                 len = it->path.length();
+//                 bestMatch = &(*it);
+//             }
+//         }
+//     }
+//     return bestMatch;
+// }
 
 
 const char* getReasonPhrase(int code) {
     switch (code) {
         case 200: return "OK";
+        case 201: return "Created";
+        case 202: return "Accepted";
+        case 204: return "No Content";
+        case 301: return "Moved Permanently";
+        case 302: return "Found";
+        case 400: return "Bad Request";
+        case 401: return "Unauthorized";
         case 403: return "Forbidden";
         case 404: return "Not Found";
         case 405: return "Method Not Allowed";
+        case 413: return "Payload Too Large";
+        case 415: return "Unsupported Media Type";
         case 500: return "Internal Server Error";
         case 501: return "Not Implemented";
         case 502: return "Bad Gateway";
+        case 503: return "Service Unavailable";
         case 504: return "Gateway Timeout";
         default: return "Unknown Status";
     }

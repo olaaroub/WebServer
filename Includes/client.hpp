@@ -17,7 +17,7 @@ private:
 
     public:
     void sendResponseString(const std::string& response);
-    // const LocationConfigs *findLocation(const std::string &uri);
+    const LocationConfigs *findLocation(const std::string &uri);
     void handleHttpError(int statusCode);
 
     void sendErrorResponse(int statusCode, const std::string& reasonPhrase);

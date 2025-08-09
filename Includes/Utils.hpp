@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:18 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/08 19:29:15 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/09 22:30:45 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ std::string getExtension(const std::string& path);
 std::string getFileContents(const std::string& filePath);
  std::string trimWhitespace(const std::string& s);
  std::string generateUniqueFilename();
- const LocationConfigs *findLocation(const std::string &uri, const ServerConfigs &server_config);
+//  const LocationConfigs *findLocation(const std::string &uri, const ServerConfigs &server_config);
     const char* getReasonPhrase(int code);
    std::string getMimeType(const std::string &filePath);
 std::string generate_body_FromFile(std::string pathFIle);
