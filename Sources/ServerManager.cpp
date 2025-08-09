@@ -1,6 +1,7 @@
 #include "ServerManager.hpp"
 #include "CgiExecutor.hpp"
 #include "client.hpp"
+#include <csignal>
 
 // std::vector<network *> serverManager::servers;
 int serverManager::kernel_identifier = 0;
@@ -111,6 +112,11 @@ void serverManager::checkCgiTimeouts()
     }
 }
 
+void serverManager:: signal_handler(int)
+{
+    throw std::runtime_error("signal catched");
+}
+
 void serverManager::listening()
 {
     std::cout << "--evlist lenghet" << activeNetworks.size() << std::endl;
@@ -135,6 +141,8 @@ void serverManager::listening()
 
         checkCgiTimeouts();
         reapChildProcesses();
+
+        signal(SIGINT, signal_handler);
 
         for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
         {
@@ -189,7 +197,7 @@ void serverManager::startServers()
     // }
     catch (std::exception &e)
     {
-        std::cerr << "Server shutting down: " << e.what() << std::endl;
+        std::cerr << "\n Server shutting down: " << e.what() << std::endl;
         // Cleanup map
         for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); ++it)
         {

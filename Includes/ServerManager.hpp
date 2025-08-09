@@ -19,6 +19,7 @@ class serverManager
         static void checkCgiTimeouts();
         static void reapChildProcesses();
 
+        static void signal_handler(int);
         serverManager();
     public:
 
