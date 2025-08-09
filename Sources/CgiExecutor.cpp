@@ -158,7 +158,8 @@ void CgiExecutor::onEvent()
         waitpid(_pid, &status, 0); // Blocking wait is safe now, we know it's terminated.
 
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
-            _client->sendErrorResponse(502, "Bad Gateway");
+			_client->handleHttpError(502);
+            // _client->sendErrorResponse(502, "Bad Gateway");
         else
         {
             // The script succeeded. Now, let's process its output.

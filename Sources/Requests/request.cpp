@@ -105,8 +105,9 @@ void Request:: ContentLenghtRead()
         number = headers.map["content-length"].at(0);
         is_number(number);
         _chunkSize = atol(number.c_str());
-        if (_chunkSize < 0)
-            throw std::runtime_error("Request parser Error:bad request!");
+        // if (_chunkSize < 0)
+            // throw std::runtime_error("Request parser Error:bad request!"); // ach had l9lawwi wach tatsna unsigned long ikon 9el mn 0 ?????
+                                                                            // walayni rak 7mar
         if (_chunkSize > max_body_size)
             throw std::runtime_error("Request parser Error: the content lenght too large!");
     }
