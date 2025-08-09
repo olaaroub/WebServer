@@ -40,7 +40,8 @@
 #include <sys/wait.h>
 #include <limits.h>
 #include <ctime>
-
+#include <cstdio> 
+#include <dirent.h>
 
 
 #endif

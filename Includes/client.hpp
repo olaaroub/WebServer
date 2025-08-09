@@ -11,11 +11,15 @@ private:
     Request request;
     time_t lastActivity;
     // unsigned long long _maxBodyBytes;
-    const LocationConfigs *findLocation(const std::string &uri);
+    // const LocationConfigs *findLocation(const std::string &uri);
 
     void _convertMaxBodySize();
 
     public:
+    void sendResponseString(const std::string& response);
+    // const LocationConfigs *findLocation(const std::string &uri);
+    void handleHttpError(int statusCode);
+
     void sendErrorResponse(int statusCode, const std::string& reasonPhrase);
     client(const ServerConfigs &server_config);
 

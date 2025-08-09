@@ -95,7 +95,7 @@ void serverManager::checkCgiTimeouts()
                 std::cerr << red << "CGI script with PID " << executor->getPid() << " timed out. Terminating." << reset << std::endl;
                 kill(executor->getPid(), SIGKILL);
                 // waitpid(executor->getPid(), NULL, 0);
-                executor->getClient()->sendErrorResponse(504, "Gateway Timeout");
+                executor->getClient()->handleHttpError(504);
                 should_delete = true;
             }
 

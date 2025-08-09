@@ -6,11 +6,12 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/06 22:17:08 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/08 19:29:50 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Utils.hpp"
+#include "response.hpp"
 
 std::string joinPaths(const std::string& p1, const std::string& p2) {
 
@@ -101,4 +102,86 @@ std::string generateUniqueFilename() {
     return ss.str() + ".ser";
 }
 
+const LocationConfigs *findLocation(const std::string &uri, const ServerConfigs &server_config) // i should handle the case where
+{                                                                   // /images/ or /images and the given uri uses that prefix TODO
+    const LocationConfigs *bestMatch = NULL;
+    size_t len = 0;
+
+    const std::vector<LocationConfigs> &locations = server_config.locations;
+
+    for (std::vector<LocationConfigs>::const_iterator it = locations.begin(); it != locations.end(); ++it)
+    {
+        if (uri.rfind(it->path, 0) == 0)
+        {
+            if (it->path.length() > len)
+            {
+                len = it->path.length();
+                bestMatch = &(*it);
+            }
+        }
+    }
+    return bestMatch;
+}
+
+
+const char* getReasonPhrase(int code) {
+    switch (code) {
+        case 200: return "OK";
+        case 403: return "Forbidden";
+        case 404: return "Not Found";
+        case 405: return "Method Not Allowed";
+        case 500: return "Internal Server Error";
+        case 501: return "Not Implemented";
+        case 502: return "Bad Gateway";
+        case 504: return "Gateway Timeout";
+        default: return "Unknown Status";
+    }
+}
+
+std::string getMimeType(const std::string &filePath)
+{
+    // Find the position of the last dot
+    size_t dot_pos = filePath.rfind('.');
+    if (dot_pos == std::string::npos)
+    {
+        // No extension found, return the default
+        return "application/octet-stream";
+    }
+
+    // Get the extension substring
+    std::string extension = filePath.substr(dot_pos);
+
+    // Look up the extension
+    if (extension == ".html" || extension == ".htm")
+        return "text/html";
+    if (extension == ".css")
+        return "text/css";
+    if (extension == ".js")
+        return "application/javascript";
+    if (extension == ".jpg" || extension == ".jpeg")
+        return "image/jpeg";
+    if (extension == ".png")
+        return "image/png";
+    if (extension == ".gif")
+        return "image/gif";
+    if (extension == ".txt")
+        return "text/plain";
+
+    // Return the default for unknown extensions
+    return "application/octet-stream";
+}
+
+std::string generate_body_FromFile(std::string pathFIle)
+{
+    std::ifstream file_stream(pathFIle.c_str(), std::ios::binary);
+    if (!file_stream)
+    {
+        throw "open file failed !";
+    }
+    std::stringstream body;
+
+    body << file_stream.rdbuf();
+
+    return body.str();
+}
 
