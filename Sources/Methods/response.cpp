@@ -53,9 +53,29 @@ response::response(int socket_fd, const ServerConfigs &save_server_config) : ser
 
 // --- THE NEW FUNCTION :
 
-void response::get_response(std::string path_file)
+
+
+void response::send_res_autoindexFile(std::string file_content)
 {
-    send_fullresponse(socket_fd, getFileSize(path_file), path_file, "HTTP/1.1 200 OK\r\n");
+    std::stringstream response;
+    // Status Line
+    response << "HTTP/1.1 200 OK\r\n";
+    // Headers
+    response << "Content-Length: " << file_content.size() << "\r\n";
+    response << "Content-Type: " << "text/html" << "\r\n";
+
+    // Blank line separating headers from body
+    response << "\r\n";
+    send_string(socket_fd, response.str());
+    send_string(socket_fd, file_content);
+}
+
+void response::get_response(std::string path_file, bool autoindex)
+{
+    if (autoindex == true) // mean autoindex is on . 
+        send_res_autoindexFile(path_file);
+    else
+        send_fullresponse(socket_fd, getFileSize(path_file), path_file, "HTTP/1.1 200 OK\r\n");
     throw std::runtime_error("Response Get sucess sent!");
 }
 

@@ -192,8 +192,11 @@ void client::onEvent() // handlehttprequest
             std::cout << red << "----------- PART OF METHODS GET START --------------" << reset << std::endl;
             Get get(fullPath, location);
             int type_res = get.check_path();
-            if (type_res == 1)
-                SendResponse.get_response(get.get_final_path());
+            std::cout << green << "type result : " << type_res << reset << std::endl;
+            if (type_res == 0) // mean autoindex is on . ! 
+                SendResponse.get_response(get.generate_Fileautoindex(), true);
+            else if (type_res == 1)
+                SendResponse.get_response(get.get_final_path(), false);
             else
                 SendResponse.error_response(type_res);
         }
@@ -255,5 +258,5 @@ client::~client()
 
 
 
-5_ handle the while of send the response 4kB.
+
 */
