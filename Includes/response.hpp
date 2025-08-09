@@ -18,7 +18,7 @@ private:
     void send_body(int socket_fd, std::string file_path);
     void send_chunk(int socket_fd, const char* data, size_t length);
     void send_string(int socket_fd, std::string response);
-
+    void send_res_autoindexFile(std::string file_content);
     long getFileSize(const std::string &path);
     std::string get_statusLine(std::string type_res);
     std::string create_path_error(std::string type_error);
@@ -28,8 +28,8 @@ private:
     const ServerConfigs &server_config;
 public:
 
-    void get_response(std::string path_file);
-    void post_response(std::string location_file);
+    void get_response(std::string path_file, bool autoindex);
+    void post_response();
     void delete_response();
     void error_response(int type_error);
 

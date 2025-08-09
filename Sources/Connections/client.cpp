@@ -216,22 +216,37 @@ void client::onEvent() // handlehttprequest
             std::cout << red << "----------- PART OF METHODS GET START --------------" << reset << std::endl;
             Get get(fullPath, location);
             int type_res = get.check_path();
-            if (type_res == 1)
-                SendResponse.get_response(get.get_final_path());
+            std::cout << green << "type result : " << type_res << reset << std::endl;
+            if (type_res == 0) // mean autoindex is on . !
+                SendResponse.get_response(get.generate_Fileautoindex(), true);
+            else if (type_res == 1)
+                SendResponse.get_response(get.get_final_path(), false);
             else
                 SendResponse.error_response(type_res);
         }
         else if (request.requestLine.get_method() == "POST")
         {
             Post post(location->root);
-            if (request.requestLine.queryLine.empty())
-                post.path_savedFile = joinPaths(post.get_locationFiles(), generateUniqueFilename());
+            std::map<std::string, std::vector<std::string> >::const_iterator it;
+            it = request.headers.map.find("content-type");
+            if (it == request.headers.map.end()) // it not found the content-type correctly !
+                SendResponse.error_response(400);
+
+            std::string content_type = request.headers.map["content-type"].at(0);
+
+            unsigned long check_multipartFOrmData = content_type.find("multipart/form-data");
+            if (check_multipartFOrmData != std::string::npos)
+            {
+                int type_res = post.post_multipartFormData(content_type, request.body_content.str());
+                if (type_res != 1)
+                    SendResponse.error_response(type_res);
+            }
             else
-                post.path_savedFile = joinPaths(post.get_locationFiles(), post.extractfileName(request.requestLine.queryLine));
-            std::ofstream savefile(post.path_savedFile.c_str(), std::ios::binary);
-            savefile.write(request.body_content.str().c_str(), request.body_content.str().length());
-            savefile.close();
-            SendResponse.post_response(post.path_savedFile);
+                post.post_Query(request.requestLine.queryLine, request.body_content.str());
+
+            SendResponse.post_response();
+
+            // --- //
         }
         else if (request.requestLine.get_method() == "DELETE")
         {
@@ -248,9 +263,7 @@ void client::onEvent() // handlehttprequest
                     SendResponse.error_response(code);
             }
             else
-            {
-                // handle the dirctory!
-            }
+               SendResponse.error_response(403);
         }
     }
 }
@@ -268,8 +281,6 @@ client::~client()
 2_ handle autoindex in get method
 
 
-4_ handle multipart in Post method .
 
-5_ handle the while of send the response 4kB.
-6_ handle the delete of directory in DELETE method .
+
 */
