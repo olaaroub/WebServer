@@ -1,164 +1,224 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🚀 Webserv Test Suite | Cosmic Edition</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-b from-black via-purple-900 to-black text-gray-200 min-h-screen">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>42 Webserv — Project Home</title>
+  <meta name="description" content="42 Webserv — a custom HTTP server built for the 42 school project. Mandatory part implemented. Cookies & sessions: coming soon." />
+  <style>
+    :root{
+      --bg1: #0f172a;
+      --bg2: #071033;
+      --card: rgba(255,255,255,0.03);
+      --accent: linear-gradient(90deg,#7c3aed,#06b6d4);
+      --glass: rgba(255,255,255,0.04);
+      --muted: rgba(255,255,255,0.65);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial; background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.12), transparent), radial-gradient(800px 400px at 90% 90%, rgba(6,182,212,0.08), transparent), var(--bg1); color:#e6eef8}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1100px;margin:48px auto;padding:28px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{width:56px;height:56px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(2,6,23,0.6);font-weight:700}
+    .logo small{font-size:18px}
+    h1{margin:6px 0 0;font-size:32px}
+    p.lead{margin:8px 0 0;color:var(--muted)}
 
-  <div class="container mx-auto max-w-3xl p-6">
-    <header class="mb-10 text-center">
-      <h1 class="text-4xl sm:text-5xl font-bold text-pink-400">🌌 Webserv Test Suite</h1>
-      <p class="mt-2 text-purple-300">Test your HTTP server in style 🚀</p>
+    .hero{display:grid;grid-template-columns:1fr 360px;gap:24px;margin-top:28px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:20px;border-radius:14px;box-shadow:0 6px 30px rgba(2,6,23,0.6);backdrop-filter: blur(6px);}
+
+    .status-pill{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:999px;font-weight:600}
+    .pill-coming{background:linear-gradient(90deg,#f97316,#f43f5e);color:white;animation:pulse 2s infinite}
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+
+    .features{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+    .feature{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:10px;background:var(--glass)}
+    .feature svg{flex-shrink:0;margin-top:3px}
+    .feature h4{margin:0;font-size:15px}
+    .feature p{margin:4px 0 0;color:var(--muted);font-size:13px}
+
+    .right{display:flex;flex-direction:column;gap:12px}
+    .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px;border-radius:10px}
+
+    .code{background:#020617;padding:12px;border-radius:8px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono',monospace;font-size:13px;color:#cfe9ff;overflow:auto}
+
+    .btn{display:inline-flex;gap:8px;align-items:center;padding:10px 14px;border-radius:10px;background:var(--accent);color:white;font-weight:700;border:none;cursor:pointer}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:700}
+
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .meta{display:flex;gap:10px;align-items:center}
+
+    footer{margin-top:28px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;align-items:center}
+
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr}
+      .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media (max-width:520px){
+      .grid{grid-template-columns:1fr}
+      .wrap{margin:20px;padding:16px}
+      h1{font-size:24px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo"><small>42</small></div>
+        <div>
+          <h1>42 Webserv</h1>
+          <p class="lead">A teaching HTTP server built for <strong>42 School</strong> — fast, minimal, and extensible.</p>
+		  <p>Built by: <strong>olaaroub, ohammou & iahamdan</strong> — <span style="color:var(--muted)">42 Webserv Project</span></p>
+        </div>
+      </div>
+      <div class="meta">
+        <div class="status-pill pill-coming">🍪 Cookies & Sessions — Coming Soon</div>
+        <a class="btn ghost" href="#features">Explore</a>
+      </div>
     </header>
 
-    <!-- application/x-www-form-urlencoded -->
-    <section class="bg-gradient-to-r from-purple-800/50 to-pink-900/50 backdrop-blur p-6 mb-6 rounded-xl shadow-md hover:shadow-pink-700 transition">
-      <h2 class="text-2xl font-bold mb-4 text-pink-300">📝 Form URL Encoded</h2>
-      <form action="/uploads" method="post" class="space-y-4">
-        <div>
-          <label class="block font-medium mb-1">Name:</label>
-          <input name="name" type="text" class="w-full p-2 rounded-md bg-black/40 border border-pink-500 text-pink-100 focus:outline-none focus:border-pink-300">
+    <section class="hero">
+      <div class="card">
+        <h3 style="margin:0 0 8px">Project Highlights</h3>
+        <p style="margin:0;color:var(--muted)">This repo implements the mandatory part (socket handling, parsing, request routing, CGI support basics). The cookies & sessions feature is planned next — it's called out above so reviewers know it's on the roadmap.</p>
+
+        <div class="features">
+          <div class="feature">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 12h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 6h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 18h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <div>
+              <h4>HTTP parsing & routing</h4>
+              <p>Robust parser for requests, support for routing and method handling (GET, POST).</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7l3-7z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+            <div>
+              <h4>CGI</h4>
+              <p>Executes external programs to generate dynamic responses (configured via the assignment specs).</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 21h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <div>
+              <h4>Static file serving</h4>
+              <p>Efficient file read and correct Content-Length and MIME type responses.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 12h3l3 8 4-16 3 8h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div>
+              <h4>Virtual hosts & config</h4>
+              <p>Per-host configuration parsing to support several server blocks like the assignment.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2v20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2 12h20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <div>
+              <h4>Error handling</h4>
+              <p>Custom 4xx/5xx pages and careful status code management for graders.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div>
+              <h4>Extensible & tested</h4>
+              <p>Designed with small, testable components — easy to iterate and add sessions later.</p>
+            </div>
+          </div>
         </div>
-        <div>
-          <label class="block font-medium mb-1">Email:</label>
-          <input name="email" type="email" class="w-full p-2 rounded-md bg-black/40 border border-pink-500 text-pink-100 focus:outline-none focus:border-pink-300">
+
+        <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+          <button class="btn" onclick="copyCurl()">Copy curl example</button>
+          <a class="btn ghost" href="#readme">Open README</a>
+          <div style="margin-left:auto;color:var(--muted);font-size:13px">Build: Mandatory ✅</div>
         </div>
-        <button type="submit" class="w-full bg-pink-600 text-white py-2 rounded-md font-semibold hover:bg-pink-500 transition">Send POST</button>
-      </form>
-    </section>
 
-    <!-- application/json -->
-    <section class="bg-gradient-to-r from-purple-800/50 to-indigo-900/50 backdrop-blur p-6 mb-6 rounded-xl shadow-md hover:shadow-indigo-700 transition">
-      <h2 class="text-2xl font-bold mb-4 text-indigo-300">🔧 JSON POST</h2>
-      <p class="text-sm text-gray-400 mb-2">Send raw JSON to <code>/uploads</code> using fetch</p>
-      <textarea id="jsonInput" rows="4" class="w-full p-2 rounded-md bg-black/40 border border-indigo-500 text-indigo-100 focus:outline-none focus:border-indigo-300" placeholder='{"key":"value"}'></textarea>
-      <button onclick="sendJson()" class="mt-2 w-full bg-indigo-600 text-white py-2 rounded-md font-semibold hover:bg-indigo-500 transition">Send JSON</button>
-    </section>
-
-    <!-- text/plain -->
-    <section class="bg-gradient-to-r from-purple-800/50 to-blue-900/50 backdrop-blur p-6 mb-6 rounded-xl shadow-md hover:shadow-blue-700 transition">
-      <h2 class="text-2xl font-bold mb-4 text-blue-300">🗒️ Plain Text POST</h2>
-      <p class="text-sm text-gray-400 mb-2">Send text/plain to <code>/uploads</code></p>
-      <textarea id="textInput" rows="3" class="w-full p-2 rounded-md bg-black/40 border border-blue-500 text-blue-100 focus:outline-none focus:border-blue-300" placeholder='Some plain text...'></textarea>
-      <button onclick="sendText()" class="mt-2 w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-500 transition">Send Text</button>
-    </section>
-
-    <!-- multipart/form-data with progress -->
-    <section class="bg-gradient-to-r from-pink-800/50 to-purple-900/50 backdrop-blur p-6 mb-6 rounded-xl shadow-md hover:shadow-pink-700 transition">
-      <h2 class="text-2xl font-bold mb-4 text-pink-300">📁 File Upload (Multipart)</h2>
-      <form id="uploadForm" class="space-y-4">
-        <input type="file" name="fileToUpload" id="fileToUpload" required class="block w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-pink-600 file:text-white hover:file:bg-pink-700 transition">
-        <div class="w-full bg-pink-900 rounded-full h-3 overflow-hidden">
-          <div id="progressBar" class="bg-pink-400 h-3 rounded-full w-0 transition-all"></div>
+        <div style="margin-top:12px;font-size:13px;color:var(--muted)">
+          <strong>Roadmap:</strong> Cookies & Sessions, persistent sessions, improved cookie flags (HttpOnly, Secure), and test coverage.
         </div>
-        <button type="submit" class="w-full bg-pink-700 text-white font-bold py-2 rounded hover:bg-pink-600 transition">Upload File</button>
-      </form>
+      </div>
+
+      <aside class="right">
+        <div class="card ghost">
+          <h4 style="margin:0 0 8px">Try it locally</h4>
+          <div class="code" id="curlBlock">curl -i http://localhost:8080/ -H "Host: example.com"</div>
+          <div style="margin-top:8px;display:flex;gap:8px">
+            <button class="btn" onclick="copyCurl()">Copy</button>
+            <button class="btn ghost" onclick="showStatus()">Show status</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px">Tech stack & style</h4>
+          <div class="grid">
+            <div class="ghost" style="padding:10px">C++98<br><small style="color:var(--muted)">(assignment requirement)</small></div>
+            <div class="ghost" style="padding:10px">POSIX sockets<br><small style="color:var(--muted)">poll/select</small></div>
+            <div class="ghost" style="padding:10px">Makefile & Shell</div>
+          </div>
+        </div>
+
+        <div class="card ghost">
+          <h4 style="margin:0 0 8px">Quick links</h4>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <a class="btn ghost" href="#code">Source</a>
+            <a class="btn ghost" href="#tests">Tests</a>
+            <a class="btn ghost" href="#issues">Issues</a>
+          </div>
+        </div>
+      </aside>
     </section>
 
-    <!-- DELETE method -->
-    <section class="bg-gradient-to-r from-purple-800/50 to-red-900/50 backdrop-blur p-6 mb-6 rounded-xl shadow-md hover:shadow-red-700 transition">
-      <h2 class="text-2xl font-bold mb-4 text-red-300">🗑️ DELETE Resource</h2>
-      <p class="text-sm text-gray-400 mb-2">Enter path to delete (e.g., <code>/uploads/file.txt</code>)</p>
-      <div class="flex space-x-2">
-        <input type="text" id="deletePath" class="flex-1 p-2 rounded-md bg-black/40 border border-red-500 text-red-100 focus:outline-none focus:border-red-300" placeholder="/uploads/file.txt">
-        <button onclick="sendDelete()" class="bg-red-600 text-white px-4 rounded-md font-semibold hover:bg-red-500 transition">Delete</button>
+    <section id="features" style="margin-top:22px">
+      <div class="card">
+        <h3 style="margin:0 0 8px">Implementation status snapshot</h3>
+        <p style="margin:0;color:var(--muted)">This summary helps reviewers quickly find what you completed and what you'll add.</p>
+
+        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 140px;gap:12px;align-items:center">
+          <div>
+            <ul style="margin:8px 0 0;padding-left:18px;color:var(--muted)">
+              <li>Socket handling, accept loop, worker management — <strong>done</strong></li>
+              <li>Request parsing and header handling — <strong>done</strong></li>
+              <li>CGI spawn & environment handling — <strong>done</strong></li>
+              <li>Static file serving & range support — <strong>done</strong></li>
+              <li>Cookies & sessions — <em>planned</em></li>
+            </ul>
+          </div>
+          <div>
+            <div style="height:10px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden">
+              <div style="width:76%;height:100%;background:var(--accent)"></div>
+            </div>
+            <div style="font-size:13px;color:var(--muted);margin-top:6px">Progress: 76% (mandatory complete)</div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- CGI test -->
-    <section class="bg-gradient-to-r from-purple-800/50 to-yellow-900/50 backdrop-blur p-6 rounded-xl shadow-md hover:shadow-yellow-700 transition">
-      <h2 class="text-2xl font-bold mb-4 text-yellow-300">⚙️ CGI Scripts</h2>
-      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <a href="/cgi-bin/1.py" class="bg-yellow-500 text-black text-center font-bold py-2 rounded-md hover:bg-yellow-400 transition">Python CGI</a>
-        <a href="/cgi-bin/1.php" class="bg-green-500 text-black text-center font-bold py-2 rounded-md hover:bg-green-400 transition">PHP CGI</a>
-        <a href="/cgi-bin/1.sh" class="bg-gray-300 text-black text-center font-bold py-2 rounded-md hover:bg-gray-200 transition">Shell CGI</a>
-      </div>
-    </section>
+    <footer>
+      <div>Built by: <strong>olaaroub, ohammou & iahamdan</strong> — <span style="color:var(--muted)">42 Webserv Project</span></div>
+      <div style="text-align:right">License: MIT · <span style="color:var(--muted)">C++98</span></div>
+    </footer>
   </div>
 
   <script>
-    async function sendJson() {
-      const json = document.getElementById('jsonInput').value;
-      try {
-        const resp = await fetch('/uploads', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: json
-        });
-        alert(await resp.text());
-      } catch (e) {
-        console.error(e);
-        alert('Failed to send JSON');
-      }
+    function copyCurl(){
+      const text = document.getElementById('curlBlock').innerText;
+      navigator.clipboard?.writeText(text).then(()=>{
+        alert('curl command copied to clipboard!');
+      }).catch(()=>{
+        // fallback
+        const ta = document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); alert('copied!')}catch(e){alert('could not copy')}; ta.remove();
+      })
     }
-
-    async function sendText() {
-      const text = document.getElementById('textInput').value;
-      try {
-        const resp = await fetch('/uploads', {
-          method: 'POST',
-          headers: {'Content-Type': 'text/plain'},
-          body: text
-        });
-        alert(await resp.text());
-      } catch (e) {
-        console.error(e);
-        alert('Failed to send text');
-      }
+    function showStatus(){
+      alert('Mandatory part implemented. Cookies & sessions coming soon.\nSuggested next steps:\n1) design session storage (file / memory)\n2) add Set-Cookie header helper\n3) test with browser and curl.');
     }
-
-    async function sendDelete() {
-      const path = document.getElementById('deletePath').value;
-      if (!path) return alert('Please enter a path!');
-      try {
-        const resp = await fetch(path, { method: 'DELETE' });
-        alert('Delete response: ' + await resp.text());
-      } catch (e) {
-        console.error(e);
-        alert('Failed to send DELETE');
-      }
-    }
-
-    document.getElementById('uploadForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const fileInput = document.getElementById('fileToUpload');
-      const file = fileInput.files[0];
-      if (!file) return alert('Please choose a file!');
-
-      const formData = new FormData();
-      formData.append('fileToUpload', file);
-
-      const xhr = new XMLHttpRequest();
-      const progressBar = document.getElementById('progressBar');
-      xhr.open('POST', '/uploads', true);
-
-      xhr.upload.onprogress = function(e) {
-        if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          progressBar.style.width = percent + '%';
-        }
-      };
-
-      xhr.onload = function() {
-        if (xhr.status === 200) {
-          alert('Upload complete!\n' + xhr.responseText);
-          progressBar.style.width = '0%';
-        } else {
-          alert('Upload failed: ' + xhr.statusText);
-          progressBar.style.width = '0%';
-        }
-      };
-
-      xhr.onerror = function() {
-        alert('An error occurred during upload.');
-        progressBar.style.width = '0%';
-      };
-
-      xhr.send(formData);
-    });
   </script>
 </body>
 </html>

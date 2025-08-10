@@ -106,7 +106,9 @@ void client::onEvent() // handlehttprequest
     {
         std::string fullPath;
         const std::string &requestUri = normalizePath(request.requestLine.getUrl());
+        std::cout << "Uri  after normalizing: " << requestUri << std::endl;
         const LocationConfigs *location = findLocation(requestUri);
+        std:: cout << "returned location is " << location->path<< std::endl;
         if (location)
             fullPath = joinPaths(location->root, requestUri);
 
@@ -187,6 +189,14 @@ void client::onEvent() // handlehttprequest
                 delete this;
             }
             return;
+        }
+        if (location->redirection_set)// hada ila kant redirect
+        {
+            HttpResponse responseBuilder;
+            responseBuilder.setStatus(location->redirection_code);
+            responseBuilder.addHeader("Location", location->redirection_url);
+            sendResponseString(responseBuilder.toString());
+            throw std::runtime_error("Redirect response sent.");
         }
 
         if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(),
