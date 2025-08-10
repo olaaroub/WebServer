@@ -23,6 +23,11 @@ void Headers:: AddToMap(std::string line)
         throw std::runtime_error("Headers Error: format not exist");
     std::string key = line.substr(0, cont);
     std::string value = line.substr(cont + 2);
+    if (key.empty() || value.empty())
+        throw std::runtime_error("Headers Error: format not exist");
+    for (size_t i = 0; i < key.length(); i++)
+        if (key[i] == ' ' || !isprint(key[i]) || !isascii(key[i]))
+            throw std::runtime_error("Headers Error: Bad request: space in key");
     to_lower(key);
     // std::cout<< key << " " << value << std::endl;
     // exit(0);
@@ -47,6 +52,11 @@ void Headers:: HeadersParser()
         || map["content-type"].size() > 1 || map["authorization"].size() > 1
             || map["transfer-encoding"].size() > 1)
         throw std::runtime_error("Headers Error: duplicate headers");
+    if (map["host"].empty())
+        throw std::runtime_error("Headers Error: host not found");
+    if (!map["content-length"].empty() && !map["transfer-encoding"].empty())
+        throw std::runtime_error("Headers Error: content-length and transfer-encoding not allowed together");
+    
     // for (std::map<std::string, std::vector<std::string> >::iterator it = map.begin(); it != map.end(); it++)
     // {
     //     std::cout << "first: '" << it->first << "' second: '" << it->second.at(0) << "'" << std::endl;

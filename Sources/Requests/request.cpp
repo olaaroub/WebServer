@@ -126,9 +126,9 @@ void Request:: ContentLenghtRead()
 
 void Request:: ParsBody()
 {
-    if (!headers.map["content-length"].empty() && headers.map["transfer-encoding"].empty())
+    if (!headers.map["content-length"].empty())
         ContentLenghtRead();
-    else if (!headers.map["transfer-encoding"].empty() && headers.map["transfer-encoding"].at(0) == "chunked" && headers.map["content-length"].empty())
+    else if (!headers.map["transfer-encoding"].empty() && headers.map["transfer-encoding"].at(0) == "chunked")
         ChunkReaContent();
     else
         throw std::runtime_error("Request parser Error: this method to transfer data not allowed!");
