@@ -36,6 +36,8 @@ void Request:: ParsHeaders()
         headers.set_buffer(buffer.substr(0, cont + 2));
         buffer = buffer.substr(cont + 4);
         headers.HeadersParser();
+        headers.cookieParser();
+        // cookie here
         if (requestLine.get_method() != "POST")
             request_ended = true;
         else

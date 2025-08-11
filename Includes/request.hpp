@@ -19,6 +19,7 @@ private:
     void ChunkReaContent();
     void ContentLenghtRead();
 
+
     unsigned long _chunkSize;
     unsigned long _contentSize;
     bool _waiting_for_new_chunk;
