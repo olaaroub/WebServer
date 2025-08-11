@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/09 22:30:51 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/11 21:32:02 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,7 @@ std::string getMimeType(const std::string &filePath)
 
     // Get the extension substring
     std::string extension = filePath.substr(dot_pos);
+    std::cout << "extension from mime type: " << extension << std::endl;
 
     // Look up the extension
     if (extension == ".html" || extension == ".htm")
@@ -174,6 +175,8 @@ std::string getMimeType(const std::string &filePath)
         return "image/png";
     if (extension == ".gif")
         return "image/gif";
+    if (extension == ".ico")
+        return "image/x-icon";
     if (extension == ".txt")
         return "text/plain";
 

@@ -219,7 +219,7 @@ void client::onEvent() // handlehttprequest
 
         if (request.requestLine.get_method() == "GET")
         {
-            std::cout << red << "----------- PART OF METHODS GET START --------------" << reset << std::endl;
+            std::cout << red << "----------- GET START --------------" << reset << std::endl;
             HttpResponse SendResp;
             try
             {

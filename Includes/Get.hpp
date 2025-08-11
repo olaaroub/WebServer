@@ -21,7 +21,7 @@ public:
     int check_file(struct stat file_info);
     std::string get_final_path();
     std::string generate_Fileautoindex();
-    Get(std::string path, const LocationConfigs *location);
+    Get(std::string path, const LocationConfigs *location); //needs to be const ref
     ~Get();
 };
 
