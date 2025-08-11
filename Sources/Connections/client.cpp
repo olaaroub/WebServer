@@ -112,6 +112,8 @@ void client::onEvent() // handlehttprequest
         if (location)
             fullPath = joinPaths(location->root, requestUri);
 
+        std::cout << green << fullPath << reset << std::endl;
+
         if (!location)
         {
             handleHttpError(404);
@@ -192,10 +194,19 @@ void client::onEvent() // handlehttprequest
         }
         if (location->redirection_set)// hada ila kant redirect
         {
+            std::cout << "Redirecting to: " << location->redirection_url << std::endl;
+            if (location->redirection_code != 301 && location->redirection_code !=
+                302)
+            {
+                handleHttpError(500);
+                throw std::runtime_error("Invalid redirection code.");
+            }
             HttpResponse responseBuilder;
             responseBuilder.setStatus(location->redirection_code);
             responseBuilder.addHeader("Location", location->redirection_url);
             sendResponseString(responseBuilder.toString());
+            std::cout << red << responseBuilder.toString() << reset << std::endl;
+            // exit(0);
             throw std::runtime_error("Redirect response sent.");
         }
 
@@ -233,6 +244,7 @@ void client::onEvent() // handlehttprequest
                 else
                 {
                     handleHttpError(type_res);
+                    std::cerr << "error: " << type_res << " sent!" << std::endl;
                     throw std::runtime_error("Response error sucess !");
                 }
             }
