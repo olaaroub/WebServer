@@ -70,7 +70,6 @@ int Headers:: _toDecimal(std::string::iterator begin, std::string::iterator end)
 {
     int number = 0;
     std::string hexNb(begin, end);
-    std::cout << hexNb.at(0) << std::endl;
 
     std::istringstream res(hexNb);
     res >> std::hex >> number;
@@ -89,9 +88,7 @@ std::string Headers:: _percentEncoding(std::string cookie)
         {
             int res = _toDecimal(value.begin() + i + 1, value.begin() + i + 2 + 1);
             value[i] = static_cast<char>(res);
-            value.erase(i + 1, 1);
-            value.erase(i + 1, 1);
-
+            value.erase(i + 1, 2);
         }
     }
     return value;
@@ -101,7 +98,7 @@ void Headers:: _splitCookie(std::string cookie)
 {
     while (cookie[0] == ' ')
         cookie.erase(0, 1);
-    while (cookie[cookie.size() - 1] == '0')
+    while (cookie[cookie.size() - 1] == ' ')
         cookie.erase(cookie.size() - 1, 1);
 
     size_t findIndex = cookie.find("=");
