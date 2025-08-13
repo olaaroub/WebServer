@@ -108,54 +108,26 @@ void client::onEvent() // handlehttprequest
         const std::string &requestUri = normalizePath(request.requestLine.getUrl());
         std::cout << "Uri  after normalizing: " << requestUri << std::endl;
         const LocationConfigs *location = findLocation(requestUri);
+        if (!location)
+        {
+            handleHttpError(404);
+            throw std::runtime_error("Response error sucess !");
+        }
+        if(location->auth_required == true)
+        {
+            // hna ghanzid safety checks
+        }
         std:: cout << "returned location is " << location->path<< std::endl;
         if (location)
             fullPath = joinPaths(location->root, requestUri);
 
         std::cout << green << fullPath << reset << std::endl;
 
-        if (!location)
-        {
-            handleHttpError(404);
-            throw std::runtime_error("Response error sucess !");
-        }
 
         std::cout << requestUri << std::endl;
         std::string extension = getExtension(fullPath);
         std::cout << "Extension: " << extension << std::endl;
 
-        //     try
-        //     {
-        //         CgiHandler cgi(*location, fullPath, request, this->server_config);
-        //         std::string cgi_output = cgi.execute();
-
-        //         // std::cout << "ALOOOOOOOO : " << cgi_output << std::endl;
-
-        //         if (cgi_output.find("Content-Type:") == std::string::npos && cgi_output.find("content-type:") == std::string::npos &&
-        //             cgi_output.find("Content-type:") == std::string::npos) // php wld l97ba howa li khlani nzid had check kaml
-        //             throw CgiScriptException("Script response missing Content-Type header.");
-
-        //         HttpResponse cgiResponse;
-        //         cgiResponse.setFromCgiOutput(cgi_output);
-        //         cgiResponse.sendResponse(socket_fd);
-        //     }
-        //     catch (const CgiScriptException &e)
-        //     {
-        //         std::cerr << red << "CGI Script Error: " << e.what() << reset << std::endl;
-        //         sendErrorResponse(502, "Bad Gateway");
-        //     }
-        //     catch (const CgiScriptTimeoutException &e)
-        //     {
-        //         std::cerr << red << "CGI Script Error: " << e.what() << reset << std::endl;
-        //         sendErrorResponse(504, "Gateway Timeout");
-        //     }
-        //     catch (const std::exception &e)
-        //     {
-        //         std::cerr << red << "An unexpected error occurred: " << e.what() << reset << std::endl;
-        //         sendErrorResponse(500, "Internal Server Error");
-        //     }
-        //     throw std::runtime_error("CGI response sent successfully.");
-        // }
 
         if (location->cgi_handlers.count(extension))
         {
@@ -227,15 +199,15 @@ void client::onEvent() // handlehttprequest
                 int type_res = get.check_path();
                 if (type_res == 0) // mean autoindex is on . !
                 {
-                    SendResp.setStatus(201);
+                    SendResp.setStatus(200);
                     SendResp.addHeader("Content-Type", "text/html");
                     SendResp.setBody(get.generate_Fileautoindex());
                     sendResponseString(SendResp.toString());
-                    throw std::runtime_error("Response Get sent sucess auto index !");
+                    throw std::runtime_error("Auto index response sent!");
                 }
                 else if (type_res == 1)
                 {
-                    SendResp.setStatus(201);
+                    SendResp.setStatus(200);
                     SendResp.addHeader("Content-Type", getMimeType(get.get_final_path()));
                     SendResp.setBody(generate_body_FromFile(get.get_final_path()));
                     sendResponseString(SendResp.toString());
@@ -259,6 +231,7 @@ void client::onEvent() // handlehttprequest
             HttpResponse SendResp;
             try
             {
+                // std::cout << green<< location->upload_path << reset<< std::endl;
                 Post post(location->root);
                 std::map<std::string, std::vector<std::string> >::const_iterator it;
                 it = request.headers.map.find("content-type");
@@ -285,7 +258,7 @@ void client::onEvent() // handlehttprequest
 
                 SendResp.setStatus(201);
                 SendResp.addHeader("Content-Type", "text/html");
-                SendResp.setBody(generate_body_FromFile("./Pages/response.html"));
+                SendResp.setBody(generate_body_FromFile("./www/response.html"));
                 sendResponseString(SendResp.toString());
                 throw std::runtime_error("Response Post sent sucess !");
             }

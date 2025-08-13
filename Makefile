@@ -40,10 +40,10 @@ all: $(OPATH)  $(NAME)
 
 $(OPATH):
 	mkdir -p $(OPATH)
-	mkdir -p $(OPATH)/ConfigParse
-	mkdir -p $(OPATH)/Connections
-	mkdir -p $(OPATH)/Methods
-	mkdir -p $(OPATH)/Requests
+	mkdir -p $(OPATH)ConfigParse
+	mkdir -p $(OPATH)Connections
+	mkdir -p $(OPATH)Methods
+	mkdir -p $(OPATH)Requests
 
 
 $(OPATH)%.o:  $(SPATH)%.cpp

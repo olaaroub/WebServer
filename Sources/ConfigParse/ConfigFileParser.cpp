@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigFileParser.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ohammou- <ohammou-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 17:21:57 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/07/06 15:28:13 by ohammou-         ###   ########.fr       */
+/*   Updated: 2025/08/12 16:47:08 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,9 +213,7 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
 			server_conf.locations.push_back(parseLocationBlock(ss));
 		}
 		else
-		{
 			throw std::runtime_error("Config Error: Unknown directive '" + token + "' in server block.");
-		}
 	}
 	return server_conf;
 }
@@ -296,10 +294,18 @@ LocationConfigs ConfigParser::parseLocationBlock(std::stringstream &ss)
 				throw std::runtime_error("Config Error: Missing ';' after 'upload_path' directive.");
             location_conf.upload_path_set = true;
 		}
-		else
+		else if(token == "auth_required")
 		{
-			throw std::runtime_error("Config Error: Unknown directive '" + token + "' in location block.");
+			std::string val;
+			if(location_conf.auth_set)
+				throw std::runtime_error("Config Error: Duplicate 'auth_required' directive in location.");
+			ss >> val;
+			location_conf.auth_required = (val == "on");
+			if(!(ss >> token) || token != ";")
+				throw std::runtime_error("Config Error: Missing ';' after 'auth_required' directive.");
 		}
+		else
+			throw std::runtime_error("Config Error: Unknown directive '" + token + "' in location block.");
 	}
 	if (token != "}")
 		throw std::runtime_error("Config Error: Location block not closed properly.");
