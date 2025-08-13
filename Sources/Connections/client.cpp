@@ -231,8 +231,7 @@ void client::onEvent() // handlehttprequest
             HttpResponse SendResp;
             try
             {
-                // std::cout << green<< location->upload_path << reset<< std::endl;
-                Post post(location->root);
+                Post post(location->upload_path);
                 std::map<std::string, std::vector<std::string> >::const_iterator it;
                 it = request.headers.map.find("content-type");
                 if (it == request.headers.map.end()) // it not found the content-type correctly !
