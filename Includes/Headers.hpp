@@ -2,6 +2,21 @@
 #define HEADERS_HPP
 #include "lib.hpp"
 
+class ParseError : public std::exception
+{
+    private:
+        std::string _Error;
+        short _ErrorStute;
+    public:
+        ParseError(std::string Error, short stute) : _Error(Error), _ErrorStute(stute){}
+        short getStutError() const {return _ErrorStute;}
+        const char* what() const throw()
+        {
+            return _Error.c_str();
+        }
+        ~ParseError() throw() {}
+};
+
 class Headers
 {
     private:
@@ -9,12 +24,14 @@ class Headers
 
         // std::string Body_key;
         void AddToMap(std::string line);
-        void to_lower(std::string &string);
+        // std::string toLower(const std::string &string) const;
 
         void _splitCookie(std::string cookie);
         std::string _percentEncoding(std::string cookie);
         int _toDecimal(std::string::iterator begin, std::string::iterator end);
     public:
+        std::string getCookie(const std::string& key) const;
+
         void set_buffer(std::string buffer);
         std::string get_buffer();
         void HeadersParser();

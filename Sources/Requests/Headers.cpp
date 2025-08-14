@@ -1,4 +1,5 @@
 #include "Headers.hpp"
+#include "Utils.hpp"
 
 void Headers:: set_buffer(std::string buffer)
 {
@@ -9,29 +10,36 @@ std::string Headers:: get_buffer()
     return buffer;
 }
 
-void Headers:: to_lower(std::string &string)
-{
-    // std::string buf = string;
-    // for(size_t i = 0;i < buf.length();i++)
-    //     string[i] = tolower(buf[i]);
-    std::transform(string.begin(), string.end(), string.begin(), ::tolower);
+// std::string Headers::toLower(const std::string& str) const {
+//     std::string result = str;
+//     std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+//     // std::cout << green << result << reset << std::endl;
+//         return result;
+// }
+
+std::string Headers::getCookie(const std::string& key) const {
+    std::string lname = toLower(key);
+    for (std::map<std::string, std::string>::const_iterator it = cookieInfo.begin();
+         it != cookieInfo.end(); ++it) {
+        if (toLower(it->first) == lname)
+            return it->second;
+    }
+    return "";
 }
 
 void Headers:: AddToMap(std::string line)
 {
     size_t cont = line.find(":");
     if (cont == std::string::npos)
-        throw std::runtime_error("Headers Error: format not exist");
+        throw ParseError("Headers Error: format not exist", badRequest);
     std::string key = line.substr(0, cont);
     std::string value = line.substr(cont + 2);
     if (key.empty() || value.empty())
-        throw std::runtime_error("Headers Error: format not exist");
+        throw ParseError("Headers Error: format not exist", badRequest);
     for (size_t i = 0; i < key.length(); i++)
         if (key[i] == ' ' || !isprint(key[i]) || !isascii(key[i]))
-            throw std::runtime_error("Headers Error: Bad request: space in key");
-    to_lower(key);
-    // std::cout<< key << " " << value << std::endl;
-    // exit(0);
+            throw ParseError("Headers Error: Bad request: space in key", badRequest);
+    key = toLower(key);
     map[key].push_back(value);
 }
 
@@ -52,12 +60,12 @@ void Headers:: HeadersParser()
     if (map["host"].size() > 1 || map["content-length"].size() > 1
         || map["content-type"].size() > 1 || map["authorization"].size() > 1
             || map["transfer-encoding"].size() > 1)
-        throw std::runtime_error("Headers Error: duplicate headers");
+        throw ParseError("Headers Error: duplicate headers", badRequest);
     if (map["host"].empty())
-        throw std::runtime_error("Headers Error: host not found");
+        throw ParseError("Headers Error: host not found", badRequest);
     if (!map["content-length"].empty() && !map["transfer-encoding"].empty())
-        throw std::runtime_error("Headers Error: content-length and transfer-encoding not allowed together");
-    
+        throw ParseError("Headers Error: content-length and transfer-encoding not allowed together", badRequest);
+
     // for (std::map<std::string, std::vector<std::string> >::iterator it = map.begin(); it != map.end(); it++)
     // {
     //     std::cout << "first: '" << it->first << "' second: '" << it->second.at(0) << "'" << std::endl;
@@ -103,7 +111,7 @@ void Headers:: _splitCookie(std::string cookie)
 
     size_t findIndex = cookie.find("=");
     if (findIndex == std::string::npos)
-        throw std::runtime_error("Header Parser: cookieParser: wrong format");
+        throw ParseError("Header Parser: cookieParser: wrong format", badRequest);
     std::string key = cookie.substr(0, findIndex++);
     std::string value = cookie.substr(findIndex, cookie.size() - findIndex);
     cookieInfo[key] = _percentEncoding(value);

@@ -35,10 +35,8 @@ void RequestLine:: ParsRequestLine()
     str >> buff;
     SeparateUrlAndQuerys(buff);
     str >> HttpVerction;
-    if (HttpVerction != "HTTP/1.1")
-        throw std::runtime_error("RequestLine Error: verstion of HTTP not seported!");
-    if (method != "POST" && method != "GET" && method != "DELETE")
-        throw std::runtime_error("RequestLine ERROR: this method not allowed");
+    // if (method != "POST" && method != "GET" && method != "DELETE")
+    //     throw std::runtime_error("RequestLine ERROR: this method not allowed");
 }
 
 const std::string& RequestLine:: get_method() const

@@ -3,6 +3,7 @@
 
 #include "lib.hpp"
 
+
 class RequestLine
 {
     private:
@@ -20,6 +21,7 @@ class RequestLine
         const std::string& get_method() const;
         const std::string& getUrl()const;
         std::string queryLine;
+        std::string getHttpVerction() {return HttpVerction;}
 };
 
 #endif

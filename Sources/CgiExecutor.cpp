@@ -127,20 +127,6 @@ void CgiExecutor::_closeFds()
 
 void CgiExecutor::onEvent()
 {
-	// if (event & (EPOLLERR | EPOLLHUP))
-	// {
-	// 	_state = CGI_ERROR;
-	// 	return;
-	// }
-
-	// if (_state == CGI_WRITING && (event & EPOLLOUT))
-	// {
-	// 	_handleWrite();
-	// }
-	// else if (_state == CGI_READING && (event & EPOLLIN))
-	// {
-	// 	_handleRead();
-	// }
 
 	if (_state == CGI_WRITING && (event & EPOLLOUT))
         _handleWrite();
@@ -149,37 +135,52 @@ void CgiExecutor::onEvent()
 
     if (event & (EPOLLHUP | EPOLLERR))
     {
-        // The child has exited, which triggered the HUP signal.
-        // We must perform one final read to drain any data that was
-        // left in the pipe buffer before the process terminated.
+
         _handleRead();
         _state = CGI_DONE;
         int status;
-        waitpid(_pid, &status, 0); // Blocking wait is safe now, we know it's terminated.
+        waitpid(_pid, &status, 0);
 
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
 			_client->handleHttpError(502);
             // _client->sendErrorResponse(502, "Bad Gateway");
         else
         {
-            // The script succeeded. Now, let's process its output.
-            // A valid CGI response must include a Content-Type header.
-            if (_responseBuffer.find("Content-Type:") == std::string::npos &&
-                _responseBuffer.find("content-type:") == std::string::npos &&
-                _responseBuffer.find("Content-type:") == std::string::npos)
-            {
+			HttpResponse cgiResponseBuilder;
+            cgiResponseBuilder.setFromCgiOutput(_responseBuffer);
+
+            // if (_responseBuffer.find("Content-Type:") == std::string::npos &&
+            //     _responseBuffer.find("content-type:") == std::string::npos &&
+            //     _responseBuffer.find("Content-type:") == std::string::npos)
+
+			if (cgiResponseBuilder.getHeader("content-type").empty()) // get header kat rje3 kolchi miniscule bach manb9ach nchecki bzf
                 _client->handleHttpError(502);
-            }
+
             else
             {
-                HttpResponse cgiResponseBuilder;
-                cgiResponseBuilder.setFromCgiOutput(_responseBuffer);
-                _client->sendResponseString(cgiResponseBuilder.toString());
-            }
-        }
-		throw std::runtime_error("CGI execution finished.");
-    }
+				std::string actionHeaderValue = cgiResponseBuilder.getHeader("X-Session-Action");
 
+                if (!actionHeaderValue.empty() && actionHeaderValue.rfind("CREATE", 0) == 0)
+                {
+                    std::string username = "laaroubi_default";
+                    size_t userPos = actionHeaderValue.find("user=");
+                    if (userPos != std::string::npos)
+                        username = actionHeaderValue.substr(userPos + 5);
+
+                    std::string newSessionId = serverManager::createSession(username);
+
+                    std::string cookieValue = "sessionid=" + newSessionId + "; HttpOnly; Path=/";
+
+                    cgiResponseBuilder.addHeader("Set-Cookie", cookieValue);
+
+            	}
+				// else // mazal khasni n handli log out
+				_client->sendResponseString(cgiResponseBuilder.toString());
+        	}
+
+    	}
+		throw std::runtime_error("CGI execution finished.");
+	}
 }
 
 void CgiExecutor::_handleWrite()

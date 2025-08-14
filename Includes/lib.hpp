@@ -17,6 +17,16 @@
 #define red  "\033[31m"
 #define reset  "\033[0m"
 #define green "\033[32m"
+#define RES "\033[0m"
+
+enum Stutes
+{
+    noError = 0,
+    badRequest = 400,
+    ServerError = 500,
+    closeConnection = 1,
+    timeout = 408
+};
 
 #include <iostream>
 #include <string.h>

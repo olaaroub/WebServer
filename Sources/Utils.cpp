@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/13 20:39:49 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/14 22:52:23 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,3 +196,9 @@ std::string generate_body_FromFile(std::string pathFIle)
     return body.str();
 }
 
+std::string toLower(const std::string& str) {
+    std::string result = str;
+    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+    // std::cout << green << result << reset << std::endl;
+        return result;
+}

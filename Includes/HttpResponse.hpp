@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   HttpResponse2.hpp                                  :+:      :+:    :+:   */
+/*   HttpResponse.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/08 19:00:40 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/08 21:39:40 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/14 22:50:54 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ public:
 
     void setStatus(int code);
     void addHeader(const std::string& key, const std::string& value);
+    std::string getHeader(const std::string& key) const;
     void setBody(const std::string& body);
     std::string toString() const;
 };

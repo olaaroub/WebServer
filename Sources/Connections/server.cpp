@@ -28,7 +28,7 @@ void server:: bind_and_listen()
         throw std::runtime_error("!");
     }
     set_ToNoBlocking();
-    if (listen(socket_fd, 1) < 0)
+    if (listen(socket_fd, SOMAXCONN) < 0)
     {
         perror("Listen Error: ");
         throw std::runtime_error("!");
