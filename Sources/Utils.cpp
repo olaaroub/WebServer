@@ -6,12 +6,11 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/09 22:30:51 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/13 20:39:49 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Utils.hpp"
-#include "response.hpp"
 
 std::string joinPaths(const std::string& p1, const std::string& p2) {
 
@@ -160,6 +159,7 @@ std::string getMimeType(const std::string &filePath)
 
     // Get the extension substring
     std::string extension = filePath.substr(dot_pos);
+    std::cout << "extension from mime type: " << extension << std::endl;
 
     // Look up the extension
     if (extension == ".html" || extension == ".htm")
@@ -174,10 +174,13 @@ std::string getMimeType(const std::string &filePath)
         return "image/png";
     if (extension == ".gif")
         return "image/gif";
+    if (extension == ".ico")
+        return "image/x-icon";
     if (extension == ".txt")
         return "text/plain";
+    if( extension == ".mp4")
+        return "video/mp4";
 
-    // Return the default for unknown extensions
     return "application/octet-stream";
 }
 
@@ -185,9 +188,7 @@ std::string generate_body_FromFile(std::string pathFIle)
 {
     std::ifstream file_stream(pathFIle.c_str(), std::ios::binary);
     if (!file_stream)
-    {
-        throw "open file failed !";
-    }
+        throw std::runtime_error("GenerateBodyFromFile Error: open file failed !");
     std::stringstream body;
 
     body << file_stream.rdbuf();
