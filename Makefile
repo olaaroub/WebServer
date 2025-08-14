@@ -7,6 +7,8 @@ NAME = webserv
 SPATH = ./Sources/
 SRC = 	main.cpp \
 		Utils.cpp \
+		CgiExecutor.cpp \
+		HttpResponse.cpp \
 		ConfigParse/ConfigFileParser.cpp \
 		ConfigParse/ConfigFileReader.cpp\
 		ConfigParse/Configs.cpp\
@@ -17,10 +19,13 @@ SRC = 	main.cpp \
 		Requests/Headers.cpp \
 		Requests/request.cpp \
 		Requests/RequestLine.cpp \
-		Methods/response.cpp \
 		Methods/Get.cpp \
 		Methods/Methods.cpp \
-		# Methods/Methods.cpp \
+		Methods/Post.cpp \
+		Methods/Delete.cpp \
+		# 		Methods/response.cpp \
+
+
 
 SRCS = $(addprefix $(SPATH), $(SRC))
 
@@ -35,10 +40,10 @@ all: $(OPATH)  $(NAME)
 
 $(OPATH):
 	mkdir -p $(OPATH)
-	mkdir -p $(OPATH)/ConfigParse
-	mkdir -p $(OPATH)/Connections
-	mkdir -p $(OPATH)/Methods
-	mkdir -p $(OPATH)/Requests
+	mkdir -p $(OPATH)ConfigParse
+	mkdir -p $(OPATH)Connections
+	mkdir -p $(OPATH)Methods
+	mkdir -p $(OPATH)Requests
 
 
 $(OPATH)%.o:  $(SPATH)%.cpp

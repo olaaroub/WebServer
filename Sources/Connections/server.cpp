@@ -56,9 +56,15 @@ void server:: onEvent()
         clien_struct = client_re->get_sockaddr();
         socklen_t addr_size = sizeof(clien_struct);
         int fd = accept(socket_fd, (sockaddr *)clien_struct, &addr_size);
+        if (fd < 0)
+        {
+            delete client_re;
+            return ;
+        }
         client_re->set_fd(fd);
         client_re->set_ToNoBlocking();
         client_re->epoll_crt();
+        client_re->set_time(time(NULL));
         serverManager::activeNetworks[fd] = client_re;
     }
 }

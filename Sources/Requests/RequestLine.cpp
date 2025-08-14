@@ -12,65 +12,36 @@ std::string& RequestLine:: get_line()
 
 const std::string &RequestLine::getUrl()const{ return _url; }
 
-void RequestLine:: SeparateMethod()
-{
-    size_t cont = line.find(" ");
-    if (cont == std::string::npos)
-        throw std::runtime_error("RequestLine ERROR: method not found");
-    method = line.substr(0, cont);
-    line = line.substr(++cont);
-    if (method != "POST" && method != "GET" && method != "DELETE")
-        throw std::runtime_error("RequestLine ERROR: this method not allowed");
-}
 
-void RequestLine:: SeparateQuerys()
-{
-    size_t cont;
-    while (true)
-    {
-        cont = line.find("&");
-        if (cont == std::string::npos)
-            break;
-        Query_parameters.push_back(line.substr(0, cont));
-        line = line.substr(++cont);
-    }
-    cont = line.find(" ");
-    Query_parameters.push_back(line.substr(0, cont));
-    line = line.substr(++cont);
-    // for(int i = 0;i < Query_parameters.size(); i++)
-    //     std::cout << Query_parameters.at(i) << std::endl;
-}
 
-void RequestLine:: SeparateUrl()
+void RequestLine:: SeparateUrlAndQuerys(std::string buff)
 {
-    size_t cont = line.find("?");
-    size_t cont1 = line.find(" ");
-    if (cont1 == std::string::npos)
-        throw std::runtime_error("RequestLine ERROR: url error");
-    if (cont != std::string::npos)
+    size_t FindQuestionMark = buff.find("?");
+    if (FindQuestionMark == std::string::npos)
     {
-        _url = line.substr(0, cont);
-        line = line.substr(++cont);
-        SeparateQuerys();
+        _url = buff;
+        return ;
     }
-    else
-    {
-        _url = line.substr(0, cont1);
-        line = line.substr(++cont1);
-    }
-    HttpVerction = line;
-    if (HttpVerction != "HTTP/1.1")
-        throw std::runtime_error("RequestLine Error: verstion of HTTP not seported!");
+    _url = buff.substr(0, FindQuestionMark);
+    queryLine = buff.erase(0, ++FindQuestionMark);
+
 }
 
 void RequestLine:: ParsRequestLine()
 {
-    SeparateMethod();
-    SeparateUrl();
-    // std::cout << " method: '" << method << "' url: '" << url << "' httpv: '" << HttpVerction << "'" << std::endl;
+    std::string buff;
+    std::stringstream str(line);
+    str >> method;
+    str >> buff;
+    SeparateUrlAndQuerys(buff);
+    str >> HttpVerction;
+    if (HttpVerction != "HTTP/1.1")
+        throw std::runtime_error("RequestLine Error: verstion of HTTP not seported!");
+    if (method != "POST" && method != "GET" && method != "DELETE")
+        throw std::runtime_error("RequestLine ERROR: this method not allowed");
 }
 
-std::string RequestLine:: get_method()
+const std::string& RequestLine:: get_method() const
 {
     return method;
 }

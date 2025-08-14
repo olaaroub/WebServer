@@ -10,7 +10,9 @@
 #define POST "POST"
 #define DELETE "DELETE"
 
-#define MAX_EPOLL 100
+#define MAX_REQUESTLINE_SIZE 4002
+#define MAX_HEADERS_SIZE 16004
+#define MAX_EPOLL 1024
 
 #define red  "\033[31m"
 #define reset  "\033[0m"
@@ -18,6 +20,7 @@
 
 #include <iostream>
 #include <string.h>
+#include <cstring>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -34,6 +37,13 @@
 #include <set>
 #include <cstdlib>
 #include <sys/stat.h>
+#include <sys/wait.h>
+#include <limits.h>
+#include <ctime>
+#include <cstdio>
+#include <dirent.h>
+#include <csignal>
+
 
 
 #endif

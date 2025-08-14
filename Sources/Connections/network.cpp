@@ -29,6 +29,14 @@ void network:: epoll_crt()
 
 }
 
+void network:: epoll_crt(int event_flags)
+{
+    ev.events = event_flags | EPOLLRDHUP;
+    ev.data.fd = socket_fd;
+    if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_ADD, socket_fd, &ev) < 0)
+        throw std::runtime_error("Network Error: epoll control failed!");
+}
+
 network:: network(const ServerConfigs &server_config , bool is_server) : is_server(is_server), server_config(server_config)
 {
 
@@ -54,4 +62,14 @@ void network:: set_event(int ev)
 int network:: get_event()
 {
     return event;
+}
+
+time_t network:: get_time()
+{
+    return lastActivity;
+}
+
+void network:: set_time(time_t new_time)
+{
+    lastActivity = new_time;
 }

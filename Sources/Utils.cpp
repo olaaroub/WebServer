@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/07/09 14:55:28 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/13 20:39:49 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,3 +53,146 @@ std::string normalizePath(const std::string& uri) {
     }
     return result;
 }
+
+
+std::string getExtension(const std::string& path)
+{
+    size_t dot_pos = path.rfind('.');
+
+    if (dot_pos != std::string::npos)
+    {
+        size_t slash_pos = path.rfind('/');
+        if (slash_pos != std::string::npos && dot_pos < slash_pos)
+            return "";
+        return path.substr(dot_pos);
+    }
+    return "";
+}
+
+
+std::string getFileContents(const std::string& filePath) {
+    std::ifstream fileStream(filePath.c_str());
+    if (!fileStream.is_open()) {
+        return "";
+    }
+    std::stringstream buffer;
+    buffer << fileStream.rdbuf();
+    return buffer.str();
+}
+
+ std::string trimWhitespace(const std::string& s)
+{
+    const std::string WHITESPACE = " \t\r\n";
+    size_t first = s.find_first_not_of(WHITESPACE);
+    if (std::string::npos == first) {
+        return s;
+    }
+    size_t last = s.find_last_not_of(WHITESPACE);
+    return s.substr(first, (last - first + 1));
+}
+std::string generateUniqueFilename() {
+    // Get the current time as a number (seconds since 1970).
+    time_t currentTime = time(NULL);
+
+    std::stringstream ss;
+    ss << currentTime;
+
+    // 3. Add a file extension.
+    return ss.str() + ".ser";
+}
+
+// const LocationConfigs *findLocation(const std::string &uri, const ServerConfigs &server_config) // i should handle the case where
+// {                                                                   // /images/ or /images and the given uri uses that prefix TODO
+//     const LocationConfigs *bestMatch = NULL;
+//     size_t len = 0;
+
+//     const std::vector<LocationConfigs> &locations = server_config.locations;
+
+//     for (std::vector<LocationConfigs>::const_iterator it = locations.begin(); it != locations.end(); ++it)
+//     {
+//         if (uri.rfind(it->path, 0) == 0)
+//         {
+//             if (it->path.length() > len)
+//             {
+//                 len = it->path.length();
+//                 bestMatch = &(*it);
+//             }
+//         }
+//     }
+//     return bestMatch;
+// }
+
+
+const char* getReasonPhrase(int code) {
+    switch (code) {
+        case 200: return "OK";
+        case 201: return "Created";
+        case 202: return "Accepted";
+        case 204: return "No Content";
+        case 301: return "Moved Permanently";
+        case 302: return "Found";
+        case 400: return "Bad Request";
+        case 401: return "Unauthorized";
+        case 403: return "Forbidden";
+        case 404: return "Not Found";
+        case 405: return "Method Not Allowed";
+        case 413: return "Payload Too Large";
+        case 415: return "Unsupported Media Type";
+        case 500: return "Internal Server Error";
+        case 501: return "Not Implemented";
+        case 502: return "Bad Gateway";
+        case 503: return "Service Unavailable";
+        case 504: return "Gateway Timeout";
+        default: return "Unknown Status";
+    }
+}
+
+std::string getMimeType(const std::string &filePath)
+{
+    // Find the position of the last dot
+    size_t dot_pos = filePath.rfind('.');
+    if (dot_pos == std::string::npos)
+    {
+        // No extension found, return the default
+        return "application/octet-stream";
+    }
+
+    // Get the extension substring
+    std::string extension = filePath.substr(dot_pos);
+    std::cout << "extension from mime type: " << extension << std::endl;
+
+    // Look up the extension
+    if (extension == ".html" || extension == ".htm")
+        return "text/html";
+    if (extension == ".css")
+        return "text/css";
+    if (extension == ".js")
+        return "application/javascript";
+    if (extension == ".jpg" || extension == ".jpeg")
+        return "image/jpeg";
+    if (extension == ".png")
+        return "image/png";
+    if (extension == ".gif")
+        return "image/gif";
+    if (extension == ".ico")
+        return "image/x-icon";
+    if (extension == ".txt")
+        return "text/plain";
+    if( extension == ".mp4")
+        return "video/mp4";
+
+    return "application/octet-stream";
+}
+
+std::string generate_body_FromFile(std::string pathFIle)
+{
+    std::ifstream file_stream(pathFIle.c_str(), std::ios::binary);
+    if (!file_stream)
+        throw std::runtime_error("GenerateBodyFromFile Error: open file failed !");
+    std::stringstream body;
+
+    body << file_stream.rdbuf();
+
+    return body.str();
+}
+

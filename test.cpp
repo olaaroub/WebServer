@@ -1,23 +1,23 @@
 #include <iostream>
+#include <string>
 
-
-class test{
-    public : 
-    test()
-    {
-        std::cout << "ddd" << std::endl;
-        return ;
-        std::cout << "eee" << std::endl;
-    }
-};
-
-void tt(){
-     test t;
-    std::cout << "continue after ! " << std::endl;
-}
 
 int main()
 {
-   tt();
-   std::cout << "reach end  " << std::endl;
+    int a = 1;
+    int b = 3;
+    //cin >> a >> b; cin.ignore();
+    int length = 5;
+    //cin >> length; cin.ignore();
+    std::string text = "HELLO";
+    //getline(cin, text);
+    int i = 0;
+    std::string res;
+    while(text[i] )
+    {
+     
+	    std::cout << (char)(((((text[i] - 'A') * a) + b) % 29 + 'A'));
+	   
+        i++;
+    }
 }

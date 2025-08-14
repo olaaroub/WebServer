@@ -9,4 +9,6 @@ canvas.hpp
 *_POST_FILE
 nots.txt
 test
-Pages/Errors/4044.html
+*.ser
+
+.vscode/
