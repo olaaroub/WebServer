@@ -7,7 +7,7 @@
 #include "Post.hpp"
 #include "Delete.hpp"
 
-client::client(const ServerConfigs &server_config) : network(server_config, false) { _convertMaxBodySize(); }
+client::client(const ServerConfigs &server_config) : network(server_config, false), _errorStute(noError) { _convertMaxBodySize(); }
 
 void client::epoll_modify()
 {
@@ -95,15 +95,38 @@ void client::onEvent() // handlehttprequest
         throw std::runtime_error("Client disconnected or socket error.");
     else if (event & EPOLLIN)
     {
-        bool is_request_complete = request.run_parser(socket_fd);
-        if (is_request_complete)
+        try
+        {
+            bool is_request_complete = request.run_parser(socket_fd);
+            if (is_request_complete)
+            {
+                epoll_modify();
+                std::cout << "Request parsed successfully." << std::endl;
+            } 
+        }
+        catch(const ParseError &e)
         {
             epoll_modify();
-            std::cout << "Request parsed successfully." << std::endl;
+            _errorStute = e.getStutError();
+            std::cerr << e.what() << '\n';
+            if (_errorStute == closeConnection)
+                throw std::runtime_error("client close connection");
         }
+        catch(const std::exception& e)
+        {
+            epoll_modify();
+            _errorStute = ServerError;
+            std::cerr << e.what() << '\n';
+        }
+        
     }
     else if (event & EPOLLOUT)
     {
+        if (_errorStute != noError)
+        {
+            handleHttpError(_errorStute);
+            throw std::runtime_error("send Response !");
+        }
         std::string fullPath;
         const std::string &requestUri = normalizePath(request.requestLine.getUrl());
         std::cout << "Uri  after normalizing: " << requestUri << std::endl;

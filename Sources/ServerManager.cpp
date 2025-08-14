@@ -108,7 +108,6 @@ void serverManager::epollEvent(int fd, int event)
 
 void serverManager::listening()
 {
-    std::cout << "--evlist lenghet" << activeNetworks.size() << std::endl;
     std::vector<epoll_event> evlist(1024);
     while (true)
     {
@@ -138,13 +137,14 @@ void serverManager::listening()
             if (!it->second->isCgi() && (it->second->if_server() == false && (current_time - it->second->get_time()) > request_timeout))
             {
                 std::cout << "Client timeout, closing connection." << std::endl;
+                client *deletClient = dynamic_cast<client *>(it->second);
+                deletClient->handleHttpError(timeout);
                 close(it->first);
                 epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, it->first, 0);
                 delete it->second;
                 std::map<int, network *>::iterator to_erase = it;
                 ++it;
                 activeNetworks.erase(to_erase);
-                // khasni nsift response 408 Request Timeout
             }
             else
                 ++it;
@@ -162,6 +162,7 @@ void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
             try
             {
                 server *new_server = new server((*its), inet_addr((*it).host.c_str()), (*it));
+                std::cout << red << "Host: " << (*it).host << ":" << *its << RES << std::endl;
                 add_server(new_server);
             }
             catch (std::exception &e)
@@ -176,7 +177,6 @@ void serverManager::startServers()
 {
     try
     {
-        std::cout << "listening ...\n";
         listening();
     }
     catch (std::exception &e)

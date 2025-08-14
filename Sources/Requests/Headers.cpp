@@ -21,14 +21,14 @@ void Headers:: AddToMap(std::string line)
 {
     size_t cont = line.find(":");
     if (cont == std::string::npos)
-        throw std::runtime_error("Headers Error: format not exist");
+        throw ParseError("Headers Error: format not exist", badRequest);
     std::string key = line.substr(0, cont);
     std::string value = line.substr(cont + 2);
     if (key.empty() || value.empty())
-        throw std::runtime_error("Headers Error: format not exist");
+        throw ParseError("Headers Error: format not exist", badRequest);
     for (size_t i = 0; i < key.length(); i++)
         if (key[i] == ' ' || !isprint(key[i]) || !isascii(key[i]))
-            throw std::runtime_error("Headers Error: Bad request: space in key");
+            throw ParseError("Headers Error: Bad request: space in key", badRequest);
     to_lower(key);
     // std::cout<< key << " " << value << std::endl;
     // exit(0);
@@ -52,11 +52,11 @@ void Headers:: HeadersParser()
     if (map["host"].size() > 1 || map["content-length"].size() > 1
         || map["content-type"].size() > 1 || map["authorization"].size() > 1
             || map["transfer-encoding"].size() > 1)
-        throw std::runtime_error("Headers Error: duplicate headers");
+        throw ParseError("Headers Error: duplicate headers", badRequest);
     if (map["host"].empty())
-        throw std::runtime_error("Headers Error: host not found");
+        throw ParseError("Headers Error: host not found", badRequest);
     if (!map["content-length"].empty() && !map["transfer-encoding"].empty())
-        throw std::runtime_error("Headers Error: content-length and transfer-encoding not allowed together");
+        throw ParseError("Headers Error: content-length and transfer-encoding not allowed together", badRequest);
     
     // for (std::map<std::string, std::vector<std::string> >::iterator it = map.begin(); it != map.end(); it++)
     // {
@@ -103,7 +103,7 @@ void Headers:: _splitCookie(std::string cookie)
 
     size_t findIndex = cookie.find("=");
     if (findIndex == std::string::npos)
-        throw std::runtime_error("Header Parser: cookieParser: wrong format");
+        throw ParseError("Header Parser: cookieParser: wrong format", badRequest);
     std::string key = cookie.substr(0, findIndex++);
     std::string value = cookie.substr(findIndex, cookie.size() - findIndex);
     cookieInfo[key] = _percentEncoding(value);
