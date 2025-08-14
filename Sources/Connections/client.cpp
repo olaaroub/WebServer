@@ -102,7 +102,7 @@ void client::onEvent() // handlehttprequest
             {
                 epoll_modify();
                 std::cout << "Request parsed successfully." << std::endl;
-            } 
+            }
         }
         catch(const ParseError &e)
         {
@@ -118,7 +118,7 @@ void client::onEvent() // handlehttprequest
             _errorStute = ServerError;
             std::cerr << e.what() << '\n';
         }
-        
+
     }
     else if (event & EPOLLOUT)
     {
@@ -127,7 +127,6 @@ void client::onEvent() // handlehttprequest
             handleHttpError(_errorStute);
             throw std::runtime_error("send Response !");
         }
-        std::string fullPath;
         const std::string &requestUri = normalizePath(request.requestLine.getUrl());
         std::cout << "Uri  after normalizing: " << requestUri << std::endl;
         const LocationConfigs *location = findLocation(requestUri);
@@ -136,21 +135,25 @@ void client::onEvent() // handlehttprequest
             handleHttpError(404);
             throw std::runtime_error("Response error sucess !");
         }
-        if(location->auth_required == true)
+        if (location->auth_required)
         {
-            // hna ghanzid safety checks
+
+            std::string sessionId = request.headers.getCookie("sessionid");
+
+            if (serverManager::validateSession(sessionId) == false)
+            {
+                std::cout << red << "Access denied: Wlah la dkhelti l " << requestUri << ". sir sayb compte." << reset << std::endl;
+                handleHttpError(403);
+                throw std::runtime_error("Access denied due to invalid session.");
+            }
+            std::cout << green << "Access granted:  mar7ba biiik  " << requestUri << ". Valid session." << reset << std::endl;
         }
-        std:: cout << "returned location is " << location->path<< std::endl;
-        if (location)
-            fullPath = joinPaths(location->root, requestUri);
 
+        std::cout << "returned location is " << location->path << std::endl;
+        std::string fullPath = joinPaths(location->root, requestUri);
         std::cout << green << fullPath << reset << std::endl;
-
-
-        std::cout << requestUri << std::endl;
         std::string extension = getExtension(fullPath);
         std::cout << "Extension: " << extension << std::endl;
-
 
         if (location->cgi_handlers.count(extension))
         {

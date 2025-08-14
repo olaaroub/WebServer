@@ -17,8 +17,8 @@ void serverManager::add_server(network *instance)
 std::string serverManager::createSession(const std::string& username)
 {
     std::stringstream ss;
-    int seed = time(0);
-    srand(seed);
+    // int seed = time(0);
+    // srand(seed);
     ss << time(0) << "-" << rand();
     // std::cout << ss.rdbuf()<<std::endl;
 
@@ -30,6 +30,21 @@ std::string serverManager::createSession(const std::string& username)
 
     s_activeSessions[sessionId] = session;
     return sessionId;
+}
+
+bool serverManager::validateSession(const std::string& sessionId)
+{
+    if (sessionId.empty())
+        return false;
+    std::map<std::string, SessionData>::iterator it = s_activeSessions.find(sessionId);
+    if (it != s_activeSessions.end())
+    {
+        if (it->second.expiry_time > time(0))
+            return true;
+        else
+            s_activeSessions.erase(it);
+    }
+    return false;
 }
 
 void serverManager::reapChildProcesses()

@@ -34,14 +34,14 @@ class client : public network
     public:
         void sendResponseString(const std::string& response);
         const LocationConfigs *findLocation(const std::string &uri);
-        
+
         void handleHttpError(int statusCode);
-        void sendErrorResponse(int statusCode, const std::string& reasonPhrase);
+        // void sendErrorResponse(int statusCode, const std::string& reasonPhrase);
         client(const ServerConfigs &server_config);
-        
+
         void epoll_modify();
         void onEvent();
-        
+
         void set_fd(int fd)
         {
             socket_fd = fd;

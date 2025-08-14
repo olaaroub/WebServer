@@ -6,7 +6,7 @@ if (isset($_COOKIE['sessionid'])) {
     header('Content-Type: text/html');
     echo "<h1>You are already logged in.</h1>";
     echo "<p>Your session ID is: " . htmlspecialchars($_COOKIE['sessionid']) . "</p>";
-    echo '<p><a href="/secret/my_picture.jpg">Proceed to the secret area.</a></p>';
+    echo '<p><a href="/secret/veryPrivateFile.html">Proceed to the secret area.</a></p>';
     exit(); // Stop the script from running further.
 }
 
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     <?php else: ?>
         <?php echo $login_message; ?>
-        <p><a href="/secret/my_picture.jpg">Go to a protected page</a></p>
+        <p><a href="/secret/veryPrivateFile.html">Go to a protected page</a></p>
     <?php endif; ?>
 
 </body>

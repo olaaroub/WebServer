@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/08 19:02:05 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/08 21:44:47 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/14 22:53:59 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,20 +17,6 @@ HttpResponse::HttpResponse() : _http_version("HTTP/1.1"), _status_code(200) {
 }
 
 HttpResponse::~HttpResponse() {}
-
-// const char* HttpResponse::getReasonPhrase(int code) {
-//     switch (code) {
-//         case 200: return "OK";
-//         case 403: return "Forbidden";
-//         case 404: return "Not Found";
-//         case 405: return "Method Not Allowed";
-//         case 500: return "Internal Server Error";
-//         case 501: return "Not Implemented";
-//         case 502: return "Bad Gateway";
-//         case 504: return "Gateway Timeout";
-//         default: return "Unknown Status";
-//     }
-// }
 
 void HttpResponse::setStatus(int code) {
     this->_status_code = code;
@@ -45,6 +31,16 @@ void HttpResponse::setBody(const std::string& body) {
     this->_body = body;
 }
 
+std::string HttpResponse::getHeader(const std::string& key) const {
+    std::string lname = toLower(key);
+    for (std::map<std::string, std::string>::const_iterator it = _headers.begin();
+         it != _headers.end(); ++it) {
+        if (toLower(it->first) == lname) {
+            return it->second;
+        }
+    }
+    return "";
+}
 std::string HttpResponse::toString() const {
     std::stringstream response_ss;
 
@@ -125,6 +121,7 @@ void HttpResponse::setFromCgiOutput(const std::string &cgiOutput)
 				if (!value.empty() && value[0] == ' ')
 					value.erase(0, 1);
 				addHeader(key, value);
+				// std::cout << "Header added: " << key << ": " << value << std::endl;
 			}
 		}
 	}

@@ -1,4 +1,5 @@
 #include "Headers.hpp"
+#include "Utils.hpp"
 
 void Headers:: set_buffer(std::string buffer)
 {
@@ -9,12 +10,21 @@ std::string Headers:: get_buffer()
     return buffer;
 }
 
-void Headers:: to_lower(std::string &string)
-{
-    // std::string buf = string;
-    // for(size_t i = 0;i < buf.length();i++)
-    //     string[i] = tolower(buf[i]);
-    std::transform(string.begin(), string.end(), string.begin(), ::tolower);
+// std::string Headers::toLower(const std::string& str) const {
+//     std::string result = str;
+//     std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+//     // std::cout << green << result << reset << std::endl;
+//         return result;
+// }
+
+std::string Headers::getCookie(const std::string& key) const {
+    std::string lname = toLower(key);
+    for (std::map<std::string, std::string>::const_iterator it = cookieInfo.begin();
+         it != cookieInfo.end(); ++it) {
+        if (toLower(it->first) == lname)
+            return it->second;
+    }
+    return "";
 }
 
 void Headers:: AddToMap(std::string line)
@@ -29,9 +39,7 @@ void Headers:: AddToMap(std::string line)
     for (size_t i = 0; i < key.length(); i++)
         if (key[i] == ' ' || !isprint(key[i]) || !isascii(key[i]))
             throw ParseError("Headers Error: Bad request: space in key", badRequest);
-    to_lower(key);
-    // std::cout<< key << " " << value << std::endl;
-    // exit(0);
+    key = toLower(key);
     map[key].push_back(value);
 }
 
@@ -57,7 +65,7 @@ void Headers:: HeadersParser()
         throw ParseError("Headers Error: host not found", badRequest);
     if (!map["content-length"].empty() && !map["transfer-encoding"].empty())
         throw ParseError("Headers Error: content-length and transfer-encoding not allowed together", badRequest);
-    
+
     // for (std::map<std::string, std::vector<std::string> >::iterator it = map.begin(); it != map.end(); it++)
     // {
     //     std::cout << "first: '" << it->first << "' second: '" << it->second.at(0) << "'" << std::endl;
