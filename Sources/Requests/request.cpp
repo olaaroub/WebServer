@@ -157,6 +157,8 @@ bool Request:: run_parser(int socket_fd)
         throw ParseError("Request Error: read failed!", ServerError);
     if (cont == 0)
         throw ParseError("Request Error: Client closed connection unexpectedly", closeConnection);
+    if (cont > 3 && bfr[0] == 0x16 && bfr[1] == 0x03 && bfr[2] >= 0x00 && bfr[2] <= 0x04)
+        throw ParseError("Request Error: Client sent a TLS handshake", closeConnection);
     buffer.append(bfr, cont);
     StateOFParser();
     return request_ended;

@@ -15,9 +15,9 @@
 - [ ]
 
 --> ohammou
-- [ ] fixi https
-- [ ] testi testi testi toma testi layrdi 3lik
-- [ ] 9ad tanta code dialk ( 7yed implementation mn header.hpp w7yed functions li makhdamch bihom)
-- [ ] leaks(khlihom homa lkhrin)
+- [x] fixi https (the HTTPS request have a special character in begin called TLS ClientHello, he send it to start a secure connection, bhal ila kaysift wahd lkey to encrypt the request and response base on it, ana ach kandir mli kayban liya hadok lcharacters li kaybda bihom TLS ClientHello kanclose lconnection)
+- [x -> but anzid ntesti] testi testi testi toma testi layrdi 3lik (makan3rfch ntesti mzn)
+- [in progress] 9ad tanta code dialk ( 7yed implementation mn header.hpp w7yed functions li makhdamch bihom)
+- [x 9adit dyawli m3a signals khaskom ntoma t9ado dyalkom] leaks(khlihom homa lkhrin) the only allocation I do is servers-client allocation
 - [ ]
 - [ ]
