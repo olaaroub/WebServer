@@ -149,10 +149,6 @@ void CgiExecutor::onEvent()
 			HttpResponse cgiResponseBuilder;
             cgiResponseBuilder.setFromCgiOutput(_responseBuffer);
 
-            // if (_responseBuffer.find("Content-Type:") == std::string::npos &&
-            //     _responseBuffer.find("content-type:") == std::string::npos &&
-            //     _responseBuffer.find("Content-type:") == std::string::npos)
-
 			if (cgiResponseBuilder.getHeader("content-type").empty()) // get header kat rje3 kolchi miniscule bach manb9ach nchecki bzf
                 _client->handleHttpError(502);
 
@@ -174,12 +170,25 @@ void CgiExecutor::onEvent()
                     cgiResponseBuilder.addHeader("Set-Cookie", cookieValue);
 
             	}
-				// else // mazal khasni n handli log out
-				_client->sendResponseString(cgiResponseBuilder.toString());
-        	}
+				else if (!actionHeaderValue.empty() && actionHeaderValue.rfind("DELETE", 0) == 0)
+				{
+					std::string sessionId = _client->get_request().headers.getCookie("sessionid");
+
+					serverManager::deleteSession(sessionId);
+
+					std::string expiredCookie = "sessionid=deleted; HttpOnly; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT";
+					cgiResponseBuilder.addHeader("Set-Cookie", expiredCookie);
+				}
+
+				// _client->sendResponseString(cgiResponseBuilder.toString());
+				_client->prepareResponse(cgiResponseBuilder.toString());
+				serverManager::activeNetworks[_client->get_socket_fd()] = _client;
+    			_client = NULL; // fach kansift can rje3 l client wkan7ydo mn 3ndi servermanager how li mklef db
+
+			}
 
     	}
-		throw std::runtime_error("CGI execution finished.");
+		throw ResponseSentException("Cgi response sent");
 	}
 }
 
@@ -208,7 +217,7 @@ void CgiExecutor::_handleRead()
 {
 	// char buffer[4096];
 	// ssize_t bytes = read(_pipe_out_fd, buffer, sizeof(buffer));
-	// std::cout << "CGI Output: " << buffer; // Debug output
+	// std::cout << "CGI Output: " << buffer;
 	// //print bytes read
 	// std::cout << "Bytes read: " << bytes << std::endl;
 

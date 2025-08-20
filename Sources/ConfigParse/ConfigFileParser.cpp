@@ -6,11 +6,12 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 17:21:57 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/12 16:47:08 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/20 02:07:01 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigFileParser.hpp"
+#include "Utils.hpp"
 
 ConfigParser::ConfigParser(const std::string &rawContent) : _content(rawContent) { this->parse(); }
 
@@ -185,12 +186,18 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
 		{
 			if (server_conf.client_max_body_size_set)
 				throw std::runtime_error("Config Error: Duplicate 'client_max_body_size' directive.");
+
 			std::string size_str;
 			ss >> size_str;
-			server_conf.client_max_body_size = std::strtol(size_str.c_str(), NULL, 10);
+
+
+			server_conf.client_max_body_size = parseSizeToBytes(size_str);
+
 			if (!(ss >> token) || token != ";")
-				throw std::runtime_error("Config Error: Missing ';' after 'client_max_body_size' directive.");
+			throw std::runtime_error("Config Error: Missing ';' after 'client_max_body_size' directive.");
 			server_conf.client_max_body_size_set = true;
+			std::cout << "client_max_body_size: " << server_conf.client_max_body_size << std::endl;
+			exit(0);
 		}
 		else if (token == SERVER_NAME)
 		{

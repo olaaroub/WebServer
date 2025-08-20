@@ -1,12 +1,27 @@
-<?php
-// --- 1. Check for an existing session first! ---
+
+
+ <?php
+// --- 0. Check for a logout request first ---
+if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+    // This custom header is the instruction for your C++ server to delete the session
+    header("X-Session-Action: DELETE");
+    header('Content-Type: text/html');
+    echo "<!DOCTYPE html><html><head><title>Logged Out</title></head>";
+    echo "<body><h1>You have been successfully logged out.</h1>";
+    echo "<p><a href='login.php'>Log in again</a></p></body></html>";
+    exit(); // Stop the script here
+}
+
+
+// --- 1. Check for an existing session ---
 // This part handles users who are already logged in.
 if (isset($_COOKIE['sessionid'])) {
-    // If the session cookie exists, we show a "welcome back" message.
     header('Content-Type: text/html');
     echo "<h1>You are already logged in.</h1>";
     echo "<p>Your session ID is: " . htmlspecialchars($_COOKIE['sessionid']) . "</p>";
     echo '<p><a href="/secret/veryPrivateFile.html">Proceed to the secret area.</a></p>';
+    // Add the logout link
+    echo '<p><a href="login.php?action=logout">Log Out</a></p>';
     exit(); // Stop the script from running further.
 }
 

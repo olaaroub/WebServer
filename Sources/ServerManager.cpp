@@ -7,6 +7,7 @@ struct epoll_event  		        serverManager::evlist;
 std::map<int, network *> 	        serverManager::activeNetworks;
 std::map<std::string, SessionData>  serverManager::s_activeSessions;
 const int 					        serverManager::request_timeout =  10;
+const std::string                   serverManager::s_sessionFilePath = "sessions.db";
 
 void serverManager:: signal_handler(int)
 { throw std::runtime_error("signal catched"); }
@@ -17,10 +18,8 @@ void serverManager::add_server(network *instance)
 std::string serverManager::createSession(const std::string& username)
 {
     std::stringstream ss;
-    // int seed = time(0);
-    // srand(seed);
+
     ss << time(0) << "-" << rand();
-    // std::cout << ss.rdbuf()<<std::endl;
 
     std::string sessionId = ss.str();
     SessionData session;
@@ -29,7 +28,17 @@ std::string serverManager::createSession(const std::string& username)
     session.expiry_time = time(0) + 3600;
 
     s_activeSessions[sessionId] = session;
+    saveSessionsToFile();
     return sessionId;
+}
+
+void serverManager::deleteSession(const std::string& sessionId)
+{
+    if (sessionId.empty())
+        return;
+    s_activeSessions.erase(sessionId);
+    saveSessionsToFile();
+    std::cout << "[SESSION] Deleted session: " << sessionId << std::endl;
 }
 
 bool serverManager::validateSession(const std::string& sessionId)
@@ -47,13 +56,58 @@ bool serverManager::validateSession(const std::string& sessionId)
     return false;
 }
 
+
+void serverManager::loadSessionsFromFile()
+{
+    std::ifstream sessionFile(s_sessionFilePath.c_str());
+    if (!sessionFile.is_open()) {
+        std::cout << "[SESSION] No session file found." << std::endl;
+        return;
+    }
+
+    std::string line;
+    while (std::getline(sessionFile, line))
+    {
+        std::stringstream ss(line);
+        std::string sessionId, username;
+        time_t expiry_time;
+
+        if (ss >> sessionId >> username >> expiry_time) {
+            if (expiry_time > time(0))
+            {
+                SessionData session;
+                session.name = username;
+                session.expiry_time = expiry_time;
+                s_activeSessions[sessionId] = session;
+            }
+        }
+    }
+    std::cout << "[SESSION] Loaded " << s_activeSessions.size() << " active sessions from file." << std::endl;
+}
+
+void serverManager::saveSessionsToFile()
+{
+    std::ofstream sessionFile(s_sessionFilePath.c_str());
+    if (!sessionFile.is_open()) {
+        std::cerr << "Error: Could not open session file for writing!" << std::endl;
+        return;
+    }
+
+    for (std::map<std::string, SessionData>::const_iterator it = s_activeSessions.begin(); it != s_activeSessions.end(); ++it) {
+        sessionFile << it->first << " " << it->second.name << " " << it->second.expiry_time << std::endl;
+    }
+}
+
+
 void serverManager::reapChildProcesses()
 {
     int status;
     pid_t pid;
 
-    while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
-    std::cout << "kill zombie process with PID " << pid << std::endl;
+    while ((pid = waitpid(-1, &status, WNOHANG)) > 0){
+
+        std::cout << "[SERVER] Reaped zombie CGI process with PID " << pid << std::endl;
+    }
 }
 
 void serverManager::checkCgiTimeouts()
@@ -72,9 +126,8 @@ void serverManager::checkCgiTimeouts()
             should_delete = true;
             else if (time(NULL) - executor->getStartTime() > CGI_TIMEOUT_SECONDS)
             {
-                std::cerr << red << "CGI script with PID " << executor->getPid() << " timed out. Terminating." << reset << std::endl;
+                std::cout << red << "[CGI] Timeout for PID " << executor->getPid() << ". Terminating." << reset << std::endl;
                 kill(executor->getPid(), SIGKILL);
-                // waitpid(executor->getPid(), NULL, 0);
                 executor->getClient()->handleHttpError(504);
                 should_delete = true;
             }
@@ -101,9 +154,21 @@ void serverManager::epollEvent(int fd, int event)
         activeNetworks[fd]->set_event(event);
         activeNetworks[fd]->onEvent();
     }
+    catch (const ResponseSentException &e)
+    {
+        std::cout << green << "[FD: " << fd << "] Closing connection 7itach " << e.what() << reset << std::endl;
+
+        epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, fd, 0);
+        if (activeNetworks.count(fd))
+        {
+            delete activeNetworks[fd];
+            activeNetworks.erase(fd);
+        }
+        close(fd);
+    }
     catch (const std::exception &e)
     {
-        std::cerr << "cleaning fd " << fd << " 7itach: " << e.what() << std::endl;
+        std::cout << red << "[FD: " << fd << "] Client disconnected or error: " << e.what() << reset << std::endl;
         bool is_cgi = false;
         if (activeNetworks.count(fd))
             is_cgi = activeNetworks[fd]->isCgi();
@@ -124,11 +189,12 @@ void serverManager::epollEvent(int fd, int event)
 void serverManager::listening()
 {
     std::vector<epoll_event> evlist(1024);
+    std::cout << "[SERVER] Now listening for connections..." << std::endl;
     while (true)
     {
         int event = epoll_wait(kernel_identifier, evlist.data(), evlist.size(), 1000);
 
-        time_t current_time = time(NULL);
+        // time_t current_time = time(NULL);
         if (event < 0)
         {
             perror("Epoll Error: ");
@@ -147,28 +213,29 @@ void serverManager::listening()
 
         signal(SIGINT, signal_handler);
 
-        for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
-        {
-            if (!it->second->isCgi() && (it->second->if_server() == false && (current_time - it->second->get_time()) > request_timeout))
-            {
-                std::cout << "Client timeout, closing connection." << std::endl;
-                client *deletClient = dynamic_cast<client *>(it->second);
-                deletClient->handleHttpError(timeout);
-                close(it->first);
-                epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, it->first, 0);
-                delete it->second;
-                std::map<int, network *>::iterator to_erase = it;
-                ++it;
-                activeNetworks.erase(to_erase);
-            }
-            else
-                ++it;
-        }
+        // for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
+        // {
+        //     if (!it->second->isCgi() && (it->second->if_server() == false && (current_time - it->second->get_time()) > request_timeout))
+        //     {
+        //         std::cout << red << "[FD: " << it->first << "] Client timed out. Closing connection." << reset << std::endl;
+        //         client *deletClient = dynamic_cast<client *>(it->second);
+        //         deletClient->handleHttpError(timeout);
+        //         close(it->first);
+        //         epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, it->first, 0);
+        //         delete it->second;
+        //         std::map<int, network *>::iterator to_erase = it;
+        //         ++it;
+        //         activeNetworks.erase(to_erase);
+        //     }
+        //     else
+        //         ++it;
+        // }
     }
 }
 
 void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
 {
+    loadSessionsFromFile();
     kernel_identifier = epoll_create(1024);
     for (std::vector<ServerConfigs>::const_iterator it = servers.begin(); it != servers.end(); it++)
     {
@@ -177,7 +244,7 @@ void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
             try
             {
                 server *new_server = new server((*its), inet_addr((*it).host.c_str()), (*it));
-                std::cout << red << "Host: " << (*it).host << ":" << *its << RES << std::endl;
+                std::cout << "[SERVER] Listening on " << (*it).host << ":" << *its << std::endl;
                 add_server(new_server);
             }
             catch (std::exception &e)
