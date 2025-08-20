@@ -20,7 +20,7 @@ void Request:: ParsRequstLine()
         requestLine.ParsRequestLine();
         buffer.erase(0, cont+2);
         state++;
-        if (requestLine.getHttpVerction() != "HTTP/1.1")
+        if (requestLine.getHttpVerction() != "HTTP/1.1" && requestLine.getHttpVerction() != "HTTP/1.0")
             throw ParseError("RequestLine Error: verstion of HTTP not seported!", badRequest);
     }
 
