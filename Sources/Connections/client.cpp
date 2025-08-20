@@ -115,12 +115,11 @@ void client::handleHttpError(int statusCode)
     responseBuilder.setBody(body);
     // sendResponseString(responseBuilder.toString());
     prepareResponse(responseBuilder.toString());
-    _handleWrite();
+    // _handleWrite();
 }
 
 void client::onEvent() // handlehttprequest
 {
-    lastActivity = time(NULL);
     if (event & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
         throw std::runtime_error("Client disconnected or socket error.");
 
@@ -135,17 +134,19 @@ void client::onEvent() // handlehttprequest
     {
         try
         {
+            lastActivity = time(NULL);
             bool is_request_complete = request.run_parser(socket_fd);
             if (is_request_complete)
             {
+                // reque = true;
                  std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Request received: "
                           << request.requestLine.get_method() << " "
                           << request.requestLine.getUrl() << RESET << std::endl;
 
-				if (_errorStute != noError) {
-                    handleHttpError(_errorStute);
-                    return;
-                }
+				// if (_errorStute != noError) {
+                //     handleHttpError(_errorStute);
+                //     return;
+                // }
 
 				const std::string &requestUri = normalizePath(request.requestLine.getUrl());
                 const LocationConfigs *location = findLocation(requestUri);
@@ -341,11 +342,12 @@ void client::onEvent() // handlehttprequest
         }
         catch(const ParseError &e)
         {
-            _errorStute = e.getStutError();
+            // _errorStute = e.getStutError();
             std::cerr << RED << e.what() << RESET << '\n';
-            if (_errorStute == closeConnection)
+            if (e.ErrorStute == closeConnection)
                 throw std::runtime_error("client close connection");
-            handleHttpError(_errorStute);
+            handleHttpError(e.ErrorStute);
+            return;
             // _handleWrite();
         }
         catch(const ResponseSentException& e)

@@ -1,4 +1,5 @@
 #include "request.hpp"
+#include "Utils.hpp"
 
 void Request:: is_finished()
 {

@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:18 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/20 01:59:52 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/20 21:24:23 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,18 @@ class ResponseSentException : public std::exception
         ResponseSentException(const std::string& message);
         ~ResponseSentException() throw() {}
 };
+
+
+enum ErrorCode
+{
+    noError         = 0,
+    closeConnection = 1,
+    badRequest      = 400,
+    timeout         = 408,
+    payloadTooLarge = 418,
+    ServerError     = 500
+};
+
 
 std::string joinPaths(const std::string& p1, const std::string& p2);
 std::string normalizePath(const std::string& uri);

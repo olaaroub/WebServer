@@ -6,10 +6,10 @@ class ParseError : public std::exception
 {
     private:
         std::string _Error;
-        short _ErrorStute;
     public:
-        ParseError(std::string Error, short stute) : _Error(Error), _ErrorStute(stute){}
-        short getStutError() const {return _ErrorStute;}
+        short ErrorStute;
+        ParseError(std::string Error, short stute) : _Error(Error), ErrorStute(stute){}
+        short getStutError() const {return ErrorStute;}
         const char* what() const throw()
         {
             return _Error.c_str();

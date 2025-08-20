@@ -22,15 +22,6 @@
 #define MAGENTA "\033[35m"
 #define CYAN    "\033[36m"
 
-enum Stutes
-{
-    noError = 0,
-    badRequest = 400,
-    ServerError = 500,
-    closeConnection = 1,
-    timeout = 408
-};
-
 #include <iostream>
 #include <string.h>
 #include <cstring>

@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 17:21:57 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/20 02:07:01 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/20 21:25:27 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,8 +196,8 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
 			if (!(ss >> token) || token != ";")
 			throw std::runtime_error("Config Error: Missing ';' after 'client_max_body_size' directive.");
 			server_conf.client_max_body_size_set = true;
-			std::cout << "client_max_body_size: " << server_conf.client_max_body_size << std::endl;
-			exit(0);
+			// std::cout << "client_max_body_size: " << server_conf.client_max_body_size << std::endl;
+			// exit(0);
 		}
 		else if (token == SERVER_NAME)
 		{
