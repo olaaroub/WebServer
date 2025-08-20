@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ohammou- <ohammou-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:18 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/20 21:24:23 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/20 23:45:01 by ohammou-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,17 @@ class ResponseSentException : public std::exception
         ~ResponseSentException() throw() {}
 };
 
+class ParseError : public std::exception
+{
+    private:
+        std::string _Error;
+    public:
+        short ErrorStute;
+        ParseError(std::string Error, short stute);
+        short getStutError() const;
+        const char* what() const throw();
+        ~ParseError() throw();
+};
 
 enum ErrorCode
 {

@@ -199,7 +199,7 @@ void serverManager::listening()
     {
         int event = epoll_wait(kernel_identifier, evlist.data(), evlist.size(), 1000);
 
-        // time_t current_time = time(NULL);
+        time_t current_time = time(NULL);
         if (event < 0)
         {
             perror("Epoll Error: ");
@@ -218,23 +218,23 @@ void serverManager::listening()
 
         signal(SIGINT, signal_handler);
 
-        // for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
-        // {
-        //     if (!it->second->isCgi() && (it->second->if_server() == false && (current_time - it->second->get_time()) > request_timeout))
-        //     {
-        //         std::cout << RED << "[FD: " << it->first << "] Client timed out. Closing connection." << RESET << std::endl;
-        //         client *deletClient = dynamic_cast<client *>(it->second);
-        //         deletClient->handleHttpError(timeout);
-        //         close(it->first);
-        //         epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, it->first, 0);
-        //         delete it->second;
-        //         std::map<int, network *>::iterator to_erase = it;
-        //         ++it;
-        //         activeNetworks.erase(to_erase);
-        //     }
-        //     else
-        //         ++it;
-        // }
+        for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
+        {
+            client *Client = dynamic_cast<client *>(it->second);
+            if (Client != NULL && Client->is_request_complete && (current_time - Client->get_time()) > request_timeout)
+            {
+                std::cout << RED << "[FD: " << it->first << "] Client timed out. Closing connection." << RESET << std::endl;
+                Client->handleHttpError(timeout);
+                close(it->first);
+                epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, it->first, 0);
+                delete it->second;
+                std::map<int, network *>::iterator to_erase = it;
+                ++it;
+                activeNetworks.erase(to_erase);
+            }
+            else
+                ++it;
+        }
     }
 }
 

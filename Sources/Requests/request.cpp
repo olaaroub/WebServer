@@ -1,6 +1,9 @@
 #include "request.hpp"
 #include "Utils.hpp"
 
+Request:: Request() : _chunkSize(0), _contentSize(0),  _waiting_for_new_chunk(true),  state(_InRequestLine),request_ended(false) {}
+Request:: ~Request() {}
+
 void Request:: is_finished()
 {
     if (state == 2)
@@ -80,7 +83,7 @@ void Request:: ChunkReaContent()
             return;
         std::string chunkData = buffer.substr(0, _chunkSize);
         if (_chunkSize > max_body_size)
-            throw ParseError("Request Error: Body too large!", badRequest);
+            throw ParseError("Request Error: Body too large!", payloadTooLarge);
         max_body_size -= _chunkSize;
         body_content.write(chunkData.c_str(), _chunkSize);
         buffer.erase(0, _chunkSize + 2);
@@ -114,7 +117,7 @@ void Request:: ContentLenghtRead()
             request_ended = true;
         }
         if (_chunkSize > max_body_size)
-            throw ParseError("Request Error: the content lenght too large!", badRequest);
+            throw ParseError("Request Error: the content lenght too large!", payloadTooLarge);
     }
     if (buffer.empty())
         return;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ohammou- <ohammou-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/20 15:44:29 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/20 23:45:16 by ohammou-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,15 @@ ResponseSentException::ResponseSentException(const std::string& message): messag
 const char* ResponseSentException::what() const throw(){
     return messageSent.c_str();
 }
+
+
+ParseError:: ParseError(std::string Error, short stute) : _Error(Error), ErrorStute(stute) {}
+short ParseError:: getStutError() const {return ErrorStute;}
+const char* ParseError:: what() const throw()
+{
+    return _Error.c_str();
+}
+ParseError:: ~ParseError() throw() {}
 
 std::string joinPaths(const std::string& p1, const std::string& p2) {
 

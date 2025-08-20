@@ -8,12 +8,27 @@
 #include "Delete.hpp"
 
 client::client(const ServerConfigs &server_config) : network(server_config, false),
-         _errorStute(noError),_state(READING), _bytes_sent(0), _is_monitored(true) { _convertMaxBodySize(); }
+            _state(READING), _bytes_sent(0), _is_monitored(true),  is_request_complete(false) { request.max_body_size = get_max_body(); }
 
 
 void client::setMonitored(bool monitored) { _is_monitored = monitored; }
 bool client::isMonitored() const { return _is_monitored; }
 
+
+void client:: set_fd(int fd)
+{
+   socket_fd = fd;
+}
+
+Request &client:: get_request()
+{
+    return request;
+}
+
+long client:: get_max_body()
+{
+    return server_config.client_max_body_size;
+}
 
 // void client::epoll_modify()
 // {
@@ -135,7 +150,7 @@ void client::onEvent() // handlehttprequest
         try
         {
             lastActivity = time(NULL);
-            bool is_request_complete = request.run_parser(socket_fd);
+            is_request_complete = request.run_parser(socket_fd);
             if (is_request_complete)
             {
                 // reque = true;
@@ -358,10 +373,9 @@ void client::onEvent() // handlehttprequest
         }
         catch(const std::exception& e)
         {
-            _errorStute = ServerError;
             std::cerr << " jit l second catch in client.cpp"  << e.what() << '\n';
             std::cerr << RED << "Internal Server Error in client.cpp: "  << e.what() << RESET << '\n';
-            handleHttpError(_errorStute);
+            handleHttpError(ServerError);
             return;
             // _handleWrite();
         }
@@ -390,10 +404,6 @@ const LocationConfigs *client::findLocation(const std::string &uri) // i should 
     return bestMatch;
 }
 
-void client::_convertMaxBodySize()
-{
-    request.max_body_size = get_max_body() * 1024 * 1024;
-}
 
 void client::sendResponseString(const std::string &response)
 {

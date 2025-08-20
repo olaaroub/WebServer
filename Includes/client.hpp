@@ -10,8 +10,6 @@ class client : public network
     private:
         Request request;
         time_t lastActivity;
-        short _errorStute;
-        void _convertMaxBodySize();
 
         enum ClientState {
             READING,
@@ -42,18 +40,11 @@ class client : public network
         void setMonitored(bool monitored);
         bool isMonitored() const;
 
-        void set_fd(int fd)
-        {
-            socket_fd = fd;
-        }
-        Request &get_request()
-        {
-            return request;
-        }
-        long get_max_body()
-        {
-            return server_config.client_max_body_size;
-        }
+        void set_fd(int fd);
+        Request &get_request();
+        long get_max_body();
+
+        bool is_request_complete;
         ~client();
 };
 
