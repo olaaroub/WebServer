@@ -61,7 +61,7 @@ void server:: onEvent()
             delete client_re;
             return ;
         }
-        std::cout << "[FD: " << fd << "] New connection accepted." << std::endl;
+        std::cout << GREEN << "[FD: " << fd << "] New connection accepted." << RESET << std::endl;
         client_re->set_fd(fd);
         client_re->set_ToNoBlocking();
         client_re->epoll_crt();

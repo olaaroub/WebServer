@@ -45,11 +45,11 @@ CgiExecutor::CgiExecutor(const ServerConfigs &serverConf, const LocationConfigs 
 
 			if (chdir(scriptDir.c_str()) != 0)
 			{
-				std::cerr << "CGI Error: chdir failed." << std::endl;
+				std::cerr << RED << "CGI Error: chdir to " << scriptDir << " failed." << RESET << std::endl;
 				exit(EXIT_FAILURE);
 			}
 			execve(_argv[0], _argv, _envp);
-			std::cerr << "CGI Error: execve failed for " << _argv[0] << std::endl;
+			std::cerr << RED << "CGI Error: execve failed for " << _argv[0] << RESET << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -142,7 +142,10 @@ void CgiExecutor::onEvent()
         waitpid(_pid, &status, 0);
 
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+		{
+			std::cerr << RED << "[CGI] Script exited with non-zero status for PID " << _pid << RESET << std::endl;
 			_client->handleHttpError(502);
+		}
             // _client->sendErrorResponse(502, "Bad Gateway");
         else
         {
@@ -150,7 +153,11 @@ void CgiExecutor::onEvent()
             cgiResponseBuilder.setFromCgiOutput(_responseBuffer);
 
 			if (cgiResponseBuilder.getHeader("content-type").empty()) // get header kat rje3 kolchi miniscule bach manb9ach nchecki bzf
-                _client->handleHttpError(502);
+            {
+				std::cerr << YELLOW << "[CGI] Script for PID " << _pid << " did not return a Content-Type header." << RESET << std::endl;
+				_client->handleHttpError(502);
+			}
+
 
             else
             {

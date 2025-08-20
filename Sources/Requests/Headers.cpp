@@ -13,7 +13,7 @@ std::string Headers:: get_buffer()
 // std::string Headers::toLower(const std::string& str) const {
 //     std::string result = str;
 //     std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-//     // std::cout << green << result << reset << std::endl;
+//     // std::cout << GREEN << result << RESET << std::endl;
 //         return result;
 // }
 
@@ -115,7 +115,7 @@ void Headers:: _splitCookie(std::string cookie)
     std::string key = cookie.substr(0, findIndex++);
     std::string value = cookie.substr(findIndex, cookie.size() - findIndex);
     cookieInfo[key] = _percentEncoding(value);
-    std::cout << "key: '" << key << "' value: '" << cookieInfo[key] << "'" << std::endl;
+    std::cout << MAGENTA << "Parsed Cookie: key='" << key << "', value='" << cookieInfo[key] << "'" << RESET << std::endl;
 }
 
 void Headers:: cookieParser()

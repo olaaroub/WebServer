@@ -78,8 +78,8 @@ void client::_handleWrite()
 
 void client::handleHttpError(int statusCode)
 {
-    std::cout << red << "[FD: " << this->socket_fd << "] Sending error response: " << statusCode
-            << " " << getReasonPhrase(statusCode) << reset << std::endl;
+    std::cout << RED << "[FD: " << this->socket_fd << "] Sending error response: " << statusCode
+            << " " << getReasonPhrase(statusCode) << RESET << std::endl;
     HttpResponse responseBuilder;
     responseBuilder.setStatus(statusCode);
     responseBuilder.addHeader("Content-Type", "text/html");
@@ -138,9 +138,9 @@ void client::onEvent() // handlehttprequest
             bool is_request_complete = request.run_parser(socket_fd);
             if (is_request_complete)
             {
-                std::cout << green << "[FD: " << this->socket_fd << "] Request received: "
+                 std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Request received: "
                           << request.requestLine.get_method() << " "
-                          << request.requestLine.getUrl() << reset << std::endl;
+                          << request.requestLine.getUrl() << RESET << std::endl;
 
 				if (_errorStute != noError) {
                     handleHttpError(_errorStute);
@@ -163,7 +163,7 @@ void client::onEvent() // handlehttprequest
                 if (location->cgi_handlers.count(extension))
                 {
 
-                    std::cout << "[FD: " << this->socket_fd << "] Passing to CGI handler for " << fullPath << std::endl;
+                    std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Passing to CGI handler for " << fullPath << RESET << std::endl;
                     struct stat script_stat;
 					if (request.requestLine.get_method() == "DELETE" || (std::find(location->allowed_methods.begin(), location->allowed_methods.end(),
 						request.requestLine.get_method()) == location->allowed_methods.end()))//  check if method is allowed
@@ -175,14 +175,14 @@ void client::onEvent() // handlehttprequest
 					if (stat(fullPath.c_str(), &script_stat) != 0)
 					{
 						handleHttpError(404);
-						std::cerr << red << "Response 404 sent for non-existent CGI script!" << reset << std::endl;
+						std::cerr << RED << "Response 404 sent for non-existent CGI script!" << RESET << std::endl;
 						return;
 						// throw ResponseSentException();
 					}
 					if (!(script_stat.st_mode & S_IRUSR))
 					{
 						handleHttpError(403);
-						std::cerr << red << "Response 403 sent for unreadable CGI script!" << reset << std::endl;
+						std::cerr << RED << "Response 403 sent for unreadable CGI script!" << RESET << std::endl;
 						return;
 						// throw ResponseSentException();
 					}
@@ -202,27 +202,25 @@ void client::onEvent() // handlehttprequest
 
 					if (serverManager::validateSession(sessionId) == false)
 					{
-						std::cout << red << "[FD: " << this->socket_fd << "] Access denied for " << requestUri << ". Invalid session." << reset << std::endl;
+						std::cout << YELLOW << "[FD: " << this->socket_fd << "] Access denied for " << requestUri << ". Invalid session." << RESET << std::endl;
 						handleHttpError(403);
 						return;
 						// throw ResponseSentException();
 						// throw std::runtime_error("Access denied due to invalid session.");
 					}
-					std::cout << green << "[FD: " << this->socket_fd << "] Access granted for " << requestUri << ". Valid session." << reset << std::endl;
+					std::cout << GREEN << "[FD: " << this->socket_fd << "] Access granted for " << requestUri << ". Valid session." << RESET << std::endl;
 				}
 
 
 				if (location->redirection_set)
                 {
-                    std::cout << "[FD: " << this->socket_fd << "] Redirecting to: " << location->redirection_url << std::endl;
-
-					 if (location->redirection_code != 301 && location->redirection_code !=
-						302)
-					{
-						handleHttpError(500);
-						return;
-	                    // _handleWrite();
-					}
+                    if (location->redirection_code != 301 && location->redirection_code != 302)
+                    {
+                        handleHttpError(500);
+                        return;
+                        // _handleWrite();
+                    }
+                    std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Redirecting to: " << location->redirection_url << RESET << std::endl;
 					HttpResponse responseBuilder;
                     responseBuilder.setStatus(location->redirection_code);
                     responseBuilder.addHeader("Location", location->redirection_url);
@@ -243,8 +241,8 @@ void client::onEvent() // handlehttprequest
 
 				HttpResponse SendResp;
 				if (request.requestLine.get_method() == "GET") {
-					std::cout << green << "[FD: " << this->socket_fd
-						<< "] Responding with GET for " << fullPath << reset << std::endl;
+					std::cout << MAGENTA << "[FD: " << this->socket_fd
+						<< "] Responding with GET for " << fullPath << RESET << std::endl;
                     Get get(fullPath, location);
                     int type_res = get.check_path();
                     if (type_res == 0) {
@@ -263,8 +261,8 @@ void client::onEvent() // handlehttprequest
 
                 }
 				else if (request.requestLine.get_method() == "POST") {
-					std::cout << green << "[FD: " << this->socket_fd
-						<< "] Responding with POST for " << fullPath << reset << std::endl;
+					std::cout << MAGENTA << "[FD: " << this->socket_fd
+						<< "] Responding with POST for " << fullPath << RESET << std::endl;
                     Post post(location->upload_path);
 
 					// Post post(location->upload_path);
@@ -302,8 +300,8 @@ void client::onEvent() // handlehttprequest
                     SendResp.setStatus(201);
                 }
 				else if (request.requestLine.get_method() == "DELETE") {
-					std::cout << green << "[FD: " << this->socket_fd
-						<< "] Responding with DELETE for " << fullPath << reset << std::endl;
+					std::cout << MAGENTA << "[FD: " << this->socket_fd
+						<< "] Responding with DELETE for " << fullPath << RESET << std::endl;
                     Delete del(fullPath, location);
 
 
@@ -344,7 +342,7 @@ void client::onEvent() // handlehttprequest
         catch(const ParseError &e)
         {
             _errorStute = e.getStutError();
-            std::cerr << e.what() << '\n';
+            std::cerr << RED << e.what() << RESET << '\n';
             if (_errorStute == closeConnection)
                 throw std::runtime_error("client close connection");
             handleHttpError(_errorStute);
@@ -352,6 +350,7 @@ void client::onEvent() // handlehttprequest
         }
         catch(const ResponseSentException& e)
         {
+            std::cout << GREEN << "[FD: " << this->socket_fd << "] Response sent successfully." << RESET << std::endl;
             throw ResponseSentException("Response sent successfully.");
             return;
         }
@@ -359,6 +358,7 @@ void client::onEvent() // handlehttprequest
         {
             _errorStute = ServerError;
             std::cerr << " jit l second catch in client.cpp"  << e.what() << '\n';
+            std::cerr << RED << "Internal Server Error in client.cpp: "  << e.what() << RESET << '\n';
             handleHttpError(_errorStute);
             return;
             // _handleWrite();

@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/20 02:03:23 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/20 15:44:29 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,7 +175,7 @@ std::string getMimeType(const std::string &filePath)
 
     // Get the extension substring
     std::string extension = filePath.substr(dot_pos);
-    std::cout << "extension from mime type: " << extension << std::endl;
+    std::cout << MAGENTA << "MIME type lookup for extension: " << extension << RESET << std::endl;
 
     // Look up the extension
     if (extension == ".html" || extension == ".htm")
@@ -215,6 +215,6 @@ std::string generate_body_FromFile(std::string pathFIle)
 std::string toLower(const std::string& str) {
     std::string result = str;
     std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-    // std::cout << green << result << reset << std::endl;
+    // std::cout << GREEN << result << RESET << std::endl;
         return result;
 }

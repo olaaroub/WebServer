@@ -28,6 +28,8 @@ std::string serverManager::createSession(const std::string& username)
     session.expiry_time = time(0) + 3600;
 
     s_activeSessions[sessionId] = session;
+    std::cout << MAGENTA << "[SESSION] Created session for user '"
+        << username << "': " << sessionId << RESET << std::endl;
     saveSessionsToFile();
     return sessionId;
 }
@@ -38,7 +40,7 @@ void serverManager::deleteSession(const std::string& sessionId)
         return;
     s_activeSessions.erase(sessionId);
     saveSessionsToFile();
-    std::cout << "[SESSION] Deleted session: " << sessionId << std::endl;
+    std::cout << MAGENTA << "[SESSION] Deleted session: " << sessionId << RESET << std::endl;
 }
 
 bool serverManager::validateSession(const std::string& sessionId)
@@ -51,7 +53,10 @@ bool serverManager::validateSession(const std::string& sessionId)
         if (it->second.expiry_time > time(0))
             return true;
         else
+        {
             s_activeSessions.erase(it);
+            std::cout << YELLOW << "[SESSION] Expired session removed: " << sessionId << RESET << std::endl;
+        }
     }
     return false;
 }
@@ -106,7 +111,7 @@ void serverManager::reapChildProcesses()
 
     while ((pid = waitpid(-1, &status, WNOHANG)) > 0){
 
-        std::cout << "[SERVER] Reaped zombie CGI process with PID " << pid << std::endl;
+        std::cout << YELLOW << "[SERVER] Reaped zombie CGI process with PID " << pid << RESET << std::endl;
     }
 }
 
@@ -126,7 +131,7 @@ void serverManager::checkCgiTimeouts()
             should_delete = true;
             else if (time(NULL) - executor->getStartTime() > CGI_TIMEOUT_SECONDS)
             {
-                std::cout << red << "[CGI] Timeout for PID " << executor->getPid() << ". Terminating." << reset << std::endl;
+                std::cout << YELLOW << "[CGI] Timeout for PID " << executor->getPid() << ". Terminating." << RESET << std::endl;
                 kill(executor->getPid(), SIGKILL);
                 executor->getClient()->handleHttpError(504);
                 should_delete = true;
@@ -156,7 +161,7 @@ void serverManager::epollEvent(int fd, int event)
     }
     catch (const ResponseSentException &e)
     {
-        std::cout << green << "[FD: " << fd << "] Closing connection 7itach " << e.what() << reset << std::endl;
+        std::cout << GREEN << "[FD: " << fd << "] Closing connection 7itach " << e.what() << RESET << std::endl;
 
         epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, fd, 0);
         if (activeNetworks.count(fd))
@@ -168,7 +173,7 @@ void serverManager::epollEvent(int fd, int event)
     }
     catch (const std::exception &e)
     {
-        std::cout << red << "[FD: " << fd << "] Client disconnected or error: " << e.what() << reset << std::endl;
+        std::cout << RED << "[FD: " << fd << "] Client disconnected or error: " << e.what() << RESET << std::endl;
         bool is_cgi = false;
         if (activeNetworks.count(fd))
             is_cgi = activeNetworks[fd]->isCgi();
@@ -189,7 +194,7 @@ void serverManager::epollEvent(int fd, int event)
 void serverManager::listening()
 {
     std::vector<epoll_event> evlist(1024);
-    std::cout << "[SERVER] Now listening for connections..." << std::endl;
+    std::cout << CYAN << "[SERVER] Now listening for connections..." << RESET << std::endl;
     while (true)
     {
         int event = epoll_wait(kernel_identifier, evlist.data(), evlist.size(), 1000);
@@ -217,7 +222,7 @@ void serverManager::listening()
         // {
         //     if (!it->second->isCgi() && (it->second->if_server() == false && (current_time - it->second->get_time()) > request_timeout))
         //     {
-        //         std::cout << red << "[FD: " << it->first << "] Client timed out. Closing connection." << reset << std::endl;
+        //         std::cout << RED << "[FD: " << it->first << "] Client timed out. Closing connection." << RESET << std::endl;
         //         client *deletClient = dynamic_cast<client *>(it->second);
         //         deletClient->handleHttpError(timeout);
         //         close(it->first);
@@ -244,7 +249,7 @@ void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
             try
             {
                 server *new_server = new server((*its), inet_addr((*it).host.c_str()), (*it));
-                std::cout << "[SERVER] Listening on " << (*it).host << ":" << *its << std::endl;
+                std::cout << CYAN << "[SERVER] Listening on " << (*it).host << ":" << *its << RESET << std::endl;
                 add_server(new_server);
             }
             catch (std::exception &e)
@@ -263,7 +268,7 @@ void serverManager::startServers()
     }
     catch (std::exception &e)
     {
-        std::cerr << green << "\n Server shutting down: " << e.what() << reset << std::endl;
+        std::cerr << YELLOW << "\nServer shutting down: " << e.what() << RESET << std::endl;
         std::map<int, network *>::iterator it;
         for (it = activeNetworks.begin(); it != activeNetworks.end(); ++it)
             delete it->second;
