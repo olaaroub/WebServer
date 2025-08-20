@@ -98,7 +98,7 @@ std::string Post::extract_nameFile(std::string header)
     start1_pos += str_searching.length();
     unsigned long end1_pos = header.find("\"", start1_pos);
     std::string nameFile = header.substr(start1_pos, end1_pos - start1_pos);
-    // std::cout << red << nameFile << reset << std::endl;
+    // std::cout << RED << nameFile << RESET << std::endl;
     return nameFile;
 }
 

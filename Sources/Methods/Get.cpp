@@ -13,7 +13,7 @@ int Get::check_dir(struct stat file_info)
         return 403;
 
     // auto index handle !
-    // std::cout <<  red << "----------  " << reset << std::endl;
+    // std::cout <<  red << "----------  " << RESET << std::endl;
     if (location->index_file.empty()) // mean the index file is not found
     {
         if (location->autoindex == true)

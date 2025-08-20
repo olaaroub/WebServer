@@ -6,7 +6,7 @@ int main(int ac, char **av)
 {
 	if (ac > 2)
 	{
-		std::cerr << "Usage: ./webserv [path_to_config_file]" << std::endl;
+		std::cerr << RED << "Usage: ./webserv [path_to_config_file]" << RESET << std::endl;
 		return 1;
 	}
 
@@ -27,7 +27,7 @@ int main(int ac, char **av)
 
 	}
 	catch (const std::exception &e){
-		std::cerr << "\nError: " << e.what() << std::endl;
+		std::cerr << RED << "\nError: " << e.what() << RESET << std::endl;
 		return 1;
 	}
 

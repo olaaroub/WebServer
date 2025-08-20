@@ -1,10 +1,10 @@
 # Li khasah chi haja i ktbha hnaya w ila saybha y checkiha layr7m lwalidin
 
 --> olaaroub
-- [ ] mse7 sessions ila client sift lik logout
-- [ ] 9ad logic dial send response bach l videos w responses lkbar itsifto kamlin (sifet chwi b chwi)
+- [x] mse7 sessions ila client sift lik logout
+- [x] 9ad logic dial send response bach l videos w responses lkbar itsifto kamlin (sifet chwi b chwi)
 - [ ] normalizi path (127.0.0.1:8080/../ makhashach doz bach mayms7ch lia chi 7aja)
-- [ ] handli max body size
+- [x] handli max body size
 - [ ]
 
 --> iahamdan

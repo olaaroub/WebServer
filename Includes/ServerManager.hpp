@@ -26,10 +26,14 @@ private:
 	static void 								reapChildProcesses();
 	static void 								signal_handler(int);
 	static std::map<std::string, SessionData>	s_activeSessions;
+	static const std::string    				s_sessionFilePath;
+    static void                 				saveSessionsToFile();
+    static void                 				loadSessionsFromFile();
 public:
 	static std::map<int, network *> 			activeNetworks;
 
 	static std::string							createSession(const std::string& username);
+	static void 								deleteSession(const std::string& sessionId);
 	static bool									validateSession(const std::string& sessionId);
 	static int 									kernel_identifier;
 

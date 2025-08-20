@@ -6,11 +6,16 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/14 22:52:23 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/20 15:44:29 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Utils.hpp"
+
+ResponseSentException::ResponseSentException(const std::string& message): messageSent(message){ ; }
+const char* ResponseSentException::what() const throw(){
+    return messageSent.c_str();
+}
 
 std::string joinPaths(const std::string& p1, const std::string& p2) {
 
@@ -101,26 +106,37 @@ std::string generateUniqueFilename() {
     return ss.str() + ".ser";
 }
 
-// const LocationConfigs *findLocation(const std::string &uri, const ServerConfigs &server_config) // i should handle the case where
-// {                                                                   // /images/ or /images and the given uri uses that prefix TODO
-//     const LocationConfigs *bestMatch = NULL;
-//     size_t len = 0;
+long parseSizeToBytes(const std::string& size_str) {
+    if (size_str.empty()) {
+        throw std::runtime_error("Config Error: client_max_body_size value is empty.");
+    }
 
-//     const std::vector<LocationConfigs> &locations = server_config.locations;
+    long number;
+    long multiplier = 1;
+    std::string num_part = size_str;
 
-//     for (std::vector<LocationConfigs>::const_iterator it = locations.begin(); it != locations.end(); ++it)
-//     {
-//         if (uri.rfind(it->path, 0) == 0)
-//         {
-//             if (it->path.length() > len)
-//             {
-//                 len = it->path.length();
-//                 bestMatch = &(*it);
-//             }
-//         }
-//     }
-//     return bestMatch;
-// }
+    char last_char = toupper(size_str[size_str.length() - 1]);
+    if (last_char == 'M' || last_char == 'K') {
+        multiplier = (last_char == 'M') ? (1024 * 1024) : 1024;
+        num_part = size_str.substr(0, size_str.length() - 1);
+    }
+
+    if (num_part.empty() || num_part.find_first_not_of("0123456789") != std::string::npos) {
+        throw std::runtime_error("Config Error: Invalid number format for client_max_body_size '" + size_str + "'");
+    }
+
+    char* end = NULL;
+    number = std::strtol(num_part.c_str(), &end, 10);
+
+    if (*end != '\0') {
+        throw std::runtime_error("Config Error: Invalid client_max_body_size value '" + size_str + "'");
+    }
+
+    if (number < 0 || (multiplier > 1 && number > LONG_MAX / (multiplier))) {
+        throw std::runtime_error("Config Error: client_max_body_size value '" + size_str + "' is too large and would cause an overflow.");
+    }
+    return number * multiplier;
+}
 
 
 const char* getReasonPhrase(int code) {
@@ -159,7 +175,7 @@ std::string getMimeType(const std::string &filePath)
 
     // Get the extension substring
     std::string extension = filePath.substr(dot_pos);
-    std::cout << "extension from mime type: " << extension << std::endl;
+    std::cout << MAGENTA << "MIME type lookup for extension: " << extension << RESET << std::endl;
 
     // Look up the extension
     if (extension == ".html" || extension == ".htm")
@@ -199,6 +215,6 @@ std::string generate_body_FromFile(std::string pathFIle)
 std::string toLower(const std::string& str) {
     std::string result = str;
     std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-    // std::cout << green << result << reset << std::endl;
+    // std::cout << GREEN << result << RESET << std::endl;
         return result;
 }
