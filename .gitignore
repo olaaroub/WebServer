@@ -12,3 +12,4 @@ test
 *.ser
 *.mp4
 .vscode/
+# *.py

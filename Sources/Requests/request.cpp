@@ -103,7 +103,6 @@ void Request:: is_number(std::string string)
 
 void Request:: ContentLenghtRead()
 {
-    // static long long ContentSize = 0;
     std::string number;
 
     if (!_chunkSize)
