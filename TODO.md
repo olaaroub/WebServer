@@ -8,11 +8,12 @@
 - [ ]
 
 --> iahamdan
-- [ ] 9ad DELETE
-- [ ] 9ad l code dialk (ms7 dkchi li matatkhdmch bih w7yed comments ..)
+- [x] 9ad DELETE
+- [x] 9ad l code dialk (ms7 dkchi li matatkhdmch bih w7yed comments ..)
 - [ ] 9ad throw logic( hadi khli ta nsaybha m3ak mni nrj3 blama dirha nta bo7dk 7it ba9i ghanchangiw logic)
-- [ ] tistit bwahd script ou tl3 lik had error "vector::_M_range_check: __n (which is 0) >= this->size() (which is 0)" script smito "Post_filed_test.py" -> kifach tranih -> dir python3 Post_filed_test.py
-- [ ]
+- [x] tistit bwahd script ou tl3 lik had error "vector::_M_range_check: __n (which is 0) >= this->size() (which is 0)" script smito "Post_filed_test.py" -> kifach tranih -> dir python3 Post_filed_test.py
+- [x] autoindex error .
+
 
 --> ohammou
 - [x] fixi https (the HTTPS request have a special character in begin called TLS ClientHello, he send it to start a secure connection, bhal ila kaysift wahd lkey to encrypt the request and response base on it, ana ach kandir mli kayban liya hadok lcharacters li kaybda bihom TLS ClientHello kanclose lconnection)

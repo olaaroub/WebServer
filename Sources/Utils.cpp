@@ -203,6 +203,8 @@ std::string getMimeType(const std::string &filePath)
         return "image/x-icon";
     if (extension == ".txt")
         return "text/plain";
+    if (extension == ".cpp")
+        return "text/plain";
     if( extension == ".mp4")
         return "video/mp4";
 

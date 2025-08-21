@@ -276,7 +276,6 @@ void client::onEvent() // handlehttprequest
                         SendResp.setBody(generate_body_FromFile(get.get_final_path()));
                     } else {
                         handleHttpError(type_res);
-                        // _handleWrite();
                         return;
                     }
 
@@ -285,11 +284,9 @@ void client::onEvent() // handlehttprequest
 					std::cout << MAGENTA << "[FD: " << this->socket_fd
 						<< "] Responding with POST for " << fullPath << RESET << std::endl;
                     Post post(location->upload_path);
-
-					// Post post(location->upload_path);
 					std::map<std::string, std::vector<std::string> >::const_iterator it;
 					it = request.headers.map.find("content-type");
-					if (it == request.headers.map.end()) // it not found the content-type correctly !
+					if (it == request.headers.map.end() || it->second.empty()) // it not found the content-type correctly !
 					{
 						handleHttpError(400);
 						return;
@@ -315,7 +312,6 @@ void client::onEvent() // handlehttprequest
 					SendResp.setStatus(201);
 					SendResp.addHeader("Content-Type", "text/html");
 					SendResp.setBody(generate_body_FromFile("./www/response.html"));
-					// sendResponseString(SendResp.toString());
 					// throw std::runtime_error("Response Post sent sucess !");
 
                     SendResp.setStatus(201);
@@ -337,10 +333,7 @@ void client::onEvent() // handlehttprequest
 						if (code == 1){
 							SendResp.setStatus(204);
 							SendResp.addHeader("Content-Type", "text/html");
-							// SendResp.setBody(generate_body_FromFile("./Pages/response.html"));
-							// sendResponseString(SendResp.toString());
 							// throw std::runtime_error("Response Delete sent sucess !");
-
 						}
 						else{
 							handleHttpError(code);
