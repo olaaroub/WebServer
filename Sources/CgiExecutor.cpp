@@ -195,7 +195,6 @@ void CgiExecutor::onEvent()
 			}
 
     	}
-		throw ResponseSentException("Cgi response sent");
 	}
 }
 

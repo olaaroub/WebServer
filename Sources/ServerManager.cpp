@@ -28,7 +28,7 @@ std::string serverManager::createSession(const std::string& username)
     session.expiry_time = time(0) + 3600;
 
     s_activeSessions[sessionId] = session;
-    std::cout << MAGENTA << "[SESSION] Created session for user '"
+    std::cerr << MAGENTA << "[SESSION] Created session for user '"
         << username << "': " << sessionId << RESET << std::endl;
     saveSessionsToFile();
     return sessionId;
@@ -218,22 +218,46 @@ void serverManager::listening()
 
         signal(SIGINT, signal_handler);
 
+        // for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
+        // {
+        //     client *Client = dynamic_cast<client *>(it->second);
+        //     if (Client != NULL && Client->is_request_complete && (current_time - Client->get_time()) > request_timeout)
+        //     {
+        //         std::cout << RED << "[FD: " << it->first << "] Client timed out. Closing connection." << RESET << std::endl;
+        //         Client->handleHttpError(timeout);
+        //         close(it->first);
+        //         epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, it->first, 0);
+        //         delete it->second;
+        //         std::map<int, network *>::iterator to_erase = it;
+        //         ++it;
+        //         activeNetworks.erase(to_erase);
+        //     }
+        //     else
+        //         ++it;
+        // }
+
         for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
         {
-            client *Client = dynamic_cast<client *>(it->second);
-            if (Client != NULL && Client->is_request_complete && (current_time - Client->get_time()) > request_timeout)
+            // We only care about non-server connections (i.e., clients)
+            if (!it->second->if_server())
             {
-                std::cout << RED << "[FD: " << it->first << "] Client timed out. Closing connection." << RESET << std::endl;
-                Client->handleHttpError(timeout);
-                close(it->first);
-                epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, it->first, 0);
-                delete it->second;
-                std::map<int, network *>::iterator to_erase = it;
-                ++it;
-                activeNetworks.erase(to_erase);
+                client *c = dynamic_cast<client *>(it->second);
+
+                // The crucial check: Only apply timeout logic if the client is being monitored.
+                // If it's not monitored, it's waiting for a CGI and should be ignored.
+                if (c && c->isMonitored() && (current_time - c->get_time()) > request_timeout)
+                {
+                    std::cout << YELLOW << "[FD: " << it->first << "] Client timed out. Closing connection." << RESET << std::endl;
+                    c->handleHttpError(timeout); // Send a 408 error
+
+                    // Clean up the timed-out client
+                    epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, it->first, 0);
+                    delete it->second;
+                    activeNetworks.erase(it++); // Use post-increment to avoid iterator invalidation
+                    continue; // Continue to the next iteration
+                }
             }
-            else
-                ++it;
+            ++it; // Move to the next network object
         }
     }
 }
