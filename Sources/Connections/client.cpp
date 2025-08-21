@@ -164,6 +164,11 @@ void client::onEvent() // handlehttprequest
                 // }
 
 				const std::string &requestUri = normalizePath(request.requestLine.getUrl());
+                if (!pathChecker(requestUri))
+                {
+                    handleHttpError(403);
+                    return ;
+                }
                 const LocationConfigs *location = findLocation(requestUri);
 
                 if (!location) {

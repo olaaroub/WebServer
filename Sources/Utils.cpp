@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/21 13:48:22 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/21 19:03:07 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,4 +225,37 @@ std::string toLower(const std::string& str) {
     std::transform(result.begin(), result.end(), result.begin(), ::tolower);
     // std::cout << GREEN << result << RESET << std::endl;
         return result;
+}
+
+bool pathChecker(std::string Uri)
+{
+    std::string buff = Uri;
+    std::stack<std::string> paths;
+    while (!buff.empty())
+    {
+        std::string dir;
+        size_t findIndex = buff.find("/");
+        if (findIndex == std::string::npos)
+        {
+            dir =  buff;
+            buff.clear();
+        }
+        else
+        {
+            dir = buff.substr(0, findIndex);
+            buff.erase(0, ++findIndex);
+        }
+        if (dir.empty() || dir == ".")
+            continue;
+        if (dir == "..")
+        {
+            if (paths.empty())
+                return false;
+            else
+                paths.pop();
+        }
+        else
+            paths.push(dir);
+    }
+    return true;
 }
