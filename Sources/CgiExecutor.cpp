@@ -145,6 +145,8 @@ void CgiExecutor::onEvent()
 		{
 			std::cerr << RED << "[CGI] Script exited with non-zero status for PID " << _pid << RESET << std::endl;
 			_client->handleHttpError(502);
+			serverManager::activeNetworks[_client->get_socket_fd()] = _client;
+    		_client = NULL;
 		}
             // _client->sendErrorResponse(502, "Bad Gateway");
         else
@@ -156,6 +158,8 @@ void CgiExecutor::onEvent()
             {
 				std::cerr << YELLOW << "[CGI] Script for PID " << _pid << " did not return a Content-Type header." << RESET << std::endl;
 				_client->handleHttpError(502);
+				serverManager::activeNetworks[_client->get_socket_fd()] = _client;
+    			_client = NULL;
 			}
 
 
@@ -193,7 +197,6 @@ void CgiExecutor::onEvent()
     			_client = NULL; // fach kansift can rje3 l client wkan7ydo mn 3ndi servermanager how li mklef db
 
 			}
-
     	}
 	}
 }

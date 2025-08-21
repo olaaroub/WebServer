@@ -221,7 +221,7 @@ void serverManager::listening()
         // for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
         // {
         //     client *Client = dynamic_cast<client *>(it->second);
-        //     if (Client != NULL && Client->is_request_complete && (current_time - Client->get_time()) > request_timeout)
+        //     if (Client != NULL && !Client->is_request_complete && (current_time - Client->get_time()) > request_timeout)
         //     {
         //         std::cout << RED << "[FD: " << it->first << "] Client timed out. Closing connection." << RESET << std::endl;
         //         Client->handleHttpError(timeout);
@@ -245,7 +245,7 @@ void serverManager::listening()
 
                 // The crucial check: Only apply timeout logic if the client is being monitored.
                 // If it's not monitored, it's waiting for a CGI and should be ignored.
-                if (c && c->isMonitored() && (current_time - c->get_time()) > request_timeout)
+                if (c && c->isMonitored() && !c->is_request_complete && (current_time - c->get_time()) > request_timeout)
                 {
                     std::cout << YELLOW << "[FD: " << it->first << "] Client timed out. Closing connection." << RESET << std::endl;
                     c->handleHttpError(timeout); // Send a 408 error
