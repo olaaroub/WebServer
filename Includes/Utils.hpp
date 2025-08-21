@@ -6,7 +6,7 @@
 /*   By: ohammou- <ohammou-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:18 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/20 23:45:01 by ohammou-         ###   ########.fr       */
+/*   Updated: 2025/08/21 16:23:59 by ohammou-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,3 +61,4 @@ std::string generate_body_FromFile(std::string pathFIle);
 // std::string toLower(const std::string& s) ;
 std::string toLower(const std::string& str);
 long parseSizeToBytes(const std::string& size_str);
+bool pathChecker(std::string Uri);

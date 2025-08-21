@@ -47,7 +47,7 @@
 #include <cstdio>
 #include <dirent.h>
 #include <csignal>
-
+#include <stack>
 
 
 #endif
