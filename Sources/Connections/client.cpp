@@ -269,7 +269,7 @@ void client::onEvent() // handlehttprequest
                     if (type_res == 0) {
                         SendResp.setStatus(200);
                         SendResp.addHeader("Content-Type", "text/html");
-                        SendResp.setBody(get.generate_Fileautoindex());
+                        SendResp.setBody(get.generate_Fileautoindex(requestUri));
                     } else if (type_res == 1) {
                         SendResp.setStatus(200);
                         SendResp.addHeader("Content-Type", getMimeType(get.get_final_path()));
