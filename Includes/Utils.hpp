@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ohammou- <ohammou-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:18 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/21 16:23:59 by ohammou-         ###   ########.fr       */
+/*   Updated: 2025/08/22 23:02:23 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ enum ErrorCode
     closeConnection = 1,
     badRequest      = 400,
     timeout         = 408,
-    payloadTooLarge = 418,
+    payloadTooLarge = 413,
     ServerError     = 500
 };
 

@@ -176,7 +176,7 @@ void client::onEvent() // handlehttprequest
                     // _handleWrite();
                     return;
                 }
-
+                // std::cout << "returned location: "<<location->path<<std::endl;
 				std::string fullPath = joinPaths(location->root, requestUri);
                 std::string extension = getExtension(fullPath);
 
