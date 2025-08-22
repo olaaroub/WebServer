@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ohammou- <ohammou-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:18 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/22 23:02:23 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/23 00:35:37 by ohammou-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,12 +39,13 @@ class ParseError : public std::exception
 
 enum ErrorCode
 {
-    noError         = 0,
-    closeConnection = 1,
-    badRequest      = 400,
-    timeout         = 408,
-    payloadTooLarge = 413,
-    ServerError     = 500
+    noError             = 0,
+    closeConnection     = 1,
+    badRequest          = 400,
+    timeout             = 408,
+    payloadTooLarge     = 413,
+    ServerError         = 500,
+    methodNotImplemented = 501
 };
 
 

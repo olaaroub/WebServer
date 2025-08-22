@@ -1,4 +1,5 @@
 #include "RequestLine.hpp"
+#include "Utils.hpp"
 
 void RequestLine:: set_line(std::string line)
 {
@@ -35,8 +36,8 @@ void RequestLine:: ParsRequestLine()
     str >> buff;
     SeparateUrlAndQuerys(buff);
     str >> HttpVerction;
-    // if (method != "POST" && method != "GET" && method != "DELETE")
-    //     throw std::runtime_error("RequestLine ERROR: this method not allowed");
+    if (method != "POST" && method != "GET" && method != "DELETE")
+        throw ParseError("RequestLine Error: method not implemented", methodNotImplemented);
 }
 
 const std::string& RequestLine:: get_method() const
