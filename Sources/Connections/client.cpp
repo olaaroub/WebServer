@@ -128,17 +128,17 @@ void client::handleHttpError(int statusCode)
     }
 
     responseBuilder.setBody(body);
-    // sendResponseString(responseBuilder.toString());
     prepareResponse(responseBuilder.toString());
     // _handleWrite();
 }
 
-void client::onEvent() // handlehttprequest
+void client::onEvent()
 {
     if (event & (EPOLLERR | EPOLLHUP | EPOLLRDHUP))
         throw std::runtime_error("Client disconnected or socket error.");
 
     if (_state == WRITING && (event & EPOLLOUT)) {
+        // std::cout << YELLOW << "sending response: " << _response_buffer << RESET << std::endl;
         std::cout << "=== how many times did you enter here" << std::endl;
         _handleWrite();
         return;
@@ -153,18 +153,12 @@ void client::onEvent() // handlehttprequest
             is_request_complete = request.run_parser(socket_fd);
             if (is_request_complete)
             {
-                // reque = true;
                 std::string method = toLower(request.requestLine.get_method());
                 if (method != "post" && method != "get" && method != "delete")
                     throw ParseError("RequestLine Error: method not implemented", methodNotImplemented);
                  std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Request received: "
                           << request.requestLine.get_method() << " "
                           << request.requestLine.getUrl() << RESET << std::endl;
-
-				// if (_errorStute != noError) {
-                //     handleHttpError(_errorStute);
-                //     return;
-                // }
 
 				const std::string &requestUri = normalizePath(request.requestLine.getUrl());
                 if (!pathChecker(requestUri))
@@ -176,10 +170,9 @@ void client::onEvent() // handlehttprequest
 
                 if (!location) {
                     handleHttpError(404);
-                    // _handleWrite();
                     return;
                 }
-                // std::cout << "returned location: "<<location->path<<std::endl;
+                std::cout << YELLOW<<"returned location: "<<location->path<< RESET<<std::endl;
 				std::string fullPath = joinPaths(location->root, requestUri);
                 std::string extension = getExtension(fullPath);
 
@@ -193,7 +186,6 @@ void client::onEvent() // handlehttprequest
 						request.requestLine.get_method()) == location->allowed_methods.end()))//  check if method is allowed
 					{
 						handleHttpError(405);
-						// throw ResponseSentException();
 						return;
 					}
 					if (stat(fullPath.c_str(), &script_stat) != 0)
@@ -201,14 +193,12 @@ void client::onEvent() // handlehttprequest
 						handleHttpError(404);
 						std::cerr << RED << "Response 404 sent for non-existent CGI script!" << RESET << std::endl;
 						return;
-						// throw ResponseSentException();
 					}
 					if (!(script_stat.st_mode & S_IRUSR))
 					{
 						handleHttpError(403);
 						std::cerr << RED << "Response 403 sent for unreadable CGI script!" << RESET << std::endl;
 						return;
-						// throw ResponseSentException();
 					}
 
                     this->setMonitored(false);
@@ -229,8 +219,6 @@ void client::onEvent() // handlehttprequest
 						std::cout << YELLOW << "[FD: " << this->socket_fd << "] Access denied for " << requestUri << ". Invalid session." << RESET << std::endl;
 						handleHttpError(403);
 						return;
-						// throw ResponseSentException();
-						// throw std::runtime_error("Access denied due to invalid session.");
 					}
 					std::cout << GREEN << "[FD: " << this->socket_fd << "] Access granted for " << requestUri << ". Valid session." << RESET << std::endl;
 				}
@@ -242,14 +230,12 @@ void client::onEvent() // handlehttprequest
                     {
                         handleHttpError(500);
                         return;
-                        // _handleWrite();
                     }
                     std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Redirecting to: " << location->redirection_url << RESET << std::endl;
 					HttpResponse responseBuilder;
                     responseBuilder.setStatus(location->redirection_code);
                     responseBuilder.addHeader("Location", location->redirection_url);
                     prepareResponse(responseBuilder.toString());
-                    _handleWrite();
                     return;
                 }
 
@@ -259,7 +245,6 @@ void client::onEvent() // handlehttprequest
 				{
 					handleHttpError(405);
 					return;
-					// throw ResponseSentException();
 				}
 
 
@@ -267,6 +252,20 @@ void client::onEvent() // handlehttprequest
 				if (request.requestLine.get_method() == "GET") {
 					std::cout << MAGENTA << "[FD: " << this->socket_fd
 						<< "] Responding with GET for " << fullPath << RESET << std::endl;
+                    struct stat path_stat;
+                    if (stat(fullPath.c_str(), &path_stat) == 0) {
+                        if (S_ISDIR(path_stat.st_mode) && !requestUri.empty() && requestUri[requestUri.length() - 1] != '/')
+                        {
+                            std::cout << YELLOW << "[FD: " << this->socket_fd
+                                << "] Path is a directory but URI is missing trailing slash. Redirecting." << RESET << std::endl;
+                            HttpResponse responseBuilder;
+                            responseBuilder.setStatus(301);
+                            responseBuilder.addHeader("Location", requestUri + "/");
+                            responseBuilder.setBody("<html><body><h1>301 Moved Permanently</h1></body></html>");
+                            prepareResponse(responseBuilder.toString());
+                            return;
+                        }
+                    }
                     Get get(fullPath, location);
                     int type_res = get.check_path();
                     if (type_res == 0) {
@@ -293,8 +292,7 @@ void client::onEvent() // handlehttprequest
 					{
 						handleHttpError(400);
 						return;
-						// throw std::runtime_error("Response error sucess !");
-					}
+					}// wach ohammou kay checki 3la hadchi f request? 3lach kachecki 3lih nta hna
 
 					std::string content_type = request.headers.map["content-type"].at(0);
 
@@ -306,7 +304,6 @@ void client::onEvent() // handlehttprequest
 						{
 							handleHttpError(type_res);
 							return;
-							// throw std::runtime_error("Response error sucess !");
 						}
 					}
 					else
@@ -314,8 +311,7 @@ void client::onEvent() // handlehttprequest
 
 					SendResp.setStatus(201);
 					SendResp.addHeader("Content-Type", "text/html");
-					SendResp.setBody(generate_body_FromFile("./www/response.html"));
-					// throw std::runtime_error("Response Post sent sucess !");
+					SendResp.setBody(generate_body_FromFile("./www/uploadSuccessful.html"));
 
                     SendResp.setStatus(201);
                 }
@@ -329,14 +325,12 @@ void client::onEvent() // handlehttprequest
 					if (type_res != 1){
 						handleHttpError(type_res);
 						return;
-						// throw std::runtime_error("Response error sucess !");
 					}
 					if (del.is_a_file == true){
 						int code = del.delete_file();
 						if (code == 1){
 							SendResp.setStatus(204);
 							SendResp.addHeader("Content-Type", "text/html");
-							// throw std::runtime_error("Response Delete sent sucess !");
 						}
 						else{
 							handleHttpError(code);
@@ -384,9 +378,10 @@ void client::onEvent() // handlehttprequest
     }
 }
 
-const LocationConfigs *client::findLocation(const std::string &uri) // i should handle the case where
-{                                                                   // /images/ or /images and the given uri uses that prefix TODO
+const LocationConfigs *client::findLocation(const std::string &uri)
+{
     const LocationConfigs *bestMatch = NULL;
+    std::string uri_prefix;
     size_t len = 0;
 
     const std::vector<LocationConfigs> &locations = this->server_config.locations;

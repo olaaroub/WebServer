@@ -103,7 +103,6 @@ void serverManager::saveSessionsToFile()
     }
 }
 
-
 void serverManager::reapChildProcesses()
 {
     int status;
