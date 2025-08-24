@@ -32,7 +32,7 @@ private:
     void StateOFParser();
     void ChunkReaContent();
     void ContentLenghtRead();
-
+    std::string _ignoreExtension(std::string line);
     
     unsigned long _chunkSize;
     unsigned long _contentSize;

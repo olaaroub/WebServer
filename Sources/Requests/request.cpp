@@ -54,6 +54,15 @@ void Request:: ParsHeaders()
 
 }
 
+std::string Request:: _ignoreExtension(std::string line)
+{
+    size_t index = line.find(";");
+    if (index == std::string::npos)
+        return line;
+    else
+        return line.substr(0, index);
+}
+
 void Request:: ChunkReaContent()
 {
     unsigned int len;
@@ -67,6 +76,8 @@ void Request:: ChunkReaContent()
             if (findNewLine == std::string::npos)
                 throw ParseError("Request Error: format of chunked POST not correct", badRequest);
             std::string line = buffer.substr(0, findNewLine);
+            line = _ignoreExtension(line);
+
             is_number(line);
             std::istringstream ff(line);
             ff >> std::hex >> len;
