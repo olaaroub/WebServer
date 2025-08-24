@@ -156,13 +156,15 @@ void client::onEvent()
                 std::string method = toLower(request.requestLine.get_method());
                 if (method != "post" && method != "get" && method != "delete")
                     throw ParseError("RequestLine Error: method not implemented", methodNotImplemented);
-                 std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Request received: "
+                std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Request received: "
                           << request.requestLine.get_method() << " "
                           << request.requestLine.getUrl() << RESET << std::endl;
 
 				const std::string &requestUri = normalizePath(request.requestLine.getUrl());
+                // std::cout << YELLOW << "Normalized URI: " << requestUri << RESET << std::endl;
                 if (!pathChecker(requestUri))
                 {
+                    std::cout << RED << "[FD: " << this->socket_fd << "] Invalid request URI: " << requestUri << RESET << std::endl;
                     handleHttpError(403);
                     return ;
                 }

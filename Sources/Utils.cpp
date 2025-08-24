@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/24 18:41:36 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/24 22:53:42 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,7 @@ const char* getReasonPhrase(int code) {
         case 405: return "Method Not Allowed";
         case 408: return "Request Timeout";
         case 413: return "Payload Too Large";
-        case 415: return "Unsupported Media Type";
+        case 414: return "URI Too Long";
         case 500: return "Internal Server Error";
         case 501: return "Not Implemented";
         case 502: return "Bad Gateway";

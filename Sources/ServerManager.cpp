@@ -277,7 +277,7 @@ void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
             {
                 if (e.ErrorStute > 0)
                     close(e.ErrorStute);
-                std::cerr << e.what() << std::endl;
+                std::cerr << RED << e.what() << RESET;
             }
         }
     }
@@ -288,7 +288,7 @@ void serverManager::startServers()
     try
     {
         if (!activeNetworks.size())
-            throw std::runtime_error("no server to run it");
+            throw std::runtime_error("No active networks");
         listening();
     }
     catch (std::exception &e)
