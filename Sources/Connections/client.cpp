@@ -154,6 +154,9 @@ void client::onEvent() // handlehttprequest
             if (is_request_complete)
             {
                 // reque = true;
+                std::string method = toLower(request.requestLine.get_method());
+                if (method != "post" && method != "get" && method != "delete")
+                    throw ParseError("RequestLine Error: method not implemented", methodNotImplemented);
                  std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Request received: "
                           << request.requestLine.get_method() << " "
                           << request.requestLine.getUrl() << RESET << std::endl;

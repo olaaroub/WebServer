@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ohammou- <ohammou-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/21 19:47:55 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/23 22:12:00 by ohammou-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,4 +261,32 @@ bool pathChecker(std::string Uri)
             paths.push(dir);
     }
     return true;
+}
+
+
+std::string uRLEncoding(std::string url)
+{
+    std::string res;
+    for (size_t i = 0; i < url.size(); i++)
+    {
+        if (i + 2 < url.size() && url[i] == '%')
+        {
+            if (std::isxdigit(url[i + 1]) && std::isxdigit(url[i + 2]))
+            {
+                int encodingChar;
+                std::string str(url.begin() + i + 1, url.begin() + i + 3);
+                std::istringstream ff(str);
+                ff >> std::hex >> encodingChar;
+                res += static_cast<char>(encodingChar);
+                url.erase(i, 2);
+            }
+            else
+                throw ParseError("uRLEncoding: Bad Request", badRequest);
+        }
+        else if (url[i] == '+')
+            res += ' ';
+        else
+            res += url[i];
+    }
+    return res;
 }

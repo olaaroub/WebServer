@@ -20,7 +20,6 @@ int main(int ac, char **av)
 		ConfigParser parser(reader.getContent());
 
 		const std::vector<ServerConfigs> &servers = parser.getServers();
-
 		serverManager::setupServers(servers);
 
 		serverManager::startServers();

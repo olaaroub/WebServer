@@ -274,8 +274,10 @@ void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
                 std::cout << CYAN << "[SERVER] Listening on " << (*it).host << ":" << *its << RESET << std::endl;
                 add_server(new_server);
             }
-            catch (std::exception &e)
+            catch (ParseError &e)
             {
+                if (e.ErrorStute > 0)
+                    close(e.ErrorStute);
                 std::cerr << e.what() << std::endl;
             }
         }
@@ -286,6 +288,8 @@ void serverManager::startServers()
 {
     try
     {
+        if (!activeNetworks.size())
+            throw std::runtime_error("no server to run it");
         listening();
     }
     catch (std::exception &e)
@@ -293,7 +297,10 @@ void serverManager::startServers()
         std::cerr << YELLOW << "\nServer shutting down: " << e.what() << RESET << std::endl;
         std::map<int, network *>::iterator it;
         for (it = activeNetworks.begin(); it != activeNetworks.end(); ++it)
+        {
+            close(it->first);
             delete it->second;
+        }
         activeNetworks.clear();
         close(kernel_identifier);
     }
