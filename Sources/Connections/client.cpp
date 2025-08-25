@@ -294,8 +294,7 @@ void client::onEvent()
 					{
 						handleHttpError(400);
 						return;
-					}// wach ohammou kay checki 3la hadchi f request? 3lach kachecki 3lih nta hna
-
+					}
 					std::string content_type = request.headers.map["content-type"].at(0);
 
 					unsigned long check_multipartFOrmData = content_type.find("multipart/form-data");
