@@ -27,6 +27,21 @@ std::string Headers::getCookie(const std::string& key) const {
     return "";
 }
 
+bool Headers:: _isValidHeaderKey(const std::string& key) {
+    if (key.empty())
+        return false;
+
+    const std::string forbiddenChars = "()<>@,;:\"/[]?={} \t";
+
+    for (size_t i = 0; i < key.length(); ++i)
+    {
+        if (iscntrl(static_cast<unsigned char>(key[i])) || forbiddenChars.find(key[i]) != std::string::npos)
+            return false;
+    }
+
+    return true;
+}
+
 void Headers:: AddToMap(std::string line)
 {
     size_t cont = line.find(":");
@@ -34,7 +49,7 @@ void Headers:: AddToMap(std::string line)
         throw ParseError("Headers Error: format not exist", badRequest);
     std::string key = line.substr(0, cont);
     std::string value = line.substr(cont + 2);
-    if (key.empty() || value.empty())
+    if (key.empty())
         throw ParseError("Headers Error: format not exist", badRequest);
     for (size_t i = 0; i < key.length(); i++)
         if (key[i] == ' ' || !isprint(key[i]) || !isascii(key[i]))

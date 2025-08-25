@@ -30,6 +30,7 @@ class Headers
         void _splitCookie(std::string cookie);
         std::string _percentEncoding(std::string cookie);
         int _toDecimal(std::string::iterator begin, std::string::iterator end);
+        bool _isValidHeaderKey(const std::string& key);
     public:
         std::string getCookie(const std::string& key) const;
 
