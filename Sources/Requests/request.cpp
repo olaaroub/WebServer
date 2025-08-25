@@ -77,7 +77,6 @@ void Request:: ChunkReaContent()
                 throw ParseError("Request Error: format of chunked POST not correct", badRequest);
             std::string line = buffer.substr(0, findNewLine);
             line = _ignoreExtension(line);
-
             is_number(line);
             std::istringstream ff(line);
             ff >> std::hex >> len;
