@@ -19,19 +19,19 @@ void server:: bind_and_listen()
     int yes = 1;
     if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
     {
-        perror("Server Error: ");
-        throw ParseError("!", socket_fd);;
+        perror("Server Error: setsocketopt error");
+        throw ParseError("Exiting...", socket_fd);
     }
     if (bind(socket_fd, (sockaddr *)&network_infos, sizeof(network_infos)) < 0)
     {
-        perror("Server Error: ");
-        throw ParseError("!", socket_fd);
+        perror("Server Error: bind error");
+        throw ParseError("Exiting...", socket_fd);
     }
     set_ToNoBlocking();
     if (listen(socket_fd, SOMAXCONN) < 0)
     {
-        perror("Listen Error: ");
-        throw ParseError("!", socket_fd);;
+        perror("Server Error: listen error");
+        throw ParseError("Exiting...", socket_fd);;
     }
 }
 

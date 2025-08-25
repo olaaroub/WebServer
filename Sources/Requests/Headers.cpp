@@ -31,11 +31,11 @@ bool Headers:: _isValidHeaderKey(const std::string& key) {
     if (key.empty())
         return false;
 
-    const std::string forbiddenChars = "()<>@,;:\"/[]?={} \t";
+    std::string invalidHeaderKeyPrintable = "()<>@,;:\\\"/[]?={} \t";
 
     for (size_t i = 0; i < key.length(); ++i)
     {
-        if (iscntrl(static_cast<unsigned char>(key[i])) || forbiddenChars.find(key[i]) != std::string::npos)
+        if (iscntrl(static_cast<unsigned char>(key[i])) || invalidHeaderKeyPrintable.find(key[i]) != std::string::npos)
             return false;
     }
 
@@ -46,14 +46,14 @@ void Headers:: AddToMap(std::string line)
 {
     size_t cont = line.find(":");
     if (cont == std::string::npos)
-        throw ParseError("Headers Error: format not exist", badRequest);
+        throw ParseError("Headers Error: Invalid Header format", badRequest);
     std::string key = line.substr(0, cont);
     std::string value = line.substr(cont + 2);
-    if (key.empty())
-        throw ParseError("Headers Error: format not exist", badRequest);
-    for (size_t i = 0; i < key.length(); i++)
-        if (key[i] == ' ' || !isprint(key[i]) || !isascii(key[i]))
-            throw ParseError("Headers Error: Bad request: space in key", badRequest);
+    if (!_isValidHeaderKey(key))
+        throw ParseError("Headers Error: Invalid Key", badRequest);
+    for (size_t i = 0; i < value.size(); i++)
+        if (!isprint(value[i]) || iscntrl(static_cast<unsigned char>(value[i])))
+            throw ParseError("Headers Error: Invalid Header value", badRequest);
     key = toLower(key);
     map[key].push_back(value);
 }

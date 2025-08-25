@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 14:21:00 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/07/10 12:02:17 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/23 21:53:16 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ private:
 	bool 											isWhitespaces(const std::string& str)const;
 	bool 											isDirective(const std::string& str)const;
 	bool 											isMethod(const std::string& str)const;
+	int 											validateAndParsePort(const std::string& port_str)const;
 
 
 	ConfigParser(const ConfigParser &obj);

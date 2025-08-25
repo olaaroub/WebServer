@@ -6,7 +6,7 @@ int                 		        serverManager::kernel_identifier = 0;
 struct epoll_event  		        serverManager::evlist;
 std::map<int, network *> 	        serverManager::activeNetworks;
 std::map<std::string, SessionData>  serverManager::s_activeSessions;
-const int 					        serverManager::request_timeout =  10;
+const int 					        serverManager::request_timeout =  60;
 const std::string                   serverManager::s_sessionFilePath = "sessions.db";
 
 void serverManager:: signal_handler(int)
@@ -102,7 +102,6 @@ void serverManager::saveSessionsToFile()
         sessionFile << it->first << " " << it->second.name << " " << it->second.expiry_time << std::endl;
     }
 }
-
 
 void serverManager::reapChildProcesses()
 {
@@ -278,7 +277,7 @@ void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
             {
                 if (e.ErrorStute > 0)
                     close(e.ErrorStute);
-                std::cerr << e.what() << std::endl;
+                std::cerr << RED << e.what() << RESET;
             }
         }
     }
@@ -289,7 +288,7 @@ void serverManager::startServers()
     try
     {
         if (!activeNetworks.size())
-            throw std::runtime_error("no server to run it");
+            throw std::runtime_error("No active networks");
         listening();
     }
     catch (std::exception &e)

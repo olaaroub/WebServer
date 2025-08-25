@@ -34,7 +34,7 @@ void RequestLine:: SeparateUrlAndQuerys(std::string buff)
 void RequestLine:: ParsRequestLine()
 {
     std::string buff;
-    std::string forbidenChars = "{}|\\^[]`";
+    std::string forbidenChars = " \t{}|\\^[]`";
     std::stringstream str(line);
     str >> method;
     str >> buff;
@@ -44,7 +44,7 @@ void RequestLine:: ParsRequestLine()
     for (size_t i = 0; i < _url.size(); i++)
     {
         size_t index = forbidenChars.find(_url[i]);
-        if (!isprint(_url[i]) || index != std::string::npos || _url[i] == ' ')
+        if (!isprint(_url[i]) || index != std::string::npos)
             throw ParseError("invalid characters in uri", badRequest);
     }
     _url = uRLEncoding(_url);
