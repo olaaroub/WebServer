@@ -13,7 +13,7 @@ std::string Headers:: get_buffer()
 // std::string Headers::toLower(const std::string& str) const {
 //     std::string result = str;
 //     std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-//     // std::cout << green << result << reset << std::endl;
+//     // std::cout << GREEN << result << RESET << std::endl;
 //         return result;
 // }
 
@@ -31,14 +31,16 @@ void Headers:: AddToMap(std::string line)
 {
     size_t cont = line.find(":");
     if (cont == std::string::npos)
-        throw ParseError("Headers Error: format not exist", badRequest);
+        throw ParseError("Headers Error: Invalid Header format", badRequest);
     std::string key = line.substr(0, cont);
     std::string value = line.substr(cont + 2);
-    if (key.empty() || value.empty())
-        throw ParseError("Headers Error: format not exist", badRequest);
+    // std::cout << YELLOW << "Header Line: '" << line << "'" << RESET << std::endl;
+    // std::cout << MAGENTA << "Parsed Header - Key: '" << key << "', Value: '" << value << "'" << RESET << std::endl;
+    if (key.empty())
+        throw ParseError("Headers Error: Empty Key or Value!", badRequest);
     for (size_t i = 0; i < key.length(); i++)
-        if (key[i] == ' ' || !isprint(key[i]) || !isascii(key[i]))
-            throw ParseError("Headers Error: Bad request: space in key", badRequest);
+        if (key[i] == ' ' || !isprint(key[i]) || !isascii(key[i]) )// is validKey(key)
+            throw ParseError("Headers Error: Invalid Key", badRequest);
     key = toLower(key);
     map[key].push_back(value);
 }
@@ -115,7 +117,7 @@ void Headers:: _splitCookie(std::string cookie)
     std::string key = cookie.substr(0, findIndex++);
     std::string value = cookie.substr(findIndex, cookie.size() - findIndex);
     cookieInfo[key] = _percentEncoding(value);
-    std::cout << "key: '" << key << "' value: '" << cookieInfo[key] << "'" << std::endl;
+    std::cout << MAGENTA << "Parsed Cookie: key='" << key << "', value='" << cookieInfo[key] << "'" << RESET << std::endl;
 }
 
 void Headers:: cookieParser()

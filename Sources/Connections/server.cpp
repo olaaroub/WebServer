@@ -19,19 +19,19 @@ void server:: bind_and_listen()
     int yes = 1;
     if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
     {
-        perror("Server Error: ");
-        throw std::runtime_error("!");
+        perror("Server Error: setsocketopt error");
+        throw ParseError("Exiting...", socket_fd);
     }
     if (bind(socket_fd, (sockaddr *)&network_infos, sizeof(network_infos)) < 0)
     {
-        perror("Server Error: ");
-        throw std::runtime_error("!");
+        perror("Server Error: bind error");
+        throw ParseError("Exiting...", socket_fd);
     }
     set_ToNoBlocking();
     if (listen(socket_fd, SOMAXCONN) < 0)
     {
-        perror("Listen Error: ");
-        throw std::runtime_error("!");
+        perror("Server Error: listen error");
+        throw ParseError("Exiting...", socket_fd);;
     }
 }
 
@@ -39,7 +39,7 @@ void server:: creat_socket()
 {
     socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_fd < 0)
-        std::runtime_error("Server Error: Socket failed!");
+        ParseError("Server Error: Socket failed!", socket_fd);
     network_infos.sin_family = AF_INET;
     network_infos.sin_addr.s_addr = this->ip_addres;
     network_infos.sin_port = htons(this->port);
@@ -61,6 +61,7 @@ void server:: onEvent()
             delete client_re;
             return ;
         }
+        std::cout << GREEN << "[FD: " << fd << "] New connection accepted." << RESET << std::endl;
         client_re->set_fd(fd);
         client_re->set_ToNoBlocking();
         client_re->epoll_crt();

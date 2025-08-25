@@ -10,5 +10,6 @@ canvas.hpp
 nots.txt
 test
 *.ser
-
+*.mp4
 .vscode/
+# *.py

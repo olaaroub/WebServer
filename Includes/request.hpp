@@ -32,7 +32,7 @@ private:
     void StateOFParser();
     void ChunkReaContent();
     void ContentLenghtRead();
-
+    std::string _ignoreExtension(std::string line);
     
     unsigned long _chunkSize;
     unsigned long _contentSize;
@@ -61,8 +61,8 @@ private:
 
         std::stringstream body_content;
         std::fstream *file;
-        Request() : _chunkSize(0), _contentSize(0),  _waiting_for_new_chunk(true),  state(_InRequestLine),request_ended(false) {}
-        ~Request() {}
+        Request();
+        ~Request();
 };
 
 #endif

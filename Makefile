@@ -1,6 +1,7 @@
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
 CXXFLAGS += -fsanitize=address -g3
+# MAKEFLAGS = -j
 
 NAME = webserv
 
@@ -23,7 +24,6 @@ SRC = 	main.cpp \
 		Methods/Methods.cpp \
 		Methods/Post.cpp \
 		Methods/Delete.cpp \
-		# 		Methods/response.cpp \
 
 
 
@@ -63,7 +63,8 @@ fclean: clean
 	rm -f $(NAME)
 	rm -rf $(OPATH)
 
-re: fclean all
+re: fclean
+	make all
 
 .PHONY: all clean fclean re
 

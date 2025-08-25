@@ -26,7 +26,6 @@ void network:: epoll_crt()
     ev.data.fd = socket_fd;
     if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_ADD, socket_fd, &ev) < 0)
         throw std::runtime_error("Network Error: epoll control failed!");
-
 }
 
 void network:: epoll_crt(int event_flags)

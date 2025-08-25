@@ -20,7 +20,7 @@ public:
     int check_dir(struct stat file_info);
     int check_file(struct stat file_info);
     std::string get_final_path();
-    std::string generate_Fileautoindex();
+    std::string generate_Fileautoindex(std::string requestUri);
     Get(std::string path, const LocationConfigs *location); //needs to be const ref
     ~Get();
 };

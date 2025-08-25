@@ -6,11 +6,12 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 17:21:57 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/12 16:47:08 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/23 22:57:37 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigFileParser.hpp"
+#include "Utils.hpp"
 
 ConfigParser::ConfigParser(const std::string &rawContent) : _content(rawContent) { this->parse(); }
 
@@ -80,6 +81,18 @@ bool ConfigParser::isMethod(const std::string &str)const{
 	return(str == GET || str == POST || str == DELETE);
 }
 
+int ConfigParser::validateAndParsePort(const std::string& port_str)const {
+    if (port_str.empty() || port_str.find_first_not_of("0123456789") != std::string::npos) {
+        throw std::runtime_error("Config Error: Port '" + port_str + "' is not a valid number.");
+    }
+
+    long port = std::strtol(port_str.c_str(), NULL, 10);
+    if (port < 1 || port > 65535) {
+        throw std::runtime_error("Config Error: Port number '" + port_str + "' is out of range");
+    }
+    return static_cast<int>(port);
+}
+
 void ConfigParser::parse()
 {
 	this->checkBraces();
@@ -138,36 +151,32 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
 			std::string parsed_host;
 			int parsed_port;
 			size_t colon_pos = listen_val.find(':');
-			if (colon_pos != std::string::npos){
+
+			if (colon_pos != std::string::npos) {
 				parsed_host = listen_val.substr(0, colon_pos);
-				// std::cout << "parsed_host: '" << parsed_host <<"'"<< std::endl;
-				// std::cout << "server_conf.host: '" << server_conf.host<<"'" << std::endl;
-				parsed_port = std::atoi(listen_val.substr(colon_pos + 1).c_str());
+                if (parsed_host.empty())
+                    parsed_host = "0.0.0.0";
+
+				std::string port_str = listen_val.substr(colon_pos + 1);
+				parsed_port = validateAndParsePort(port_str);
+
 				if(!server_conf.host_set)
 				{
 					server_conf.host = parsed_host;
 					server_conf.host_set = true;
 				}
 				else if(server_conf.host.compare(parsed_host) != 0)
-				{
-					// std::cout << "parsed_host: '" << parsed_host <<"'"<< std::endl;
-					// std::cout << "server_conf.host: '" << server_conf.host<<"'" << std::endl;
-					// std::cout << "listen_val: '" << listen_val <<"'"<< std::endl;
-					throw std::runtime_error("Config Error: Server block cannot have multiple host adresses.");
-				}
+					throw std::runtime_error("Config Error: Server block cannot have multiple host addresses.");
 			}
-			else{
-				parsed_port = std::atoi(listen_val.c_str());
-				std::cout << "parsed_host: '" << parsed_host <<"'"<< std::endl;
-				std::cout << "server_conf.host: '" << server_conf.host<<"'" << std::endl;
+			else {
+                if (listen_val.find('.') != std::string::npos) {
+                    throw std::runtime_error("Config Error: listen directive '" + listen_val + "' is missing a port.");
+                }
+				parsed_port = validateAndParsePort(listen_val);
 				if(!server_conf.host_set)
 				{
 					server_conf.host = "0.0.0.0";
 					server_conf.host_set = true;
-				}
-				else if(server_conf.host.compare(parsed_host) != 0)
-				{
-					throw std::runtime_error("Server block cannot have multiple host adresses.");
 				}
 			}
 
@@ -179,18 +188,23 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
 
 			if (!(ss >> token) || token != ";")
 				throw std::runtime_error("Config Error: Missing ';' after 'listen' directive.");
-			// server_conf.host_set = true;
 		}
 		else if (token == CLIENT_MAX_BODY_SIZE)
 		{
 			if (server_conf.client_max_body_size_set)
 				throw std::runtime_error("Config Error: Duplicate 'client_max_body_size' directive.");
+
 			std::string size_str;
 			ss >> size_str;
-			server_conf.client_max_body_size = std::strtol(size_str.c_str(), NULL, 10);
+
+
+			server_conf.client_max_body_size = parseSizeToBytes(size_str);
+
 			if (!(ss >> token) || token != ";")
-				throw std::runtime_error("Config Error: Missing ';' after 'client_max_body_size' directive.");
+			throw std::runtime_error("Config Error: Missing ';' after 'client_max_body_size' directive.");
 			server_conf.client_max_body_size_set = true;
+			// std::cout << "client_max_body_size: " << server_conf.client_max_body_size << std::endl;
+			// exit(0);
 		}
 		else if (token == SERVER_NAME)
 		{
@@ -214,6 +228,11 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
 		}
 		else
 			throw std::runtime_error("Config Error: Unknown directive '" + token + "' in server block.");
+	}
+	if(!server_conf.client_max_body_size_set)
+	{
+		server_conf.client_max_body_size = 10 * 1024 * 1024;
+		server_conf.client_max_body_size_set = true;
 	}
 	return server_conf;
 }
@@ -309,6 +328,25 @@ LocationConfigs ConfigParser::parseLocationBlock(std::stringstream &ss)
 	}
 	if (token != "}")
 		throw std::runtime_error("Config Error: Location block not closed properly.");
+
+	if(!location_conf.root_set && !location_conf.redirection_set)
+		throw std::runtime_error("Config Error: 'root' directive is required in location block.");
+	if(location_conf.allowed_methods.empty() && !location_conf.redirection_set)
+		throw std::runtime_error("Config Error: 'allow_methods' directive is required in location block.");
+	if(std::find(location_conf.allowed_methods.begin(), location_conf.allowed_methods.end(), "POST") != location_conf.allowed_methods.end()
+		&& !location_conf.upload_path_set && !location_conf.cgi_set)
+		throw std::runtime_error("Config Error: 'upload_path' directive is required when POST method is allowed.");
+	if(!location_conf.autoindex_set)
+	{
+		location_conf.autoindex = false;
+		location_conf.autoindex_set = true;
+	}
+	if(!location_conf.auth_set)
+	{
+		location_conf.auth_required = false;
+		location_conf.auth_set = true;
+	}
+
 	return location_conf;
 }
 

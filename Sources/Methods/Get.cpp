@@ -13,7 +13,7 @@ int Get::check_dir(struct stat file_info)
         return 403;
 
     // auto index handle !
-    // std::cout <<  red << "----------  " << reset << std::endl;
+    // std::cout <<  red << "----------  " << RESET << std::endl;
     if (location->index_file.empty()) // mean the index file is not found
     {
         if (location->autoindex == true)
@@ -29,11 +29,12 @@ int Get::check_dir(struct stat file_info)
     return check_file(new_file_info);
 }
 
-std::string Get::generate_Fileautoindex()
+std::string Get::generate_Fileautoindex(std::string requestUri)
 {
     DIR *dir = opendir(path.c_str());
     // if (dir == NULL)
     //     return 500;
+
 
     std::stringstream html;
     html << "<!DOCTYPE html>\n<html>\n<head><title>Index of " << path << "</title></head>\n";
@@ -49,6 +50,8 @@ std::string Get::generate_Fileautoindex()
         if (entry == NULL)
             break ;
         std::string name = entry->d_name;
+       
+
         if (name == "." || name == "..")
         {
             continue;
@@ -58,13 +61,17 @@ std::string Get::generate_Fileautoindex()
         // Check if the entry is a directory
         if (entry->d_type == DT_DIR)
             link_path += "/";
-
+        // check
+        if (path[path.length() - 1] != '/')
+        {
+            link_path = requestUri + "/" + link_path;
+        }
         // Add the link
-        html << "<li><a href=\"" << link_path << "\">" << link_path << "</a></li>\n";
+        html << "<li><a href=\"" <<  link_path << "\">" << name << "</a></li>\n";
+        // std::cout << "!!!!!!!!!!!   " << link_path << std::endl;
     }
 
     html << "</ul>\n</body>\n</html>";
-
     closedir(dir);
     return html.str();
 }

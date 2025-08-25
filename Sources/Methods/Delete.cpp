@@ -19,8 +19,8 @@ int Delete::check_dir(struct stat file_info)
     // if (stat(this->path.c_str(), &new_file_info) != 0)
     //     return "404";
     // return check_file(new_file_info);
-    // std::cout << red << "you try to delete a dirctory !! " << reset << std::endl;
-    // std::cout << red << "path of the dir : " << this->path << reset << std::endl;
+    // std::cout << RED << "you try to delete a dirctory !! " << RESET << std::endl;
+    // std::cout << RED << "path of the dir : " << this->path << RESET << std::endl;
     return 1;
 }
 
@@ -44,10 +44,10 @@ std::string Delete::get_final_path()
 int Delete::delete_file()
 {
     if (std::remove(this->path.c_str()) == 0)
-        std::cout << green << "file deleted !" << reset << std::endl;
+        std::cout << GREEN << "file deleted !" << RESET << std::endl;
     else
     {
-        perror("Error deleting file"); 
+        perror("Error deleting file");
 
         if (errno == ENOENT)
         {

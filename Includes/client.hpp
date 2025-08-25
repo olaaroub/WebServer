@@ -5,33 +5,28 @@
 #include "request.hpp"
 #include "Methods.hpp"
 
-
-// class ParseError : public std::exception
-// {
-//     private:
-//         std::string _Error;
-//         short _ErrorStute;
-//     public:
-//         ParseError(std::string Error, short stute) : _Error(Error), _ErrorStute(stute){}
-//         short getStutError() const {return _ErrorStute;}
-//         const char* what() const throw()
-//         {
-//             return _Error.c_str();
-//         }
-// };
-
 class client : public network
 {
     private:
         Request request;
         time_t lastActivity;
-        short _errorStute;
-        // unsigned long long _maxBodyBytes;
-        // const LocationConfigs *findLocation(const std::string &uri);
 
-        void _convertMaxBodySize();
+        enum ClientState {
+            READING,
+            WRITING
+        };
+
+        ClientState _state;
+        std::string _response_buffer;
+        size_t _bytes_sent;
+
+        void _handleWrite();
+        bool _is_monitored;
 
     public:
+
+        void prepareResponse(const std::string& response);
+
         void sendResponseString(const std::string& response);
         const LocationConfigs *findLocation(const std::string &uri);
 
@@ -42,18 +37,14 @@ class client : public network
         void epoll_modify();
         void onEvent();
 
-        void set_fd(int fd)
-        {
-            socket_fd = fd;
-        }
-        Request &get_request()
-        {
-            return request;
-        }
-        long get_max_body()
-        {
-            return server_config.client_max_body_size;
-        }
+        void setMonitored(bool monitored);
+        bool isMonitored() const;
+
+        void set_fd(int fd);
+        Request &get_request();
+        long get_max_body();
+
+        bool is_request_complete;
         ~client();
 };
 
