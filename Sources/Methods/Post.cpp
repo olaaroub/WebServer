@@ -55,7 +55,11 @@ int Post::post_multipartFormData(std::string content_type, std::string body_cont
         }
         std::string file_name = extract_nameFile(header);
 
+
+
         std::ofstream savefile1(joinPaths(get_locationFiles(), file_name).c_str(), std::ios::binary);
+        if (savefile1.is_open() == false)
+            return 403;
         savefile1.write(content.c_str(), content.length());
         savefile1.close();
 

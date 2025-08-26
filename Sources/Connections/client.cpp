@@ -210,7 +210,6 @@ void client::onEvent()
                     return;
                 }
 
-
 				if (location->auth_required)
 				{
 
@@ -241,14 +240,12 @@ void client::onEvent()
                     return;
                 }
 
-
 				if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(),
 					request.requestLine.get_method()) == location->allowed_methods.end())//  check if method is allowed
 				{
 					handleHttpError(405);
 					return;
 				}
-
 
 				HttpResponse SendResp;
 				if (request.requestLine.get_method() == "GET") {
@@ -294,8 +291,7 @@ void client::onEvent()
 					{
 						handleHttpError(400);
 						return;
-					}// wach ohammou kay checki 3la hadchi f request? 3lach kachecki 3lih nta hna
-
+					}
 					std::string content_type = request.headers.map["content-type"].at(0);
 
 					unsigned long check_multipartFOrmData = content_type.find("multipart/form-data");
