@@ -191,7 +191,6 @@ void CgiExecutor::onEvent()
 					cgiResponseBuilder.addHeader("Set-Cookie", expiredCookie);
 				}
 
-				// _client->sendResponseString(cgiResponseBuilder.toString());
 				_client->prepareResponse(cgiResponseBuilder.toString());
 				serverManager::activeNetworks[_client->get_socket_fd()] = _client;
     			_client = NULL; // fach kansift can rje3 l client wkan7ydo mn 3ndi servermanager how li mklef db
@@ -224,33 +223,6 @@ void CgiExecutor::_handleWrite()
 
 void CgiExecutor::_handleRead()
 {
-	// char buffer[4096];
-	// ssize_t bytes = read(_pipe_out_fd, buffer, sizeof(buffer));
-	// std::cout << "CGI Output: " << buffer;
-	// //print bytes read
-	// std::cout << "Bytes read: " << bytes << std::endl;
-
-	// if (bytes > 0)
-	// {
-	// 	_responseBuffer.append(buffer, bytes);
-	// }
-	// else
-	// {
-	// 	_state = CGI_DONE;
-	// 	int status;
-	// 	waitpid(_pid, &status, 0);
-
-	// 	if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
-	// 	{
-	// 		_client->sendErrorResponse(502, "Bad Gateway");
-	// 		return;
-	// 	}
-
-	// 	HttpResponse cgiResponse;
-	// 	cgiResponse.setFromCgiOutput(_responseBuffer);
-	// 	cgiResponse.sendResponse(_client->get_socket_fd());
-	// }
-
 	 while (true)
     {
         char buffer[4096];
@@ -275,6 +247,8 @@ void CgiExecutor::_setupEnvironment(const Request &req, const LocationConfigs &l
 	env.push_back("SCRIPT_NAME=" + req.requestLine.getUrl());
 	env.push_back("SERVER_PROTOCOL=HTTP/1.1");
 	env.push_back("REDIRECT_STATUS=200");
+	std::string sessionId = req.headers.getCookie("sessionid");
+
 
 	if (!server_config.server_names.empty())
 		env.push_back("SERVER_NAME=" + server_config.server_names[0]);
@@ -301,9 +275,6 @@ void CgiExecutor::_setupEnvironment(const Request &req, const LocationConfigs &l
 		ss.str("");
 	}
 
-	// if (req.headers.map.count("content-type")) {
-	//     env.push_back("CONTENT_TYPE=" + req.headers.map.at("content-type")[0]);
-	// }
 	std::map<std::string, std::vector<std::string> >::const_iterator it;
 
 	it = req.headers.map.find("content-type");
@@ -314,16 +285,6 @@ void CgiExecutor::_setupEnvironment(const Request &req, const LocationConfigs &l
 	{
 		if (it->first == "content-length" || it->first == "content-type")
 			continue;
-
-		// std::string header_name = "HTTP_";
-		// for (size_t i = 0; i < it->first.length(); ++i)
-		// {
-		// 	if (it->first[i] == '-')
-		// 		header_name += '_';
-		// 	else
-		// 		header_name += toupper(it->first[i]);
-		// }
-
 		std::string header_name = "HTTP_";
         std::string key = it->first;
         std::transform(key.begin(), key.end(), key.begin(), ::toupper);
@@ -332,6 +293,14 @@ void CgiExecutor::_setupEnvironment(const Request &req, const LocationConfigs &l
 
 		if (!it->second.empty())
 			env.push_back(header_name + "=" + it->second[0]);
+	}
+
+	if (!sessionId.empty()) {
+		if (serverManager::validateSession(sessionId)) {
+			env.push_back("HTTP_X_SESSION_STATUS=VALID");
+		} else {
+			env.push_back("HTTP_X_SESSION_STATUS=INVALID");
+		}
 	}
 
 	_envp = new char *[env.size() + 1];

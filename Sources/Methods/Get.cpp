@@ -35,10 +35,9 @@ std::string Get::generate_Fileautoindex(std::string requestUri)
     // if (dir == NULL)
     //     return 500;
 
-
     std::stringstream html;
-    html << "<!DOCTYPE html>\n<html>\n<head><title>Index of " << path << "</title></head>\n";
-    html << "<body>\n<h1>Index of " << path << "</h1>\n<ul>\n";
+    html << "<!DOCTYPE html>\n<html>\n<head><title>listing directory " << path << "</title></head>\n";
+    html << "<body>\n<h1>" << path << "</h1>\n<ul>\n";
 
     html << "<li><a href=\"..\">../</a></li>\n";
 
@@ -50,7 +49,7 @@ std::string Get::generate_Fileautoindex(std::string requestUri)
         if (entry == NULL)
             break ;
         std::string name = entry->d_name;
-       
+
 
         if (name == "." || name == "..")
         {
