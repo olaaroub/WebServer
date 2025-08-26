@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/21 19:03:07 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/24 22:53:42 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,8 +161,9 @@ const char* getReasonPhrase(int code) {
         case 403: return "Forbidden";
         case 404: return "Not Found";
         case 405: return "Method Not Allowed";
+        case 408: return "Request Timeout";
         case 413: return "Payload Too Large";
-        case 415: return "Unsupported Media Type";
+        case 414: return "URI Too Long";
         case 500: return "Internal Server Error";
         case 501: return "Not Implemented";
         case 502: return "Bad Gateway";
@@ -260,4 +261,32 @@ bool pathChecker(std::string Uri)
             paths.push(dir);
     }
     return true;
+}
+
+
+std::string uRLEncoding(std::string url)
+{
+    std::string res;
+    for (size_t i = 0; i < url.size(); i++)
+    {
+        if (i + 2 < url.size() && url[i] == '%')
+        {
+            if (std::isxdigit(url[i + 1]) && std::isxdigit(url[i + 2]))
+            {
+                int encodingChar;
+                std::string str(url.begin() + i + 1, url.begin() + i + 3);
+                std::istringstream ff(str);
+                ff >> std::hex >> encodingChar;
+                res += static_cast<char>(encodingChar);
+                url.erase(i, 2);
+            }
+            else
+                throw ParseError("uRLEncoding: Bad Request", badRequest);
+        }
+        else if (url[i] == '+')
+            res += ' ';
+        else
+            res += url[i];
+    }
+    return res;
 }

@@ -16,16 +16,16 @@ void Request:: ParsRequstLine()
 {
     size_t cont = buffer.find("\r\n");
 
-    if (buffer.size() > MAX_REQUESTLINE_SIZE)
-        throw ParseError("Request Error: Request Line Size too Large!", badRequest);
     if (cont != std::string::npos)
     {
         requestLine.set_line(buffer.substr(0, cont));
         requestLine.ParsRequestLine();
         buffer.erase(0, cont+2);
         state++;
-        if (requestLine.getHttpVerction() != "HTTP/1.1" && requestLine.getHttpVerction() != "HTTP/1.0")
+        std::string verction = toLower(requestLine.getHttpVerction());
+        if (verction != "http/1.1" && verction != "http/1.0")
             throw ParseError("RequestLine Error: verstion of HTTP not seported!", badRequest);
+        
     }
 
 }
@@ -35,7 +35,7 @@ void Request:: ParsHeaders()
     size_t cont = buffer.find("\r\n\r\n");
 
     if (buffer.size() > MAX_HEADERS_SIZE)
-        throw ParseError("Request Error: Headers Size too Large!", badRequest);
+        throw ParseError("Request Error: Headers Size too Large!", requestHeaderTooLarge);
     if (cont != std::string::npos)
     {
 
@@ -44,7 +44,7 @@ void Request:: ParsHeaders()
         headers.HeadersParser();
         headers.cookieParser();
         // cookie here
-        if (requestLine.get_method() != "POST")
+        if (requestLine.get_method() != "POST" && requestLine.get_method() != "post")
             request_ended = true;
         else
             request_ended = false;
@@ -52,6 +52,15 @@ void Request:: ParsHeaders()
         state++;
     }
 
+}
+
+std::string Request:: _ignoreExtension(std::string line)
+{
+    size_t index = line.find(";");
+    if (index == std::string::npos)
+        return line;
+    else
+        return line.substr(0, index);
 }
 
 void Request:: ChunkReaContent()
@@ -67,6 +76,7 @@ void Request:: ChunkReaContent()
             if (findNewLine == std::string::npos)
                 throw ParseError("Request Error: format of chunked POST not correct", badRequest);
             std::string line = buffer.substr(0, findNewLine);
+            line = _ignoreExtension(line);
             is_number(line);
             std::istringstream ff(line);
             ff >> std::hex >> len;
@@ -146,7 +156,7 @@ void Request:: StateOFParser()
         ParsRequstLine();
     if (state == _InHeaders)
         ParsHeaders();
-    if (state == _InPost && requestLine.get_method() == "POST")
+    if (state == _InPost && (requestLine.get_method() == "POST" || requestLine.get_method() == "post"))
         ParsBody();
 
 }

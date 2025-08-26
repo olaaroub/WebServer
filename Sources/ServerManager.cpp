@@ -6,7 +6,7 @@ int                 		        serverManager::kernel_identifier = 0;
 struct epoll_event  		        serverManager::evlist;
 std::map<int, network *> 	        serverManager::activeNetworks;
 std::map<std::string, SessionData>  serverManager::s_activeSessions;
-const int 					        serverManager::request_timeout =  10;
+const int 					        serverManager::request_timeout =  60;
 const std::string                   serverManager::s_sessionFilePath = "sessions.db";
 
 void serverManager:: signal_handler(int)
@@ -102,7 +102,6 @@ void serverManager::saveSessionsToFile()
         sessionFile << it->first << " " << it->second.name << " " << it->second.expiry_time << std::endl;
     }
 }
-
 
 void serverManager::reapChildProcesses()
 {
@@ -274,9 +273,11 @@ void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
                 std::cout << CYAN << "[SERVER] Listening on " << (*it).host << ":" << *its << RESET << std::endl;
                 add_server(new_server);
             }
-            catch (std::exception &e)
+            catch (ParseError &e)
             {
-                std::cerr << e.what() << std::endl;
+                if (e.ErrorStute > 0)
+                    close(e.ErrorStute);
+                std::cerr << RED << e.what() << RESET;
             }
         }
     }
@@ -286,6 +287,8 @@ void serverManager::startServers()
 {
     try
     {
+        if (!activeNetworks.size())
+            throw std::runtime_error("No active networks");
         listening();
     }
     catch (std::exception &e)
@@ -293,7 +296,10 @@ void serverManager::startServers()
         std::cerr << YELLOW << "\nServer shutting down: " << e.what() << RESET << std::endl;
         std::map<int, network *>::iterator it;
         for (it = activeNetworks.begin(); it != activeNetworks.end(); ++it)
+        {
+            close(it->first);
             delete it->second;
+        }
         activeNetworks.clear();
         close(kernel_identifier);
     }
