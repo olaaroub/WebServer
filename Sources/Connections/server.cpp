@@ -27,7 +27,7 @@ void server:: bind_and_listen()
         perror("Server Error: bind error");
         throw ParseError("Exiting...", socket_fd);
     }
-    // set_ToNoBlocking();
+    set_ToNoBlocking();
     if (listen(socket_fd, SOMAXCONN) < 0)
     {
         perror("Server Error: listen error");
@@ -37,7 +37,7 @@ void server:: bind_and_listen()
 
 void server:: creat_socket()
 {
-    socket_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+    socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_fd < 0)
         ParseError("Server Error: Socket failed!", socket_fd);
     network_infos.sin_family = AF_INET;
@@ -55,8 +55,7 @@ void server:: onEvent()
         client *client_re = new client(server_config);
         clien_struct = client_re->get_sockaddr();
         socklen_t addr_size = sizeof(clien_struct);
-        // int fd = accept(socket_fd, (sockaddr *)clien_struct, &addr_size);
-        int fd = accept4(socket_fd, (sockaddr *)clien_struct, &addr_size, SOCK_NONBLOCK);
+        int fd = accept(socket_fd, (sockaddr *)clien_struct, &addr_size);
         if (fd < 0)
         {
             delete client_re;
@@ -64,9 +63,9 @@ void server:: onEvent()
         }
         std::cout << GREEN << "[FD: " << fd << "] New connection accepted." << RESET << std::endl;
         client_re->set_fd(fd);
+        client_re->set_ToNoBlocking();
         client_re->epoll_crt();
         client_re->set_time(time(NULL));
         serverManager::activeNetworks[fd] = client_re;
-
     }
 }

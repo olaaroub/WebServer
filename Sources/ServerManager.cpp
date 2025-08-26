@@ -258,11 +258,6 @@ void serverManager::listening()
         }
     }
 }
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>   // <-- Important, defines struct addrinfo
-#include <cstring>   // for memset
-#include <iostream>
 
 void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
 {
@@ -272,12 +267,6 @@ void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
     {
         for (std::vector<int>::const_iterator its = it->ports.begin(); its != it->ports.end(); its++)
         {
-            // struct addrinfo hints, *res;
-            // memset(&hints, 0, sizeof(hints));
-            // hints.ai_family = AF_INET;
-            // hints.ai_socktype = SOCK_STREAM;
-            // getaddrinfo((*it).host.c_str(), NULL, &hints, &res);
-            // struct sockaddr_in* ipv4 = (struct sockaddr_in*)res->ai_addr;
             try
             {
                 server *new_server = new server((*its), inet_addr((*it).host.c_str()), (*it));

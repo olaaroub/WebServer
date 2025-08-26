@@ -6,14 +6,14 @@ int network:: get_socket_fd()
     return socket_fd;
 }
 
-// void network:: set_ToNoBlocking()
-// {
-//     int flags = fcntl(socket_fd, F_GETFL, 0);
-//     if (flags < 0)
-//         throw std::runtime_error("Network Error: Failed to get socket flags");
-//     if (fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK) == -1)
-//         throw std::runtime_error("Network Error: Failed to set non-blocking mode\n");
-// }
+void network:: set_ToNoBlocking()
+{
+    int flags = fcntl(socket_fd, F_GETFL, 0);
+    if (flags < 0)
+        throw std::runtime_error("Network Error: Failed to get socket flags");
+    if (fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK) == -1)
+        throw std::runtime_error("Network Error: Failed to set non-blocking mode\n");
+}
 
 network:: network(const ServerConfigs &server_config) : server_config(server_config)
 {
