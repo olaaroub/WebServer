@@ -8,11 +8,9 @@ std::map<int, network *> 	        serverManager::activeNetworks;
 std::map<std::string, SessionData>  serverManager::s_activeSessions;
 const int 					        serverManager::request_timeout =  60;
 const std::string                   serverManager::s_sessionFilePath = "sessions.db";
-bool isShutdown = false;
+
 void serverManager:: signal_handler(int)
-{
-    isShutdown = true;
-}
+{ throw std::runtime_error("signal catched"); }
 
 void serverManager::add_server(network *instance)
 { activeNetworks[instance->get_socket_fd()] = instance; }
@@ -201,8 +199,6 @@ void serverManager::listening()
         int event = epoll_wait(kernel_identifier, evlist.data(), evlist.size(), 1000);
 
         time_t current_time = time(NULL);
-        if (isShutdown)
-            throw std::runtime_error("signal catched");
         if (event < 0)
         {
             perror("Epoll Error: ");
@@ -220,8 +216,7 @@ void serverManager::listening()
         reapChildProcesses();
 
         signal(SIGINT, signal_handler);
-        signal(SIGTERM, signal_handler);
-        signal(SIGPIPE, SIG_IGN);
+
         // for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
         // {
         //     client *Client = dynamic_cast<client *>(it->second);
