@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 17:21:57 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/23 22:57:37 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/25 23:18:04 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -320,6 +320,7 @@ LocationConfigs ConfigParser::parseLocationBlock(std::stringstream &ss)
 				throw std::runtime_error("Config Error: Duplicate 'auth_required' directive in location.");
 			ss >> val;
 			location_conf.auth_required = (val == "on");
+			location_conf.auth_set = true;
 			if(!(ss >> token) || token != ";")
 				throw std::runtime_error("Config Error: Missing ';' after 'auth_required' directive.");
 		}

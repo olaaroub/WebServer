@@ -210,7 +210,6 @@ void client::onEvent()
                     return;
                 }
 
-
 				if (location->auth_required)
 				{
 
@@ -241,14 +240,12 @@ void client::onEvent()
                     return;
                 }
 
-
 				if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(),
 					request.requestLine.get_method()) == location->allowed_methods.end())//  check if method is allowed
 				{
 					handleHttpError(405);
 					return;
 				}
-
 
 				HttpResponse SendResp;
 				if (request.requestLine.get_method() == "GET") {

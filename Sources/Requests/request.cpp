@@ -25,7 +25,7 @@ void Request:: ParsRequstLine()
         std::string verction = toLower(requestLine.getHttpVerction());
         if (verction != "http/1.1" && verction != "http/1.0")
             throw ParseError("RequestLine Error: verstion of HTTP not seported!", badRequest);
-        
+
     }
 
 }
@@ -166,14 +166,14 @@ bool Request:: run_parser(int socket_fd)
 {
     char bfr[1024];
 
-    int cont = read(socket_fd, &bfr, 1023);
-    if (cont < 0)
+    int count = read(socket_fd, &bfr, 1023);
+    if (count < 0)
         throw ParseError("Request Error: read failed!", ServerError);
-    if (cont == 0)
+    if (count == 0)
         throw ParseError("Request Error: Client closed connection unexpectedly", closeConnection);
-    if (cont > 3 && bfr[0] == 0x16 && bfr[1] == 0x03 && bfr[2] >= 0x00 && bfr[2] <= 0x04)
+    if (count > 3 && bfr[0] == 0x16 && bfr[1] == 0x03 && bfr[2] >= 0x00 && bfr[2] <= 0x04)
         throw ParseError("Request Error: Client sent a TLS handshake", closeConnection);
-    buffer.append(bfr, cont);
+    buffer.append(bfr, count);
     StateOFParser();
     return request_ended;
 }
