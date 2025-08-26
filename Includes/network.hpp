@@ -21,7 +21,7 @@ class network
 
         void epoll_crt(int event_flags);
         void epoll_crt();
-        void set_ToNoBlocking();
+        // void set_ToNoBlocking();
 
         sockaddr_in *get_sockaddr();
         bool if_server();
