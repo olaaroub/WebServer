@@ -6,11 +6,13 @@ int                 		        serverManager::kernel_identifier = 0;
 struct epoll_event  		        serverManager::evlist;
 std::map<int, network *> 	        serverManager::activeNetworks;
 std::map<std::string, SessionData>  serverManager::s_activeSessions;
-const int 					        serverManager::request_timeout =  10;
+const int 					        serverManager::request_timeout =  60;
 const std::string                   serverManager::s_sessionFilePath = "sessions.db";
-
+bool isShutdown = false;
 void serverManager:: signal_handler(int)
-{ throw std::runtime_error("signal catched"); }
+{
+    isShutdown = true;
+}
 
 void serverManager::add_server(network *instance)
 { activeNetworks[instance->get_socket_fd()] = instance; }
@@ -199,6 +201,8 @@ void serverManager::listening()
         int event = epoll_wait(kernel_identifier, evlist.data(), evlist.size(), 1000);
 
         time_t current_time = time(NULL);
+        if (isShutdown)
+            throw std::runtime_error("signal catched");
         if (event < 0)
         {
             perror("Epoll Error: ");
@@ -216,7 +220,8 @@ void serverManager::listening()
         reapChildProcesses();
 
         signal(SIGINT, signal_handler);
-
+        signal(SIGTERM, signal_handler);
+        signal(SIGPIPE, SIG_IGN);
         // for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
         // {
         //     client *Client = dynamic_cast<client *>(it->second);
@@ -258,6 +263,11 @@ void serverManager::listening()
         }
     }
 }
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>   // <-- Important, defines struct addrinfo
+#include <cstring>   // for memset
+#include <iostream>
 
 void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
 {
@@ -267,6 +277,12 @@ void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
     {
         for (std::vector<int>::const_iterator its = it->ports.begin(); its != it->ports.end(); its++)
         {
+            // struct addrinfo hints, *res;
+            // memset(&hints, 0, sizeof(hints));
+            // hints.ai_family = AF_INET;
+            // hints.ai_socktype = SOCK_STREAM;
+            // getaddrinfo((*it).host.c_str(), NULL, &hints, &res);
+            // struct sockaddr_in* ipv4 = (struct sockaddr_in*)res->ai_addr;
             try
             {
                 server *new_server = new server((*its), inet_addr((*it).host.c_str()), (*it));

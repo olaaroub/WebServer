@@ -27,6 +27,21 @@ std::string Headers::getCookie(const std::string& key) const {
     return "";
 }
 
+bool Headers:: _isValidHeaderKey(const std::string& key) {
+    if (key.empty())
+        return false;
+
+    std::string invalidHeaderKeyPrintable = "()<>@,;:\\\"/[]?={} \t";
+
+    for (size_t i = 0; i < key.length(); ++i)
+    {
+        if (iscntrl(static_cast<unsigned char>(key[i])) || invalidHeaderKeyPrintable.find(key[i]) != std::string::npos)
+            return false;
+    }
+
+    return true;
+}
+
 void Headers:: AddToMap(std::string line)
 {
     size_t cont = line.find(":");
@@ -34,13 +49,11 @@ void Headers:: AddToMap(std::string line)
         throw ParseError("Headers Error: Invalid Header format", badRequest);
     std::string key = line.substr(0, cont);
     std::string value = line.substr(cont + 2);
-    // std::cout << YELLOW << "Header Line: '" << line << "'" << RESET << std::endl;
-    // std::cout << MAGENTA << "Parsed Header - Key: '" << key << "', Value: '" << value << "'" << RESET << std::endl;
-    if (key.empty())
-        throw ParseError("Headers Error: Empty Key or Value!", badRequest);
-    for (size_t i = 0; i < key.length(); i++)
-        if (key[i] == ' ' || !isprint(key[i]) || !isascii(key[i]) )// is validKey(key)
-            throw ParseError("Headers Error: Invalid Key", badRequest);
+    if (!_isValidHeaderKey(key))
+        throw ParseError("Headers Error: Invalid Key", badRequest);
+    for (size_t i = 0; i < value.size(); i++)
+        if (!isprint(value[i]) || iscntrl(static_cast<unsigned char>(value[i])))
+            throw ParseError("Headers Error: Invalid Header value", badRequest);
     key = toLower(key);
     map[key].push_back(value);
 }
