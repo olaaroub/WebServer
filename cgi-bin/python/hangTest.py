@@ -19,7 +19,7 @@ post_data = sys.stdin.read()
 # --- Send the HTTP response headers ---
 # CORRECT WAY: Use sys.stdout.write for precise control over output.
 # This avoids the extra newline added by the print() function.
-sys.stdout.write("Content-Type: text/html\r\n")
+sys.stdot.write("Content-Type: text/html\r\n")
 sys.stdout.write("\r\n") # This blank line is crucial to separate headers from the body.
 sys.stdout.flush() # Ensure headers are sent immediately.
 

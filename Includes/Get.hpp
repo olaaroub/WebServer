@@ -1,11 +1,8 @@
 #ifndef GET_HPP
 #define GET_HPP
 
-// #include "network.hpp"
-// #include "request.hpp"
-// #include "client.hpp"
+#include "client.hpp"
 #include "lib.hpp"
-#include "Methods.hpp"
 
 class Get
 {
@@ -21,7 +18,7 @@ public:
     int check_file(struct stat file_info);
     std::string get_final_path();
     std::string generate_Fileautoindex(std::string requestUri);
-    Get(std::string path, const LocationConfigs *location); //needs to be const ref
+    Get(std::string path, const LocationConfigs *location);
     ~Get();
 };
 

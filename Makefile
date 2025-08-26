@@ -1,6 +1,6 @@
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98
-CXXFLAGS += -fsanitize=address -g3
+# CXXFLAGS += -fsanitize=address -g3
 # MAKEFLAGS = -j
 
 NAME = webserv
@@ -21,7 +21,6 @@ SRC = 	main.cpp \
 		Requests/request.cpp \
 		Requests/RequestLine.cpp \
 		Methods/Get.cpp \
-		Methods/Methods.cpp \
 		Methods/Post.cpp \
 		Methods/Delete.cpp \
 

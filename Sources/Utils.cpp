@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/26 02:41:50 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/26 21:15:16 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,68 +162,63 @@ const char *getReasonPhrase(int code)
 
 std::string getMimeType(const std::string &filePath)
 {
-    size_t dot_pos = filePath.rfind('.');
-    if (dot_pos == std::string::npos)
-        return "application/octet-stream";
-    std::string extension = filePath.substr(dot_pos);
-    // std::cout << MAGENTA << "MIME type lookup for extension: " << extension << RESET << std::endl;
+    static std::map<std::string, std::string> mime_types;
+    if (mime_types.empty()) {
+        // Web Content
+        mime_types[".html"] = "text/html";
+        mime_types[".htm"]  = "text/html";
+        mime_types[".css"]  = "text/css";
+        mime_types[".js"]   = "application/javascript";
+        mime_types[".json"] = "application/json";
+        mime_types[".xml"]  = "application/xml";
 
-    if (extension == ".html" || extension == ".htm")
-        return "text/html";
-    if (extension == ".css")
-        return "text/css";
-    if (extension == ".js")
-        return "application/javascript";
-    if (extension == ".jpg" || extension == ".jpeg")
-        return "image/jpeg";
-    if (extension == ".png")
-        return "image/png";
-    if (extension == ".gif")
-        return "image/gif";
-    if (extension == ".ico")
-        return "image/x-icon";
-    if (extension == ".txt")
-        return "text/plain";
-    if (extension == ".mp4")
-        return "video/mp4";
-    if (extension == ".json")
-        return "application/json";
-    if (extension == ".xml")
-        return "application/xml";
-    if (extension == ".svg")
-        return "image/svg+xml";
-    if (extension == ".csv")
-        return "text/csv";
-    if (extension == ".pdf")
-        return "application/pdf";
-    if (extension == ".mpeg" || extension == ".mpg")
-        return "video/mpeg";
-    if (extension == ".webm")
-        return "video/webm";
-    if (extension == ".ogg")
-        return "audio/ogg";
-    if (extension == ".mp3")
-        return "audio/mpeg";
-    if (extension == ".wav")
-        return "audio/wav";
-    if (extension == ".zip")
-        return "application/zip";
-    if (extension == ".tar")
-        return "application/x-tar";
-    if (extension == ".rar")
-        return "application/x-rar-compressed";
-    if (extension == ".7z")
-        return "application/x-7z-compressed";
-    if (extension == ".woff")
-        return "font/woff";
-    if (extension == ".woff2")
-        return "font/woff2";
-    if (extension == ".ttf")
-        return "font/ttf";
-    if (extension == ".eot")
-        return "application/vnd.ms-fontobject";
-    if (extension == ".otf")
-        return "font/otf";
+        // Images
+        mime_types[".jpeg"] = "image/jpeg";
+        mime_types[".jpg"]  = "image/jpeg";
+        mime_types[".png"]  = "image/png";
+        mime_types[".gif"]  = "image/gif";
+        mime_types[".svg"]  = "image/svg+xml";
+        mime_types[".ico"]  = "image/x-icon";
+        mime_types[".webp"] = "image/webp";
+
+        // Video
+        mime_types[".mp4"]  = "video/mp4";
+        mime_types[".webm"] = "video/webm";
+        mime_types[".mpeg"] = "video/mpeg";
+        mime_types[".mpg"]  = "video/mpeg";
+
+        // Audio
+        mime_types[".mp3"]  = "audio/mpeg";
+        mime_types[".ogg"]  = "audio/ogg";
+        mime_types[".wav"]  = "audio/wav";
+
+        // Documents & Data
+        mime_types[".pdf"]  = "application/pdf";
+        mime_types[".txt"]  = "text/plain";
+        mime_types[".csv"]  = "text/csv";
+
+        // Fonts
+        mime_types[".ttf"]   = "font/ttf";
+        mime_types[".otf"]   = "font/otf";
+        mime_types[".woff"]  = "font/woff";
+        mime_types[".woff2"] = "font/woff2";
+        mime_types[".eot"]   = "application/vnd.ms-fontobject";
+
+        // Archives
+        mime_types[".zip"]  = "application/zip";
+        mime_types[".tar"]  = "application/x-tar";
+        mime_types[".rar"]  = "application/x-rar-compressed";
+        mime_types[".7z"]   = "application/x-7z-compressed";
+    }
+
+    size_t dot_pos = filePath.rfind('.');
+    if (dot_pos != std::string::npos) {
+        std::string extension = filePath.substr(dot_pos);
+        std::map<std::string, std::string>::const_iterator it = mime_types.find(extension);
+        if (it != mime_types.end()) {
+            return it->second;
+        }
+    }
 
     return "application/octet-stream";
 }

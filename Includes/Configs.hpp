@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 18:29:07 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/12 18:26:49 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/26 20:43:29 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,41 +17,37 @@
 struct LocationConfigs
 {
 	LocationConfigs();
-	std::string path;
-    std::string root;
-    std::string index_file;
-    std::vector<std::string> allowed_methods;
-    bool        autoindex;
-    int         redirection_code;
-    std::string redirection_url;
+	std::string 							path;
+	std::string 							root;
+	std::string 							index_file;
+	std::string 							redirection_url;
+	std::string 							upload_path;
+	std::vector<std::string> 				allowed_methods;
+	std::map<std::string, std::string>		cgi_handlers;
 
-    std::map<std::string, std::string> cgi_handlers;
-    std::string upload_path;
-    bool        auth_required;
-
-    bool root_set;
-    bool autoindex_set;
-    bool index_file_set;
-    bool redirection_set;
-    bool upload_path_set;
-    bool cgi_set;
-    bool auth_set;
+	bool 									autoindex;
+	int 									redirection_code;
+	bool 									auth_required;
+	bool 									root_set;
+	bool 									autoindex_set;
+	bool 									index_file_set;
+	bool 									redirection_set;
+	bool 									upload_path_set;
+	bool 									cgi_set;
+	bool 									auth_set;
 };
-
 
 struct ServerConfigs
 {
 	ServerConfigs();
-	std::vector<int>         ports;
-    std::string host;
-    std::vector<std::string> server_names;
-    long        client_max_body_size;
-    std::map<int, std::string> error_pages;
-    std::vector<LocationConfigs> locations;
+	std::string 							host;
+	long 									client_max_body_size;
+	bool 									host_set;
+	bool 									client_max_body_size_set;
 
-    bool host_set;
-    bool client_max_body_size_set;
+	std::vector<int> 						ports;
+	std::vector<std::string>				server_names;
+	std::map<int, std::string> 				error_pages;
+	std::vector<LocationConfigs> 			locations;
 
 };
-
-

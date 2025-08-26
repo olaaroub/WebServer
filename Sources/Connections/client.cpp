@@ -8,36 +8,15 @@
 #include "Delete.hpp"
 
 client::client(const ServerConfigs &server_config) : network(server_config, false),
-            _state(READING), _bytes_sent(0), _is_monitored(true),  is_request_complete(false) { request.max_body_size = get_max_body(); }
-
+            _state(READING), _bytes_sent(0), _is_monitored(true),  requestComplete(false) { _request.max_body_size = get_max_body(); }
 
 void client::setMonitored(bool monitored) { _is_monitored = monitored; }
 bool client::isMonitored() const { return _is_monitored; }
-
-
-void client:: set_fd(int fd)
-{
-   socket_fd = fd;
-}
-
-Request &client:: get_request()
-{
-    return request;
-}
-
-long client:: get_max_body()
-{
-    return server_config.client_max_body_size;
-}
-
-// void client::epoll_modify()
-// {
-//     ev.events = EPOLLOUT | EPOLLRDHUP;
-//     ev.data.fd = socket_fd;
-//     if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_MOD, socket_fd, &ev) < 0)
-//         throw std::runtime_error("Client Error: epoll control failed!");
-
-// }
+void client:: set_fd(int fd){ socket_fd = fd; }
+Request &client:: get_request(){ return _request; }
+long client:: get_max_body(){ return server_config.client_max_body_size; }
+time_t client::getTime() const{ return _lastActivity; }
+void	client::setTime(time_t time){ _lastActivity = time; }
 
 void client::prepareResponse(const std::string& response)
 {
@@ -49,14 +28,14 @@ void client::prepareResponse(const std::string& response)
     ev.events = EPOLLOUT | EPOLLRDHUP;
     ev.data.fd = socket_fd;
 
-    if (_is_monitored)// machi cgi
+    if (_is_monitored)
     {
         if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_MOD, socket_fd, &ev) < 0) {
             throw std::runtime_error("Client Error: epoll_ctl MOD failed on a monitored client!");
         }
     }
 
-   else // cgi
+   else
     {
         if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_ADD, socket_fd, &ev) < 0) {
              throw std::runtime_error("Client Error: epoll_ctl ADD failed on an unmonitored client!");
@@ -149,18 +128,18 @@ void client::onEvent()
     {
         try
         {
-            lastActivity = time(NULL);
-            is_request_complete = request.run_parser(socket_fd);
-            if (is_request_complete)
+            _lastActivity = time(NULL);
+            requestComplete = _request.run_parser(socket_fd);
+            if (requestComplete)
             {
-                std::string method = toLower(request.requestLine.get_method());
+                std::string method = toLower(_request.requestLine.get_method());
                 if (method != "post" && method != "get" && method != "delete")
                     throw ParseError("RequestLine Error: method not implemented", methodNotImplemented);
                 std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Request received: "
-                          << request.requestLine.get_method() << " "
-                          << request.requestLine.getUrl() << RESET << std::endl;
+                          << _request.requestLine.get_method() << " "
+                          << _request.requestLine.getUrl() << RESET << std::endl;
 
-				const std::string &requestUri = normalizePath(request.requestLine.getUrl());
+				const std::string &requestUri = normalizePath(_request.requestLine.getUrl());
                 // std::cout << YELLOW << "Normalized URI: " << requestUri << RESET << std::endl;
                 if (!pathChecker(requestUri))
                 {
@@ -184,8 +163,8 @@ void client::onEvent()
 
                     std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Passing to CGI handler for " << fullPath << RESET << std::endl;
                     struct stat script_stat;
-					if (request.requestLine.get_method() == "DELETE" || (std::find(location->allowed_methods.begin(), location->allowed_methods.end(),
-						request.requestLine.get_method()) == location->allowed_methods.end()))//  check if method is allowed
+					if (_request.requestLine.get_method() == "DELETE" || (std::find(location->allowed_methods.begin(), location->allowed_methods.end(),
+						_request.requestLine.get_method()) == location->allowed_methods.end()))//  check if method is allowed
 					{
 						handleHttpError(405);
 						return;
@@ -206,14 +185,14 @@ void client::onEvent()
                     this->setMonitored(false);
 					serverManager::activeNetworks.erase(this->socket_fd);
                     epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, this->socket_fd, 0);
-                    new CgiExecutor(this->server_config, *location, request, this, fullPath);
+                    new CgiExecutor(this->server_config, *location, _request, this, fullPath);
                     return;
                 }
 
 				if (location->auth_required)
 				{
 
-					std::string sessionId = request.headers.getCookie("sessionid");
+					std::string sessionId = _request.headers.getCookie("sessionid");
 
 					if (serverManager::validateSession(sessionId) == false)
 					{
@@ -241,14 +220,14 @@ void client::onEvent()
                 }
 
 				if (std::find(location->allowed_methods.begin(), location->allowed_methods.end(),
-					request.requestLine.get_method()) == location->allowed_methods.end())//  check if method is allowed
+					_request.requestLine.get_method()) == location->allowed_methods.end())//  check if method is allowed
 				{
 					handleHttpError(405);
 					return;
 				}
 
 				HttpResponse SendResp;
-				if (request.requestLine.get_method() == "GET") {
+				if (_request.requestLine.get_method() == "GET") {
 					std::cout << MAGENTA << "[FD: " << this->socket_fd
 						<< "] Responding with GET for " << fullPath << RESET << std::endl;
                     struct stat path_stat;
@@ -281,23 +260,23 @@ void client::onEvent()
                     }
 
                 }
-				else if (request.requestLine.get_method() == "POST") {
+				else if (_request.requestLine.get_method() == "POST") {
 					std::cout << MAGENTA << "[FD: " << this->socket_fd
 						<< "] Responding with POST for " << fullPath << RESET << std::endl;
                     Post post(location->upload_path);
 					std::map<std::string, std::vector<std::string> >::const_iterator it;
-					it = request.headers.map.find("content-type");
-					if (it == request.headers.map.end() || it->second.empty()) // it not found the content-type correctly !
+					it = _request.headers.map.find("content-type");
+					if (it == _request.headers.map.end() || it->second.empty())
 					{
 						handleHttpError(400);
 						return;
 					}
-					std::string content_type = request.headers.map["content-type"].at(0);
+					std::string content_type = _request.headers.map["content-type"].at(0);
 
 					unsigned long check_multipartFOrmData = content_type.find("multipart/form-data");
 					if (check_multipartFOrmData != std::string::npos)
 					{
-						int type_res = post.post_multipartFormData(content_type, request.body_content.str());
+						int type_res = post.post_multipartFormData(content_type, _request.body_content.str());
 						if (type_res != 1)
 						{
 							handleHttpError(type_res);
@@ -305,7 +284,7 @@ void client::onEvent()
 						}
 					}
 					else
-						post.post_Query(request.requestLine.queryLine, request.body_content.str());
+						post.post_Query(_request.requestLine.queryLine, _request.body_content.str());
 
 					SendResp.setStatus(201);
 					SendResp.addHeader("Content-Type", "text/html");
@@ -313,7 +292,7 @@ void client::onEvent()
 
                     SendResp.setStatus(201);
                 }
-				else if (request.requestLine.get_method() == "DELETE") {
+				else if (_request.requestLine.get_method() == "DELETE") {
 					std::cout << MAGENTA << "[FD: " << this->socket_fd
 						<< "] Responding with DELETE for " << fullPath << RESET << std::endl;
                     Delete del(fullPath, location);
@@ -364,9 +343,14 @@ void client::onEvent()
             throw ResponseSentException("Response sent successfully.");
             return;
         }
+		catch(const CgiExecutorException& e)
+		{
+			std::cerr << RED << "CGI Error: " << e.what() << RESET << '\n';
+			handleHttpError(500);
+			return;
+		}
         catch(const std::exception& e)
         {
-            std::cerr << " jit l second catch in client.cpp"  << e.what() << '\n';
             std::cerr << RED << "Internal Server Error in client.cpp: "  << e.what() << RESET << '\n';
             handleHttpError(ServerError);
             return;

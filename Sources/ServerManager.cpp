@@ -135,6 +135,8 @@ void serverManager::checkCgiTimeouts()
                 std::cout << YELLOW << "[CGI] Timeout for PID " << executor->getPid() << ". Terminating." << RESET << std::endl;
                 kill(executor->getPid(), SIGKILL);
                 executor->getClient()->handleHttpError(504);
+                activeNetworks[executor->getClient()->get_socket_fd()] = executor->getClient();
+                executor->removeClient();
                 should_delete = true;
             }
 
@@ -163,13 +165,14 @@ void serverManager::epollEvent(int fd, int event)
     catch (const ResponseSentException &e)
     {
         std::cout << GREEN << "[FD: " << fd << "] Closing connection 7itach " << e.what() << RESET << std::endl;
-
         epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, fd, 0);
         if (activeNetworks.count(fd))
         {
+
             delete activeNetworks[fd];
             activeNetworks.erase(fd);
         }
+
         close(fd);
     }
     catch (const std::exception &e)
@@ -221,11 +224,12 @@ void serverManager::listening()
 
         signal(SIGINT, signal_handler);
         signal(SIGTERM, signal_handler);
+        signal(SIGQUIT, signal_handler);
         signal(SIGPIPE, SIG_IGN);
         // for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
         // {
         //     client *Client = dynamic_cast<client *>(it->second);
-        //     if (Client != NULL && !Client->is_request_complete && (current_time - Client->get_time()) > request_timeout)
+        //     if (Client != NULL && !Client->requestComplete && (current_time - Client->get_time()) > request_timeout)
         //     {
         //         std::cout << RED << "[FD: " << it->first << "] Client timed out. Closing connection." << RESET << std::endl;
         //         Client->handleHttpError(timeout);
@@ -246,7 +250,7 @@ void serverManager::listening()
             {
                 client *c = dynamic_cast<client *>(it->second);
 
-                if (c && c->isMonitored() && !c->is_request_complete && (current_time - c->get_time()) > request_timeout)
+                if (c && c->isMonitored() && !c->requestComplete && (current_time - c->getTime()) > request_timeout)
                 {
                     std::cout << YELLOW << "[FD: " << it->first << "] Client timed out. Closing connection." << RESET << std::endl;
                     c->handleHttpError(timeout);
@@ -263,11 +267,6 @@ void serverManager::listening()
         }
     }
 }
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>   // <-- Important, defines struct addrinfo
-#include <cstring>   // for memset
-#include <iostream>
 
 void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
 {

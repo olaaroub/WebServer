@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 14:21:00 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/23 21:53:16 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/26 20:23:22 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,7 @@
 #include "lib.hpp"
 #include "Configs.hpp"
 
-class ConfigParser
-{
+class ConfigParser{
 public:
 	ConfigParser(const std::string &rawContent);
 	~ConfigParser();

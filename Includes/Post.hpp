@@ -1,11 +1,8 @@
 #ifndef POST_HPP
 #define POST_HPP
 
-// #include "network.hpp"
-// #include "request.hpp"
-// #include "client.hpp"
+#include "client.hpp"
 #include "lib.hpp"
-#include "Methods.hpp"
 
 class Post
 {

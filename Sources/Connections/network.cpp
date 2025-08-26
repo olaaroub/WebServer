@@ -62,13 +62,3 @@ int network:: get_event()
 {
     return event;
 }
-
-time_t network:: get_time()
-{
-    return lastActivity;
-}
-
-void network:: set_time(time_t new_time)
-{
-    lastActivity = new_time;
-}
