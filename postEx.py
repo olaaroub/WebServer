@@ -29,3 +29,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     response = s.recv(4096)
     print("=== Server Response ===")
     print(response.decode(errors="ignore"))
+
