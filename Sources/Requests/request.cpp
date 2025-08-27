@@ -22,8 +22,8 @@ void Request::ParsRequstLine()
 		requestLine.ParsRequestLine();
 		_buffer.erase(0, cont + 2);
 		state++;
-		std::string verction = toLower(requestLine.getHttpVerction());
-		if (verction != "http/1.1" && verction != "http/1.0")
+		std::string verction = requestLine.getHttpVerction();
+		if (verction != "HTTP/1.1" && verction != "HTTP/1.0")
 			throw ParseError("RequestLine Error: verstion of HTTP not seported!", badRequest);
 	}
 }
@@ -42,7 +42,7 @@ void Request::ParsHeaders()
 		headers.HeadersParser();
 		headers.cookieParser();
 		// cookie here
-		if (requestLine.get_method() != "POST" && requestLine.get_method() != "post")
+		if (requestLine.get_method() != "POST")
 			request_ended = true;
 		else
 			request_ended = false;
@@ -139,9 +139,9 @@ void Request::ContentLenghtRead()
 
 void Request::ParsBody()
 {
-	if (!headers.map["content-length"].empty())
+	if (headers.map.find("content-length") != headers.map.end())
 		ContentLenghtRead();
-	else if (!headers.map["transfer-encoding"].empty() && headers.map["transfer-encoding"].at(0) == "chunked")
+	else if (headers.map.find("transfer-encoding") != headers.map.end() && headers.map["transfer-encoding"].at(0) == "chunked")
 		ChunkReaContent();
 	else
 		throw ParseError("Request Error: this method to transfer data not allowed!", badRequest);
@@ -153,7 +153,7 @@ void Request::StateOFParser()
 		ParsRequstLine();
 	if (state == _InHeaders)
 		ParsHeaders();
-	if (state == _InPost && (requestLine.get_method() == "POST" || requestLine.get_method() == "post"))
+	if (state == _InPost && requestLine.get_method() == "POST")
 		ParsBody();
 }
 

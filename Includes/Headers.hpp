@@ -11,6 +11,7 @@ private:
 	std::string 										_percentEncoding(std::string cookie);
 	int 												_toDecimal(std::string::iterator begin, std::string::iterator end);
 	bool 												_isValidHeaderKey(const std::string &key);
+	std::string											_trim(std::string str);
 
 public:
 	std::string 										getCookie(const std::string &key) const;

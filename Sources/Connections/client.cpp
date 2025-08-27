@@ -135,11 +135,11 @@ void client::onEvent()
 			requestComplete = _request.run_parser(_socket_fd);
 			if (requestComplete)
 			{
-				std::string method = toLower(_request.requestLine.get_method());
-				if (method != "post" && method != "get" && method != "delete")
+				std::string method = _request.requestLine.get_method();
+				if (method != "POST" && method != "GET" && method != "DELETE")
 					throw ParseError("RequestLine Error: method not implemented", methodNotImplemented);
 				std::cout << MAGENTA << "[FD: " << this->_socket_fd << "] Request received: "
-						  << _request.requestLine.get_method() << " "
+						  << method << " "
 						  << _request.requestLine.getUrl() << RESET << std::endl;
 
 				const std::string &requestUri = normalizePath(_request.requestLine.getUrl());
@@ -281,6 +281,7 @@ void client::onEvent()
 						return;
 					}
 					std::string content_type = _request.headers.map["content-type"].at(0);
+					std::cout << content_type << std::endl;
 
 					unsigned long check_multipartFOrmData = content_type.find("multipart/form-data");
 					if (check_multipartFOrmData != std::string::npos)

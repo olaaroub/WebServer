@@ -45,13 +45,25 @@ bool Headers::_isValidHeaderKey(const std::string &key)
 	return true;
 }
 
+std::string	Headers:: _trim(std::string str)
+{
+	if (str.empty())
+		return "";
+    size_t start = str.find_first_not_of("\t ");
+    if (start == std::string::npos) {
+        return "";
+    }
+    size_t end = str.find_last_not_of("\t ");
+    return str.substr(start, end - start + 1);
+}
+
 void Headers::AddToMap(std::string line)
 {
 	size_t cont = line.find(":");
 	if (cont == std::string::npos)
 		throw ParseError("Headers Error: Invalid Header format", badRequest);
 	std::string key = line.substr(0, cont);
-	std::string value = line.substr(cont + 2);
+	std::string value = _trim(line.substr(cont + 1));
 	if (!_isValidHeaderKey(key))
 		throw ParseError("Headers Error: Invalid Key", badRequest);
 	for (size_t i = 0; i < value.size(); i++)
@@ -73,14 +85,17 @@ void Headers::HeadersParser()
 		AddToMap(_buffer.substr(0, cont));
 		_buffer = _buffer.substr(cont + 2);
 	}
-
-	if (map["host"].size() > 1 || map["content-length"].size() > 1 || map["content-type"].size() > 1 || map["authorization"].size() > 1 || map["transfer-encoding"].size() > 1)
-		throw ParseError("Headers Error: duplicate headers", badRequest);
-	if (map["host"].empty())
+	if (map.find("host") == map.end() || map["host"].size() != 1 || (!map["host"].empty() && map["host"].at(0).empty()))
 		throw ParseError("Headers Error: host not found", badRequest);
-	if (!map["content-length"].empty() && !map["transfer-encoding"].empty())
+	
+	std::string keysCheck[3] = {"content-length", "authorization", "transfer-encoding"};
+	for (int i = 0; i < 3; i++)
+	{
+		if (map.find(keysCheck[i]) != map.end() && (map[keysCheck[i]].size() != 1 || (!map[keysCheck[i]].empty() && map[keysCheck[i]].at(0).empty())))
+			throw ParseError("Headers Error: ", badRequest);
+	}
+	if (map.find("content-length") != map.end() && map.find("transfer-encoding") != map.end())
 		throw ParseError("Headers Error: content-length and transfer-encoding not allowed together", badRequest);
-
 	// for (std::map<std::string, std::vector<std::string> >::iterator it = map.begin(); it != map.end(); it++)
 	// {
 	//     std::cout << "first: '" << it->first << "' second: '" << it->second.at(0) << "'" << std::endl;
