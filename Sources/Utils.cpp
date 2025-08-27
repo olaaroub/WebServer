@@ -6,299 +6,322 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/26 21:15:16 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/27 18:25:33 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Utils.hpp"
 
 ResponseSentException::ResponseSentException(const std::string &message) : messageSent(message) { ; }
-const char *ResponseSentException::what() const throw(){ return messageSent.c_str(); }
+const char *ResponseSentException::what() const throw() { return messageSent.c_str(); }
 
 ParseError::ParseError(std::string Error, short stute) : _Error(Error), ErrorStute(stute) {}
 short ParseError::getStutError() const { return ErrorStute; }
-const char *ParseError::what() const throw(){ return _Error.c_str(); }
+const char *ParseError::what() const throw() { return _Error.c_str(); }
 ParseError::~ParseError() throw() {}
 
 std::string joinPaths(const std::string &p1, const std::string &p2)
 {
 
-    if (p1.empty())
-        return p2;
-    if (p2.empty())
-        return p1;
+	if (p1.empty())
+		return p2;
+	if (p2.empty())
+		return p1;
 
-    std::string path1 = p1;
-    std::string path2 = p2;
-    while (!path1.empty() && path1[path1.length() - 1] == '/')
-        path1 = path1.substr(0, path1.length() - 1);
+	std::string path1 = p1;
+	std::string path2 = p2;
+	while (!path1.empty() && path1[path1.length() - 1] == '/')
+		path1 = path1.substr(0, path1.length() - 1);
 
-    while (!path2.empty() && path2[0] == '/')
-        path2 = path2.substr(1);
-    return path1 + "/" + path2;
+	while (!path2.empty() && path2[0] == '/')
+		path2 = path2.substr(1);
+	return path1 + "/" + path2;
 }
 
 std::string normalizePath(const std::string &uri)
 {
-    if (uri.empty())
-        return "/";
+	if (uri.empty())
+		return "/";
 
-    std::string result;
-    result.reserve(uri.length());
-    result += '/';
+	std::string result;
+	result.reserve(uri.length());
+	result += '/';
 
-    for (size_t i = 0; i < uri.length(); ++i)
-    {
-        if (uri[i] == '/')
-        {
-            if (result[result.length() - 1] != '/')
-                result += '/';
-        }
-        else
-            result += uri[i];
-    }
-    return result;
+	for (size_t i = 0; i < uri.length(); ++i)
+	{
+		if (uri[i] == '/')
+		{
+			if (result[result.length() - 1] != '/')
+				result += '/';
+		}
+		else
+			result += uri[i];
+	}
+	return result;
 }
 
 std::string getExtension(const std::string &path)
 {
-    size_t dot_pos = path.rfind('.');
+	size_t dot_pos = path.rfind('.');
 
-    if (dot_pos != std::string::npos)
-    {
-        size_t slash_pos = path.rfind('/');
-        if (slash_pos != std::string::npos && dot_pos < slash_pos)
-            return "";
-        return path.substr(dot_pos);
-    }
-    return "";
+	if (dot_pos != std::string::npos)
+	{
+		size_t slash_pos = path.rfind('/');
+		if (slash_pos != std::string::npos && dot_pos < slash_pos)
+			return "";
+		return path.substr(dot_pos);
+	}
+	return "";
 }
 
 std::string getFileContents(const std::string &filePath)
 {
-    std::ifstream fileStream(filePath.c_str());
-    if (!fileStream.is_open())
-        return "";
-    std::stringstream buffer;
-    buffer << fileStream.rdbuf();
-    return buffer.str();
+	std::ifstream fileStream(filePath.c_str());
+	if (!fileStream.is_open())
+		return "";
+	std::stringstream buffer;
+	buffer << fileStream.rdbuf();
+	return buffer.str();
 }
 
 std::string trimWhitespace(const std::string &s)
 {
-    const std::string WHITESPACE = " \t\r\n";
-    size_t first = s.find_first_not_of(WHITESPACE);
-    if (std::string::npos == first)
-        return s;
-    size_t last = s.find_last_not_of(WHITESPACE);
-    return s.substr(first, (last - first + 1));
+	const std::string WHITESPACE = " \t\r\n";
+	size_t first = s.find_first_not_of(WHITESPACE);
+	if (std::string::npos == first)
+		return s;
+	size_t last = s.find_last_not_of(WHITESPACE);
+	return s.substr(first, (last - first + 1));
 }
 
 std::string generateUniqueFilename()
 {
-    time_t currentTime = time(NULL);
+	time_t currentTime = time(NULL);
 
-    std::stringstream ss;
-    ss << currentTime;
+	std::stringstream ss;
+	ss << currentTime;
 
-    // 3. Add a file extension.
-    return ss.str() + ".ser";
+	// 3. Add a file extension.
+	return ss.str() + ".ser";
 }
 
 long parseSizeToBytes(const std::string &size_str)
 {
-    if (size_str.empty())
-        throw std::runtime_error("Config Error: client_max_body_size value is empty.");
+	if (size_str.empty())
+		throw std::runtime_error("Config Error: client_max_body_size value is empty.");
 
-    long number;
-    long multiplier = 1;
-    std::string num_part = size_str;
+	long number;
+	long multiplier = 1;
+	std::string num_part = size_str;
 
-    char last_char = toupper(size_str[size_str.length() - 1]);
-    if (last_char == 'M' || last_char == 'K')
-    {
-        multiplier = (last_char == 'M') ? (1024 * 1024) : 1024;
-        num_part = size_str.substr(0, size_str.length() - 1);
-    }
+	char last_char = toupper(size_str[size_str.length() - 1]);
+	if (last_char == 'M' || last_char == 'K')
+	{
+		multiplier = (last_char == 'M') ? (1024 * 1024) : 1024;
+		num_part = size_str.substr(0, size_str.length() - 1);
+	}
 
-    if (num_part.empty() || num_part.find_first_not_of("0123456789") != std::string::npos)
-        throw std::runtime_error("Config Error: Invalid number format for client_max_body_size '" + size_str + "'");
+	if (num_part.empty() || num_part.find_first_not_of("0123456789") != std::string::npos)
+		throw std::runtime_error("Config Error: Invalid number format for client_max_body_size '" + size_str + "'");
 
-    char *end = NULL;
-    number = std::strtol(num_part.c_str(), &end, 10);
+	char *end = NULL;
+	number = std::strtol(num_part.c_str(), &end, 10);
 
-    if (*end != '\0')
-        throw std::runtime_error("Config Error: Invalid client_max_body_size value '" + size_str + "'");
+	if (*end != '\0')
+		throw std::runtime_error("Config Error: Invalid client_max_body_size value '" + size_str + "'");
 
-    if (number < 0 || (multiplier > 1 && number > LONG_MAX / (multiplier)))
-        throw std::runtime_error("Config Error: client_max_body_size value '" + size_str + "' is too large and would cause an overflow.");
-    return number * multiplier;
+	if (number < 0 || (multiplier > 1 && number > LONG_MAX / (multiplier)))
+		throw std::runtime_error("Config Error: client_max_body_size value '" + size_str + "' is too large and would cause an overflow.");
+	return number * multiplier;
 }
 
 const char *getReasonPhrase(int code)
 {
-    switch (code){
-    case 200: return "OK";
-    case 201: return "Created";
-    case 202: return "Accepted";
-    case 204: return "No Content";
-    case 301: return "Moved Permanently";
-    case 302: return "Found";
-    case 400: return "Bad Request";
-    case 401: return "Unauthorized";
-    case 403: return "Forbidden";
-    case 404: return "Not Found";
-    case 405: return "Method Not Allowed";
-    case 408: return "Request Timeout";
-    case 413: return "Payload Too Large";
-    case 414: return "URI Too Long";
-    case 500: return "Internal Server Error";
-    case 501: return "Not Implemented";
-    case 502: return "Bad Gateway";
-    case 504: return "Gateway Timeout";
-    default : return "Unknown Status";
-    }
+	switch (code)
+	{
+	case 200:
+		return "OK";
+	case 201:
+		return "Created";
+	case 202:
+		return "Accepted";
+	case 204:
+		return "No Content";
+	case 301:
+		return "Moved Permanently";
+	case 302:
+		return "Found";
+	case 400:
+		return "Bad Request";
+	case 401:
+		return "Unauthorized";
+	case 403:
+		return "Forbidden";
+	case 404:
+		return "Not Found";
+	case 405:
+		return "Method Not Allowed";
+	case 408:
+		return "Request Timeout";
+	case 413:
+		return "Payload Too Large";
+	case 414:
+		return "URI Too Long";
+	case 500:
+		return "Internal Server Error";
+	case 501:
+		return "Not Implemented";
+	case 502:
+		return "Bad Gateway";
+	case 504:
+		return "Gateway Timeout";
+	default:
+		return "Unknown Status";
+	}
 }
 
 std::string getMimeType(const std::string &filePath)
 {
-    static std::map<std::string, std::string> mime_types;
-    if (mime_types.empty()) {
-        // Web Content
-        mime_types[".html"] = "text/html";
-        mime_types[".htm"]  = "text/html";
-        mime_types[".css"]  = "text/css";
-        mime_types[".js"]   = "application/javascript";
-        mime_types[".json"] = "application/json";
-        mime_types[".xml"]  = "application/xml";
+	static std::map<std::string, std::string> mime_types;
+	if (mime_types.empty())
+	{
+		// Web Content
+		mime_types[".html"] = "text/html";
+		mime_types[".htm"] = "text/html";
+		mime_types[".css"] = "text/css";
+		mime_types[".js"] = "application/javascript";
+		mime_types[".json"] = "application/json";
+		mime_types[".xml"] = "application/xml";
 
-        // Images
-        mime_types[".jpeg"] = "image/jpeg";
-        mime_types[".jpg"]  = "image/jpeg";
-        mime_types[".png"]  = "image/png";
-        mime_types[".gif"]  = "image/gif";
-        mime_types[".svg"]  = "image/svg+xml";
-        mime_types[".ico"]  = "image/x-icon";
-        mime_types[".webp"] = "image/webp";
+		// Images
+		mime_types[".jpeg"] = "image/jpeg";
+		mime_types[".jpg"] = "image/jpeg";
+		mime_types[".png"] = "image/png";
+		mime_types[".gif"] = "image/gif";
+		mime_types[".svg"] = "image/svg+xml";
+		mime_types[".ico"] = "image/x-icon";
+		mime_types[".webp"] = "image/webp";
 
-        // Video
-        mime_types[".mp4"]  = "video/mp4";
-        mime_types[".webm"] = "video/webm";
-        mime_types[".mpeg"] = "video/mpeg";
-        mime_types[".mpg"]  = "video/mpeg";
+		// Video
+		mime_types[".mp4"] = "video/mp4";
+		mime_types[".webm"] = "video/webm";
+		mime_types[".mpeg"] = "video/mpeg";
+		mime_types[".mpg"] = "video/mpeg";
 
-        // Audio
-        mime_types[".mp3"]  = "audio/mpeg";
-        mime_types[".ogg"]  = "audio/ogg";
-        mime_types[".wav"]  = "audio/wav";
+		// Audio
+		mime_types[".mp3"] = "audio/mpeg";
+		mime_types[".ogg"] = "audio/ogg";
+		mime_types[".wav"] = "audio/wav";
 
-        // Documents & Data
-        mime_types[".pdf"]  = "application/pdf";
-        mime_types[".txt"]  = "text/plain";
-        mime_types[".csv"]  = "text/csv";
+		// Documents & Data
+		mime_types[".pdf"] = "application/pdf";
+		mime_types[".txt"] = "text/plain";
+		mime_types[".csv"] = "text/csv";
 
-        // Fonts
-        mime_types[".ttf"]   = "font/ttf";
-        mime_types[".otf"]   = "font/otf";
-        mime_types[".woff"]  = "font/woff";
-        mime_types[".woff2"] = "font/woff2";
-        mime_types[".eot"]   = "application/vnd.ms-fontobject";
+		// Fonts
+		mime_types[".ttf"] = "font/ttf";
+		mime_types[".otf"] = "font/otf";
+		mime_types[".woff"] = "font/woff";
+		mime_types[".woff2"] = "font/woff2";
+		mime_types[".eot"] = "application/vnd.ms-fontobject";
 
-        // Archives
-        mime_types[".zip"]  = "application/zip";
-        mime_types[".tar"]  = "application/x-tar";
-        mime_types[".rar"]  = "application/x-rar-compressed";
-        mime_types[".7z"]   = "application/x-7z-compressed";
-    }
+		// Archives
+		mime_types[".zip"] = "application/zip";
+		mime_types[".tar"] = "application/x-tar";
+		mime_types[".rar"] = "application/x-rar-compressed";
+		mime_types[".7z"] = "application/x-7z-compressed";
+	}
 
-    size_t dot_pos = filePath.rfind('.');
-    if (dot_pos != std::string::npos) {
-        std::string extension = filePath.substr(dot_pos);
-        std::map<std::string, std::string>::const_iterator it = mime_types.find(extension);
-        if (it != mime_types.end()) {
-            return it->second;
-        }
-    }
+	size_t dot_pos = filePath.rfind('.');
+	if (dot_pos != std::string::npos)
+	{
+		std::string extension = filePath.substr(dot_pos);
+		std::map<std::string, std::string>::const_iterator it = mime_types.find(extension);
+		if (it != mime_types.end())
+		{
+			return it->second;
+		}
+	}
 
-    return "application/octet-stream";
+	return "application/octet-stream";
 }
 
 std::string generate_body_FromFile(std::string pathFIle)
 {
-    std::ifstream file_stream(pathFIle.c_str(), std::ios::binary);
-    if (!file_stream)
-        throw std::runtime_error("GenerateBodyFromFile Error: open file failed !");
-    std::stringstream body;
+	std::ifstream file_stream(pathFIle.c_str(), std::ios::binary);
+	if (!file_stream)
+		throw std::runtime_error("GenerateBodyFromFile Error: open file failed !");
+	std::stringstream body;
 
-    body << file_stream.rdbuf();
+	body << file_stream.rdbuf();
 
-    return body.str();
+	return body.str();
 }
 
 std::string toLower(const std::string &str)
 {
-    std::string result = str;
-    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-    // std::cout << GREEN << result << RESET << std::endl;
-    return result;
+	std::string result = str;
+	std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+	// std::cout << GREEN << result << RESET << std::endl;
+	return result;
 }
 
 bool pathChecker(std::string Uri)
 {
-    std::string buff = Uri;
-    std::stack<std::string> paths;
-    while (!buff.empty())
-    {
-        std::string dir;
-        size_t findIndex = buff.find("/");
-        if (findIndex == std::string::npos)
-        {
-            dir = buff;
-            buff.clear();
-        }
-        else
-        {
-            dir = buff.substr(0, findIndex);
-            buff.erase(0, ++findIndex);
-        }
-        if (dir.empty() || dir == ".")
-            continue;
-        if (dir == "..")
-        {
-            if (paths.empty())
-                return false;
-            else
-                paths.pop();
-        }
-        else
-            paths.push(dir);
-    }
-    return true;
+	std::string buff = Uri;
+	std::stack<std::string> paths;
+	while (!buff.empty())
+	{
+		std::string dir;
+		size_t findIndex = buff.find("/");
+		if (findIndex == std::string::npos)
+		{
+			dir = buff;
+			buff.clear();
+		}
+		else
+		{
+			dir = buff.substr(0, findIndex);
+			buff.erase(0, ++findIndex);
+		}
+		if (dir.empty() || dir == ".")
+			continue;
+		if (dir == "..")
+		{
+			if (paths.empty())
+				return false;
+			else
+				paths.pop();
+		}
+		else
+			paths.push(dir);
+	}
+	return true;
 }
 
 std::string uRLEncoding(std::string url)
 {
-    std::string res;
-    for (size_t i = 0; i < url.size(); i++)
-    {
-        if (i + 2 < url.size() && url[i] == '%')
-        {
-            if (std::isxdigit(url[i + 1]) && std::isxdigit(url[i + 2]))
-            {
-                int encodingChar;
-                std::string str(url.begin() + i + 1, url.begin() + i + 3);
-                std::istringstream ff(str);
-                ff >> std::hex >> encodingChar;
-                res += static_cast<char>(encodingChar);
-                url.erase(i, 2);
-            }
-            else
-                throw ParseError("uRLEncoding: Bad Request", badRequest);
-        }
-        else if (url[i] == '+')
-            res += ' ';
-        else
-            res += url[i];
-    }
-    return res;
+	std::string res;
+	for (size_t i = 0; i < url.size(); i++)
+	{
+		if (i + 2 < url.size() && url[i] == '%')
+		{
+			if (std::isxdigit(url[i + 1]) && std::isxdigit(url[i + 2]))
+			{
+				int encodingChar;
+				std::string str(url.begin() + i + 1, url.begin() + i + 3);
+				std::istringstream ff(str);
+				ff >> std::hex >> encodingChar;
+				res += static_cast<char>(encodingChar);
+				url.erase(i, 2);
+			}
+			else
+				throw ParseError("uRLEncoding: Bad Request", badRequest);
+		}
+		else if (url[i] == '+')
+			res += ' ';
+		else
+			res += url[i];
+	}
+	return res;
 }

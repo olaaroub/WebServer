@@ -22,7 +22,8 @@ public:
 		CGI_ERROR
 	};
 
-	CgiExecutor(const ServerConfigs &serverConf, const LocationConfigs &loc, const Request &req, client *client_instance, const std::string &path);
+	CgiExecutor(const ServerConfigs &serverConf, const LocationConfigs &loc,
+				 const Request &req, client *client_instance, const std::string &path);
 
 	pid_t			getPid() const;
 	time_t			getStartTime() const;

@@ -6,42 +6,42 @@
 
 class Request
 {
-    private:
-        std::string         _buffer;
-        unsigned long       _chunkSize;
-        unsigned long       _contentSize;
-        bool                _waiting_for_new_chunk;
+private:
+	std::string _buffer;
+	unsigned long _chunkSize;
+	unsigned long _contentSize;
+	bool _waiting_for_new_chunk;
 
-        void                is_finished();
-        void                is_number(std::string string);
-        void                ParsRequstLine();
-        void                ParsHeaders();
-        void                ParsBody();
-        void                StateOFParser();
-        void                ChunkReaContent();
-        void                ContentLenghtRead();
-        std::string         _ignoreExtension(std::string line);
-        
-        enum ParserStute
-        {
-            _InRequestLine,
-            _InHeaders,
-            _InPost
-        };
-    public:
-        Headers             headers;
-        RequestLine         requestLine;
-        short               state;
-        bool                request_ended;
-        unsigned long long  max_body_size;
+	void is_finished();
+	void is_number(std::string string);
+	void ParsRequstLine();
+	void ParsHeaders();
+	void ParsBody();
+	void StateOFParser();
+	void ChunkReaContent();
+	void ContentLenghtRead();
+	std::string _ignoreExtension(std::string line);
 
-        std::stringstream   body_content;
+	enum ParserStute
+	{
+		_InRequestLine,
+		_InHeaders,
+		_InPost
+	};
 
-        bool                run_parser(int socket_fd);
+public:
+	Headers headers;
+	RequestLine requestLine;
+	short state;
+	bool request_ended;
+	unsigned long long max_body_size;
 
+	std::stringstream body_content;
 
-        Request();
-        ~Request();
+	bool run_parser(int socket_fd);
+
+	Request();
+	~Request();
 };
 
 #endif
