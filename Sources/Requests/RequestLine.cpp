@@ -1,18 +1,12 @@
 #include "RequestLine.hpp"
 #include "Utils.hpp"
 
-void RequestLine:: set_line(std::string line)
-{
-    this->line += line;
-}
 
-std::string& RequestLine:: get_line()
-{
-    return line;
-}
-
+std::string RequestLine:: getHttpVerction() {return _HttpVerction;}
+void RequestLine:: set_line(std::string line){this->_line += line;}
+std::string& RequestLine:: get_line(){return _line;}
 const std::string &RequestLine::getUrl()const{ return _url; }
-
+const std::string& RequestLine:: get_method() const{return _method;}
 
 
 void RequestLine:: SeparateUrlAndQuerys(std::string buff)
@@ -35,11 +29,11 @@ void RequestLine:: ParsRequestLine()
 {
     std::string buff;
     std::string forbidenChars = " \t{}|\\^[]`";
-    std::stringstream str(line);
-    str >> method;
+    std::stringstream str(_line);
+    str >> _method;
     str >> buff;
     SeparateUrlAndQuerys(buff);
-    str >> HttpVerction;
+    str >> _HttpVerction;
     // std::cout << "'" << _url << "'" << std::endl;
     for (size_t i = 0; i < _url.size(); i++)
     {
@@ -48,9 +42,4 @@ void RequestLine:: ParsRequestLine()
             throw ParseError("invalid characters in uri", badRequest);
     }
     _url = uRLEncoding(_url);
-}
-
-const std::string& RequestLine:: get_method() const
-{
-    return method;
 }

@@ -64,7 +64,7 @@ CgiExecutor::CgiExecutor(const ServerConfigs &serverConf, const LocationConfigs 
 		if (!_requestBody.empty())
 		{
 			_state = CGI_WRITING;
-			this->socket_fd = _pipe_in_fd;
+			this->_socket_fd = _pipe_in_fd;
 			this->epoll_crt(EPOLLOUT);
 		}
 		else
@@ -72,10 +72,10 @@ CgiExecutor::CgiExecutor(const ServerConfigs &serverConf, const LocationConfigs 
 			_state = CGI_READING;
 			close(_pipe_in_fd);
 			_pipe_in_fd = -1;
-			this->socket_fd = _pipe_out_fd;
+			this->_socket_fd = _pipe_out_fd;
 			this->epoll_crt(EPOLLIN);
 		}
-		serverManager::activeNetworks[this->socket_fd] = this;
+		serverManager::activeNetworks[this->_socket_fd] = this;
 	}
 	catch (...)
 	{
@@ -181,15 +181,15 @@ void CgiExecutor::_handleWrite()
 
     if (_bytesWritten >= _requestBody.length() || bytes <= 0)
     {
-        serverManager::activeNetworks.erase(this->socket_fd);
-        epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, this->socket_fd, 0);
+        serverManager::activeNetworks.erase(this->_socket_fd);
+        epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, this->_socket_fd, 0);
         close(_pipe_in_fd);
         _pipe_in_fd = -1;
 
         _state = CGI_READING;
-        this->socket_fd = _pipe_out_fd;
+        this->_socket_fd = _pipe_out_fd;
         this->epoll_crt(EPOLLIN);
-        serverManager::activeNetworks[this->socket_fd] = this;
+        serverManager::activeNetworks[this->_socket_fd] = this;
     }
 }
 
@@ -222,14 +222,14 @@ void CgiExecutor::_setupEnvironment(const Request &req, const LocationConfigs &l
 	std::string sessionId = req.headers.getCookie("sessionid");
 
 
-	if (!server_config.server_names.empty())
-		env.push_back("SERVER_NAME=" + server_config.server_names[0]);
+	if (!_server_config.server_names.empty())
+		env.push_back("SERVER_NAME=" + _server_config.server_names[0]);
 	else
-		env.push_back("SERVER_NAME=" + server_config.host);
+		env.push_back("SERVER_NAME=" + _server_config.host);
 
-	if (!server_config.ports.empty())
+	if (!_server_config.ports.empty())
 	{
-		ss << server_config.ports[0];
+		ss << _server_config.ports[0];
 		env.push_back("SERVER_PORT=" + ss.str());
 		ss.str("");
 	}

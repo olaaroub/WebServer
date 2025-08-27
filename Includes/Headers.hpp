@@ -5,7 +5,7 @@
 
 class Headers{
 private:
-	std::string 										buffer;
+	std::string 										_buffer;
 	void 												AddToMap(std::string line);
 	void 												_splitCookie(std::string cookie);
 	std::string 										_percentEncoding(std::string cookie);

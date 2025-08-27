@@ -4,10 +4,10 @@
 
 server:: server(const ServerConfigs &server_config) : network(server_config)
 {
-    is_server = true;
+    _is_server = true;
 }
 
-server::server(in_port_t port, in_addr_t ip_addres,const ServerConfigs &server_config) : network(server_config, true),port(port), ip_addres(ip_addres)
+server::server(in_port_t port, in_addr_t ip_addres,const ServerConfigs &server_config) : network(server_config, true), _port(port), _ip_addres(ip_addres)
 {
     creat_socket();
     bind_and_listen();
@@ -17,33 +17,33 @@ server::server(in_port_t port, in_addr_t ip_addres,const ServerConfigs &server_c
 void server:: bind_and_listen()
 {
     int yes = 1;
-    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+    if (setsockopt(_socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
     {
         perror("Server Error: setsocketopt error");
-        throw ParseError("Exiting...", socket_fd);
+        throw ParseError("Exiting...", _socket_fd);
     }
-    if (bind(socket_fd, (sockaddr *)&network_infos, sizeof(network_infos)) < 0)
+    if (bind(_socket_fd, (sockaddr *)&_network_infos, sizeof(_network_infos)) < 0)
     {
         perror("Server Error: bind error");
-        throw ParseError("Exiting...", socket_fd);
+        throw ParseError("Exiting...", _socket_fd);
     }
     set_ToNoBlocking();
-    if (listen(socket_fd, SOMAXCONN) < 0)
+    if (listen(_socket_fd, SOMAXCONN) < 0)
     {
         perror("Server Error: listen error");
-        throw ParseError("Exiting...", socket_fd);;
+        throw ParseError("Exiting...", _socket_fd);;
     }
 }
 
 void server:: creat_socket()
 {
-    socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (socket_fd < 0)
-        ParseError("Server Error: Socket failed!", socket_fd);
-    network_infos.sin_family = AF_INET;
-    network_infos.sin_addr.s_addr = this->ip_addres;
-    network_infos.sin_port = htons(this->port);
-    memset(network_infos.sin_zero, 0, sizeof(network_infos.sin_zero));
+    _socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (_socket_fd < 0)
+        ParseError("Server Error: Socket failed!", _socket_fd);
+    _network_infos.sin_family = AF_INET;
+    _network_infos.sin_addr.s_addr = this->_ip_addres;
+    _network_infos.sin_port = htons(this->_port);
+    memset(_network_infos.sin_zero, 0, sizeof(_network_infos.sin_zero));
 }
 
 void server:: onEvent()
@@ -52,10 +52,10 @@ void server:: onEvent()
 
     if (event & EPOLLIN)
     {
-        client *client_re = new client(server_config);
+        client *client_re = new client(_server_config);
         clien_struct = client_re->get_sockaddr();
         socklen_t addr_size = sizeof(clien_struct);
-        int fd = accept(socket_fd, (sockaddr *)clien_struct, &addr_size);
+        int fd = accept(_socket_fd, (sockaddr *)clien_struct, &addr_size);
         if (fd < 0)
         {
             delete client_re;

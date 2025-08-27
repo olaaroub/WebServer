@@ -12,9 +12,9 @@ client::client(const ServerConfigs &server_config) : network(server_config, fals
 
 void client::setMonitored(bool monitored) { _is_monitored = monitored; }
 bool client::isMonitored() const { return _is_monitored; }
-void client:: set_fd(int fd){ socket_fd = fd; }
+void client:: set_fd(int fd){ _socket_fd = fd; }
 Request &client:: get_request(){ return _request; }
-long client:: get_max_body(){ return server_config.client_max_body_size; }
+long client:: get_max_body(){ return _server_config.client_max_body_size; }
 time_t client::getTime() const{ return _lastActivity; }
 void	client::setTime(time_t time){ _lastActivity = time; }
 
@@ -26,18 +26,18 @@ void client::prepareResponse(const std::string& response)
 
 
     ev.events = EPOLLOUT | EPOLLRDHUP;
-    ev.data.fd = socket_fd;
+    ev.data.fd = _socket_fd;
 
     if (_is_monitored)
     {
-        if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_MOD, socket_fd, &ev) < 0) {
+        if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_MOD, _socket_fd, &ev) < 0) {
             throw std::runtime_error("Client Error: epoll_ctl MOD failed on a monitored client!");
         }
     }
 
    else
     {
-        if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_ADD, socket_fd, &ev) < 0) {
+        if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_ADD, _socket_fd, &ev) < 0) {
              throw std::runtime_error("Client Error: epoll_ctl ADD failed on an unmonitored client!");
         }
         _is_monitored = true;
@@ -56,7 +56,7 @@ void client::_handleWrite()
         throw ResponseSentException("response Sent");
     }
 
-    ssize_t bytes_sent_now = send(this->socket_fd, _response_buffer.c_str() + _bytes_sent, remaining, 0);
+    ssize_t bytes_sent_now = send(this->_socket_fd, _response_buffer.c_str() + _bytes_sent, remaining, 0);
 
     if (bytes_sent_now < 0) {
         throw std::runtime_error("Send Error: Failed to send data to client.");
@@ -72,7 +72,7 @@ void client::_handleWrite()
 
 void client::handleHttpError(int statusCode)
 {
-    std::cout << RED << "[FD: " << this->socket_fd << "] Sending error response: " << statusCode
+    std::cout << RED << "[FD: " << this->_socket_fd << "] Sending error response: " << statusCode
             << " " << getReasonPhrase(statusCode) << RESET << std::endl;
     HttpResponse responseBuilder;
     responseBuilder.setStatus(statusCode);
@@ -81,10 +81,10 @@ void client::handleHttpError(int statusCode)
     std::string body;
     bool customPageFound = false;
 
-    if (this->server_config.error_pages.count(statusCode))
+    if (this->_server_config.error_pages.count(statusCode))
     {
 
-        std::string error_page_uri = this->server_config.error_pages.at(statusCode);
+        std::string error_page_uri = this->_server_config.error_pages.at(statusCode);
         const LocationConfigs *error_loc = findLocation(error_page_uri);
         if (error_loc)
         {
@@ -129,13 +129,13 @@ void client::onEvent()
         try
         {
             _lastActivity = time(NULL);
-            requestComplete = _request.run_parser(socket_fd);
+            requestComplete = _request.run_parser(_socket_fd);
             if (requestComplete)
             {
                 std::string method = toLower(_request.requestLine.get_method());
                 if (method != "post" && method != "get" && method != "delete")
                     throw ParseError("RequestLine Error: method not implemented", methodNotImplemented);
-                std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Request received: "
+                std::cout << MAGENTA << "[FD: " << this->_socket_fd << "] Request received: "
                           << _request.requestLine.get_method() << " "
                           << _request.requestLine.getUrl() << RESET << std::endl;
 
@@ -143,7 +143,7 @@ void client::onEvent()
                 // std::cout << YELLOW << "Normalized URI: " << requestUri << RESET << std::endl;
                 if (!pathChecker(requestUri))
                 {
-                    std::cout << RED << "[FD: " << this->socket_fd << "] Invalid request URI: " << requestUri << RESET << std::endl;
+                    std::cout << RED << "[FD: " << this->_socket_fd << "] Invalid request URI: " << requestUri << RESET << std::endl;
                     handleHttpError(403);
                     return ;
                 }
@@ -161,7 +161,7 @@ void client::onEvent()
                 if (location->cgi_handlers.count(extension))
                 {
 
-                    std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Passing to CGI handler for " << fullPath << RESET << std::endl;
+                    std::cout << MAGENTA << "[FD: " << this->_socket_fd << "] Passing to CGI handler for " << fullPath << RESET << std::endl;
                     struct stat script_stat;
 					if (_request.requestLine.get_method() == "DELETE" || (std::find(location->allowed_methods.begin(), location->allowed_methods.end(),
 						_request.requestLine.get_method()) == location->allowed_methods.end()))//  check if method is allowed
@@ -183,9 +183,9 @@ void client::onEvent()
 					}
 
                     this->setMonitored(false);
-					serverManager::activeNetworks.erase(this->socket_fd);
-                    epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, this->socket_fd, 0);
-                    new CgiExecutor(this->server_config, *location, _request, this, fullPath);
+					serverManager::activeNetworks.erase(this->_socket_fd);
+                    epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, this->_socket_fd, 0);
+                    new CgiExecutor(this->_server_config, *location, _request, this, fullPath);
                     return;
                 }
 
@@ -196,11 +196,11 @@ void client::onEvent()
 
 					if (serverManager::validateSession(sessionId) == false)
 					{
-						std::cout << YELLOW << "[FD: " << this->socket_fd << "] Access denied for " << requestUri << ". Invalid session." << RESET << std::endl;
+						std::cout << YELLOW << "[FD: " << this->_socket_fd << "] Access denied for " << requestUri << ". Invalid session." << RESET << std::endl;
 						handleHttpError(403);
 						return;
 					}
-					std::cout << GREEN << "[FD: " << this->socket_fd << "] Access granted for " << requestUri << ". Valid session." << RESET << std::endl;
+					std::cout << GREEN << "[FD: " << this->_socket_fd << "] Access granted for " << requestUri << ". Valid session." << RESET << std::endl;
 				}
 
 
@@ -211,7 +211,7 @@ void client::onEvent()
                         handleHttpError(500);
                         return;
                     }
-                    std::cout << MAGENTA << "[FD: " << this->socket_fd << "] Redirecting to: " << location->redirection_url << RESET << std::endl;
+                    std::cout << MAGENTA << "[FD: " << this->_socket_fd << "] Redirecting to: " << location->redirection_url << RESET << std::endl;
 					HttpResponse responseBuilder;
                     responseBuilder.setStatus(location->redirection_code);
                     responseBuilder.addHeader("Location", location->redirection_url);
@@ -228,13 +228,13 @@ void client::onEvent()
 
 				HttpResponse SendResp;
 				if (_request.requestLine.get_method() == "GET") {
-					std::cout << MAGENTA << "[FD: " << this->socket_fd
+					std::cout << MAGENTA << "[FD: " << this->_socket_fd
 						<< "] Responding with GET for " << fullPath << RESET << std::endl;
                     struct stat path_stat;
                     if (stat(fullPath.c_str(), &path_stat) == 0) {
                         if (S_ISDIR(path_stat.st_mode) && !requestUri.empty() && requestUri[requestUri.length() - 1] != '/')
                         {
-                            std::cout << YELLOW << "[FD: " << this->socket_fd
+                            std::cout << YELLOW << "[FD: " << this->_socket_fd
                                 << "] Path is a directory but URI is missing trailing slash. Redirecting." << RESET << std::endl;
                             HttpResponse responseBuilder;
                             responseBuilder.setStatus(301);
@@ -261,7 +261,7 @@ void client::onEvent()
 
                 }
 				else if (_request.requestLine.get_method() == "POST") {
-					std::cout << MAGENTA << "[FD: " << this->socket_fd
+					std::cout << MAGENTA << "[FD: " << this->_socket_fd
 						<< "] Responding with POST for " << fullPath << RESET << std::endl;
                     Post post(location->upload_path);
 					std::map<std::string, std::vector<std::string> >::const_iterator it;
@@ -293,7 +293,7 @@ void client::onEvent()
                     SendResp.setStatus(201);
                 }
 				else if (_request.requestLine.get_method() == "DELETE") {
-					std::cout << MAGENTA << "[FD: " << this->socket_fd
+					std::cout << MAGENTA << "[FD: " << this->_socket_fd
 						<< "] Responding with DELETE for " << fullPath << RESET << std::endl;
                     Delete del(fullPath, location);
 
@@ -339,7 +339,7 @@ void client::onEvent()
         }
         catch(const ResponseSentException& e)
         {
-            std::cout << GREEN << "[FD: " << this->socket_fd << "] Response sent successfully." << RESET << std::endl;
+            std::cout << GREEN << "[FD: " << this->_socket_fd << "] Response sent successfully." << RESET << std::endl;
             throw ResponseSentException("Response sent successfully.");
             return;
         }
@@ -366,7 +366,7 @@ const LocationConfigs *client::findLocation(const std::string &uri)
     std::string uri_prefix;
     size_t len = 0;
 
-    const std::vector<LocationConfigs> &locations = this->server_config.locations;
+    const std::vector<LocationConfigs> &locations = this->_server_config.locations;
 
     for (std::vector<LocationConfigs>::const_iterator it = locations.begin(); it != locations.end(); ++it)
     {
@@ -385,16 +385,16 @@ const LocationConfigs *client::findLocation(const std::string &uri)
 
 void client::sendResponseString(const std::string &response)
 {
-    ssize_t bytes_sent = send(this->socket_fd, response.c_str(), response.length(), 0);
+    ssize_t bytes_sent = send(this->_socket_fd, response.c_str(), response.length(), 0);
     if (bytes_sent < 0 || static_cast<size_t>(bytes_sent) < response.length())
         throw std::runtime_error("Send Error: Failed to send full response to client.");
 }
 
 client::~client()
 {
-    if (this->socket_fd != -1)
+    if (this->_socket_fd != -1)
     {
-        close(this->socket_fd);
+        close(this->_socket_fd);
     }
 }
 

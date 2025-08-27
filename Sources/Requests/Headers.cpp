@@ -3,11 +3,11 @@
 
 void Headers:: set_buffer(std::string buffer)
 {
-    this->buffer += buffer;
+    this->_buffer += buffer;
 }
 std::string Headers:: get_buffer()
 {
-    return buffer;
+    return _buffer;
 }
 
 // std::string Headers::toLower(const std::string& str) const {
@@ -65,11 +65,11 @@ void Headers:: HeadersParser()
 
     while (true)
     {
-        cont = buffer.find("\r\n");
+        cont = _buffer.find("\r\n");
         if (cont == std::string::npos)
             break;
-        AddToMap(buffer.substr(0, cont));
-        buffer = buffer.substr(cont + 2);
+        AddToMap(_buffer.substr(0, cont));
+        _buffer = _buffer.substr(cont + 2);
     }
 
     if (map["host"].size() > 1 || map["content-length"].size() > 1

@@ -14,13 +14,13 @@ void Request:: is_finished()
 
 void Request:: ParsRequstLine()
 {
-    size_t cont = buffer.find("\r\n");
+    size_t cont = _buffer.find("\r\n");
 
     if (cont != std::string::npos)
     {
-        requestLine.set_line(buffer.substr(0, cont));
+        requestLine.set_line(_buffer.substr(0, cont));
         requestLine.ParsRequestLine();
-        buffer.erase(0, cont+2);
+        _buffer.erase(0, cont+2);
         state++;
         std::string verction = toLower(requestLine.getHttpVerction());
         if (verction != "http/1.1" && verction != "http/1.0")
@@ -32,15 +32,15 @@ void Request:: ParsRequstLine()
 
 void Request:: ParsHeaders()
 {
-    size_t cont = buffer.find("\r\n\r\n");
+    size_t cont = _buffer.find("\r\n\r\n");
 
-    if (buffer.size() > MAX_HEADERS_SIZE)
+    if (_buffer.size() > MAX_HEADERS_SIZE)
         throw ParseError("Request Error: Headers Size too Large!", requestHeaderTooLarge);
     if (cont != std::string::npos)
     {
 
-        headers.set_buffer(buffer.substr(0, cont + 2));
-        buffer = buffer.substr(cont + 4);
+        headers.set_buffer(_buffer.substr(0, cont + 2));
+        _buffer = _buffer.substr(cont + 4);
         headers.HeadersParser();
         headers.cookieParser();
         // cookie here
@@ -68,20 +68,20 @@ void Request:: ChunkReaContent()
     unsigned int len;
     while (true)
     {
-        if (buffer.empty())
+        if (_buffer.empty())
             return ;
         if (_waiting_for_new_chunk)
         {
-            size_t findNewLine = buffer.find("\r\n");
+            size_t findNewLine = _buffer.find("\r\n");
             if (findNewLine == std::string::npos)
                 throw ParseError("Request Error: format of chunked POST not correct", badRequest);
-            std::string line = buffer.substr(0, findNewLine);
+            std::string line = _buffer.substr(0, findNewLine);
             line = _ignoreExtension(line);
             is_number(line);
             std::istringstream ff(line);
             ff >> std::hex >> len;
             _chunkSize = len;
-            buffer.erase(0, findNewLine + 2);
+            _buffer.erase(0, findNewLine + 2);
             if (!len)
             {
                 request_ended = true;
@@ -89,14 +89,14 @@ void Request:: ChunkReaContent()
             }
             _waiting_for_new_chunk = false;
         }
-        if (buffer.length() < _chunkSize + 2)
+        if (_buffer.length() < _chunkSize + 2)
             return;
-        std::string chunkData = buffer.substr(0, _chunkSize);
+        std::string chunkData = _buffer.substr(0, _chunkSize);
         if (_chunkSize > max_body_size)
             throw ParseError("Request Error: Body too large!", payloadTooLarge);
         max_body_size -= _chunkSize;
         body_content.write(chunkData.c_str(), _chunkSize);
-        buffer.erase(0, _chunkSize + 2);
+        _buffer.erase(0, _chunkSize + 2);
         _waiting_for_new_chunk = true;
         _chunkSize = 0;
     }
@@ -128,16 +128,16 @@ void Request:: ContentLenghtRead()
         if (_chunkSize > max_body_size)
             throw ParseError("Request Error: the content lenght too large!", payloadTooLarge);
     }
-    if (buffer.empty())
+    if (_buffer.empty())
         return;
     if (_contentSize < _chunkSize)
-        _contentSize += buffer.size();
+        _contentSize += _buffer.size();
     if (_contentSize > _chunkSize)
         throw ParseError("Request Error: ContentLenghtRead Error: size of content readed large of content-lenght", badRequest);
     if (_contentSize == _chunkSize)
         request_ended = true;
-    body_content.write(buffer.c_str(), buffer.length());
-    buffer.clear();
+    body_content.write(_buffer.c_str(), _buffer.length());
+    _buffer.clear();
 }
 
 void Request:: ParsBody()
@@ -172,7 +172,7 @@ bool Request:: run_parser(int socket_fd)
         throw ParseError("Request Error: Client closed connection unexpectedly", closeConnection);
     if (count > 3 && bfr[0] == 0x16 && bfr[1] == 0x03 && bfr[2] >= 0x00 && bfr[2] <= 0x04)
         throw ParseError("Request Error: Client sent a TLS handshake", closeConnection);
-    buffer.append(bfr, count);
+    _buffer.append(bfr, count);
     StateOFParser();
     return request_ended;
 }
