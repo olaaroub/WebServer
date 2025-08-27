@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/27 18:25:33 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/28 00:03:06 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,52 +131,32 @@ long parseSizeToBytes(const std::string &size_str)
 		throw std::runtime_error("Config Error: Invalid client_max_body_size value '" + size_str + "'");
 
 	if (number < 0 || (multiplier > 1 && number > LONG_MAX / (multiplier)))
-		throw std::runtime_error("Config Error: client_max_body_size value '" + size_str + "' is too large and would cause an overflow.");
+		throw std::runtime_error("Config Error: client_max_body_size value '" + size_str + "' is too large.");
 	return number * multiplier;
 }
 
 const char *getReasonPhrase(int code)
 {
-	switch (code)
-	{
-	case 200:
-		return "OK";
-	case 201:
-		return "Created";
-	case 202:
-		return "Accepted";
-	case 204:
-		return "No Content";
-	case 301:
-		return "Moved Permanently";
-	case 302:
-		return "Found";
-	case 400:
-		return "Bad Request";
-	case 401:
-		return "Unauthorized";
-	case 403:
-		return "Forbidden";
-	case 404:
-		return "Not Found";
-	case 405:
-		return "Method Not Allowed";
-	case 408:
-		return "Request Timeout";
-	case 413:
-		return "Payload Too Large";
-	case 414:
-		return "URI Too Long";
-	case 500:
-		return "Internal Server Error";
-	case 501:
-		return "Not Implemented";
-	case 502:
-		return "Bad Gateway";
-	case 504:
-		return "Gateway Timeout";
-	default:
-		return "Unknown Status";
+	switch (code){
+	case 200: return "OK";
+	case 201: return "Created";
+	case 202: return "Accepted";
+	case 204: return "No Content";
+	case 301: return "Moved Permanently";
+	case 302: return "Found";
+	case 400: return "Bad Request";
+	case 401: return "Unauthorized";
+	case 403: return "Forbidden";
+	case 404: return "Not Found";
+	case 405: return "Method Not Allowed";
+	case 408: return "Request Timeout";
+	case 413: return "Payload Too Large";
+	case 414: return "URI Too Long";
+	case 500: return "Internal Server Error";
+	case 501: return "Not Implemented";
+	case 502: return "Bad Gateway";
+	case 504: return "Gateway Timeout";
+	default : return "Unknown Status";
 	}
 }
 
@@ -185,7 +165,6 @@ std::string getMimeType(const std::string &filePath)
 	static std::map<std::string, std::string> mime_types;
 	if (mime_types.empty())
 	{
-		// Web Content
 		mime_types[".html"] = "text/html";
 		mime_types[".htm"] = "text/html";
 		mime_types[".css"] = "text/css";
@@ -193,7 +172,6 @@ std::string getMimeType(const std::string &filePath)
 		mime_types[".json"] = "application/json";
 		mime_types[".xml"] = "application/xml";
 
-		// Images
 		mime_types[".jpeg"] = "image/jpeg";
 		mime_types[".jpg"] = "image/jpeg";
 		mime_types[".png"] = "image/png";
@@ -202,30 +180,25 @@ std::string getMimeType(const std::string &filePath)
 		mime_types[".ico"] = "image/x-icon";
 		mime_types[".webp"] = "image/webp";
 
-		// Video
 		mime_types[".mp4"] = "video/mp4";
 		mime_types[".webm"] = "video/webm";
 		mime_types[".mpeg"] = "video/mpeg";
 		mime_types[".mpg"] = "video/mpeg";
 
-		// Audio
 		mime_types[".mp3"] = "audio/mpeg";
 		mime_types[".ogg"] = "audio/ogg";
 		mime_types[".wav"] = "audio/wav";
 
-		// Documents & Data
 		mime_types[".pdf"] = "application/pdf";
 		mime_types[".txt"] = "text/plain";
 		mime_types[".csv"] = "text/csv";
 
-		// Fonts
 		mime_types[".ttf"] = "font/ttf";
 		mime_types[".otf"] = "font/otf";
 		mime_types[".woff"] = "font/woff";
 		mime_types[".woff2"] = "font/woff2";
 		mime_types[".eot"] = "application/vnd.ms-fontobject";
 
-		// Archives
 		mime_types[".zip"] = "application/zip";
 		mime_types[".tar"] = "application/x-tar";
 		mime_types[".rar"] = "application/x-rar-compressed";
@@ -238,9 +211,7 @@ std::string getMimeType(const std::string &filePath)
 		std::string extension = filePath.substr(dot_pos);
 		std::map<std::string, std::string>::const_iterator it = mime_types.find(extension);
 		if (it != mime_types.end())
-		{
 			return it->second;
-		}
 	}
 
 	return "application/octet-stream";

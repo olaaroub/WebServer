@@ -15,8 +15,8 @@ int main(int ac, char **av)
 	try
 	{
 		srand(time(0));
-		FileReader reader(configPath);
 
+		FileReader reader(configPath);
 		ConfigParser parser(reader.getContent());
 
 		const std::vector<ServerConfigs> &servers = parser.getServers();

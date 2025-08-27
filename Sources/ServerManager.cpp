@@ -7,7 +7,7 @@ struct epoll_event serverManager::evlist;
 std::map<int, network *> serverManager::activeNetworks;
 std::map<std::string, SessionData> serverManager::s_activeSessions;
 const int serverManager::request_timeout = 60;
-const std::string serverManager::s_sessionFilePath = "sessions.db";
+const std::string serverManager::s_sessionFilePath = "database/sessions.db";
 bool isShutdown = false;
 void serverManager::signal_handler(int)
 {
@@ -29,11 +29,9 @@ std::string serverManager::createSession(const std::string &username)
 	SessionData session;
 
 	session.name = username;
-	session.expiry_time = time(0) + 3600;
+	session.expiry_time = time(0) + 180;
 
 	s_activeSessions[sessionId] = session;
-	std::cerr << MAGENTA << "[SESSION] Created session for user '"
-			  << username << "': " << sessionId << RESET << std::endl;
 	saveSessionsToFile();
 	return sessionId;
 }
@@ -58,7 +56,7 @@ bool serverManager::validateSession(const std::string &sessionId)
 			return true;
 		else
 		{
-			s_activeSessions.erase(it);
+			deleteSession(sessionId);
 			std::cout << YELLOW << "[SESSION] Expired session removed: " << sessionId << RESET << std::endl;
 		}
 	}
@@ -89,10 +87,12 @@ void serverManager::loadSessionsFromFile()
 				session.name = username;
 				session.expiry_time = expiry_time;
 				s_activeSessions[sessionId] = session;
+				std::cout << session.name << std::endl;
+				std::cout << expiry_time << std::endl;
 			}
 		}
 	}
-	std::cout << "[SESSION] Loaded " << s_activeSessions.size() << " active sessions from file." << std::endl;
+	std::cout << YELLOW << "[SESSION] Loaded " << s_activeSessions.size() << " active sessions from sessions.db!" << std::endl;
 }
 
 void serverManager::saveSessionsToFile()
@@ -170,7 +170,7 @@ void serverManager::epollEvent(int fd, int event)
 	}
 	catch (const ResponseSentException &e)
 	{
-		std::cout << GREEN << "[FD: " << fd << "] Closing connection 7itach " << e.what() << RESET << std::endl;
+		std::cout << GREEN << "[FD: " << fd << "] Closing connection bc " << e.what() << RESET << std::endl;
 		epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, fd, 0);
 		if (activeNetworks.count(fd))
 		{
@@ -204,7 +204,7 @@ void serverManager::epollEvent(int fd, int event)
 void serverManager::listening()
 {
 	std::vector<epoll_event> evlist(1024);
-	std::cout << CYAN << "[SERVER] Now listening for connections..." << RESET << std::endl;
+	std::cout << BLUE << "[SERVER] Now listening for connections..." << RESET << std::endl;
 	while (true)
 	{
 		int event = epoll_wait(kernel_identifier, evlist.data(), evlist.size(), 1000);

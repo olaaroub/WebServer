@@ -44,7 +44,6 @@ CgiExecutor::CgiExecutor(const ServerConfigs &serverConf, const LocationConfigs 
 			close(cgi_pipe_in[0]), close(cgi_pipe_out[1]);
 
 			std::string scriptDir = path.substr(0, path.find_last_of("/"));
-			// std::cerr << "CGI script directory: " << scriptDir << std::endl;
 			if (chdir(scriptDir.c_str()) != 0)
 			{
 				std::cerr << RED << "CGI Error: chdir to " << scriptDir << " failed." << RESET << std::endl;

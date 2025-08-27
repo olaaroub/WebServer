@@ -38,8 +38,8 @@ public:
 private:
 	pid_t			_pid;
 	time_t			_startTime;
-	int				_pipe_in_fd;  // Parent writes to this (CGI's stdin)
-	int				_pipe_out_fd; // Parent reads from this (CGI's stdout)
+	int				_pipe_in_fd;
+	int				_pipe_out_fd;
 	CgiState		_state;
 	std::string		_requestBody;
 	size_t			_bytesWritten;

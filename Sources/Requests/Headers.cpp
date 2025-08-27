@@ -144,7 +144,6 @@ void Headers::_splitCookie(std::string cookie)
 	std::string key = cookie.substr(0, findIndex++);
 	std::string value = cookie.substr(findIndex, cookie.size() - findIndex);
 	cookieInfo[key] = _percentEncoding(value);
-	std::cout << MAGENTA << "Parsed Cookie: key='" << key << "', value='" << cookieInfo[key] << "'" << RESET << std::endl;
 }
 
 void Headers::cookieParser()

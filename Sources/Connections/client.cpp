@@ -75,7 +75,7 @@ void client::_handleWrite()
 
 void client::handleHttpError(int statusCode)
 {
-	std::cout << RED << "[FD: " << this->_socket_fd << "] Sending error response: " << statusCode
+	std::cout << YELLOW << "[FD: " << this->_socket_fd << "] Sending error response: " << statusCode
 			  << " " << getReasonPhrase(statusCode) << RESET << std::endl;
 	HttpResponse responseBuilder;
 	responseBuilder.setStatus(statusCode);
@@ -122,7 +122,7 @@ void client::onEvent()
 	if (_state == WRITING && (event & EPOLLOUT))
 	{
 		// std::cout << YELLOW << "sending response: " << _response_buffer << RESET << std::endl;
-		std::cout << "=== how many times did you enter here" << std::endl;
+		// std::cout << "=== how many times did you enter here" << std::endl;
 		_handleWrite();
 		return;
 	}
@@ -157,7 +157,7 @@ void client::onEvent()
 					handleHttpError(404);
 					return;
 				}
-				std::cout << YELLOW << "returned location: " << location->path << RESET << std::endl;
+				// std::cout << YELLOW << "returned location: " << location->path << RESET << std::endl;
 				std::string fullPath = joinPaths(location->root, requestUri);
 				std::string extension = getExtension(fullPath);
 
@@ -199,11 +199,11 @@ void client::onEvent()
 
 					if (serverManager::validateSession(sessionId) == false)
 					{
-						std::cout << YELLOW << "[FD: " << this->_socket_fd << "] Access denied for " << requestUri << ". Invalid session." << RESET << std::endl;
+						std::cout << YELLOW << "[FD: " << this->_socket_fd << "] Access denied for " << requestUri << ": Invalid session." << RESET << std::endl;
 						handleHttpError(403);
 						return;
 					}
-					std::cout << GREEN << "[FD: " << this->_socket_fd << "] Access granted for " << requestUri << ". Valid session." << RESET << std::endl;
+					std::cout << GREEN << "[FD: " << this->_socket_fd << "] Access granted for " << requestUri << ": Valid session." << RESET << std::endl;
 				}
 
 				if (location->redirection_set)
@@ -353,22 +353,20 @@ void client::onEvent()
 		}
 		catch (const ResponseSentException &e)
 		{
-			std::cout << GREEN << "[FD: " << this->_socket_fd << "] Response sent successfully." << RESET << std::endl;
-			throw ResponseSentException("Response sent successfully.");
+			throw ResponseSentException("Response sent.");
 			return;
 		}
 		catch (const CgiExecutorException &e)
 		{
 			std::cerr << RED << "CGI Error: " << e.what() << RESET << '\n';
-			handleHttpError(500);
+			handleHttpError(ServerError);
 			return;
 		}
 		catch (const std::exception &e)
 		{
-			std::cerr << RED << "Internal Server Error in client.cpp: " << e.what() << RESET << '\n';
+			std::cerr << RED << "Internal Server Error: " << e.what() << RESET << '\n';
 			handleHttpError(ServerError);
 			return;
-			// _handleWrite();
 		}
 	}
 }
