@@ -6,7 +6,7 @@ print("<!DOCTYPE html>")
 print("<html lang='en'>")
 print("<head>")
 print("<meta charset='UTF-8'>")
-print("<title>🐍 CGI Marker Test</title>")
+print("<title>🐍 CGI chdir Test</title>")
 print("<style>")
 print("body {")
 print("  margin: 0; padding: 0;")
@@ -42,17 +42,17 @@ print("</style>")
 print("</head>")
 print("<body>")
 print("<div class='card'>")
-print("<h1>🐍 CGI Marker Test</h1>")
+print("<h1>🐍 CGI chdir Test</h1>")
 
 test_file = "test.txt"
 
 if os.path.exists(test_file):
     with open(test_file, "r") as f:
         content = f.read()
-    print("<p class='success'>✅ marker.txt found!</p>")
+    print("<p class='success'>✅ test.txt found!</p>")
     print("<pre>" + content + "</pre>")
 else:
-    print("<p class='error'>❌ marker.txt not found. CGI not running in the expected directory..</p>")
+    print("<p class='error'>❌ test.txt not found. CGI not running in the expected directory..</p>")
 
 print("</div>")
 print("</body>")

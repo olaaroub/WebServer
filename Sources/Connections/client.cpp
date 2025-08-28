@@ -94,7 +94,7 @@ void client::handleHttpError(int statusCode)
 			const LocationConfigs *error_loc = findLocation(error_page_uri);
 			if (error_loc)
 			{
-				std::string full_path = joinPaths(error_loc->root, error_page_uri);//./error/404.html
+				std::string full_path = joinPaths(error_loc->root, error_page_uri);
 				body = getFileContents(full_path);
 				if (!body.empty())
 					customPageFound = true;
