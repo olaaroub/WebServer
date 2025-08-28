@@ -6,13 +6,13 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/08 19:02:05 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/26 21:50:34 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/28 00:39:36 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "HttpResponse.hpp"
 
-HttpResponse::HttpResponse() : _http_version("HTTP/1.0"), _status_code(200) {
+HttpResponse::HttpResponse() : _http_version("HTTP/1.1"), _status_code(200) {
     this->_reason_phrase = getReasonPhrase(200);
 }
 

@@ -4,13 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>42 Webserv — Project Home</title>
-  <meta name="description" content="42 Webserv — a custom HTTP server built for the 42 school project. Mandatory part implemented. Cookies & sessions: coming soon." />
+  <meta name="description" content="42 Webserv — a custom HTTP server built for the 42 school project. All mandatory and bonus features are fully implemented." />
   <style>
     :root{
       --bg1: #0f172a;
       --bg2: #071033;
       --card: rgba(255,255,255,0.03);
       --accent: linear-gradient(90deg,#7c3aed,#06b6d4);
+      --accent-done: linear-gradient(90deg,#10b981,#06b6d4);
       --glass: rgba(255,255,255,0.04);
       --muted: rgba(255,255,255,0.65);
     }
@@ -29,8 +30,7 @@
     .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:20px;border-radius:14px;box-shadow:0 6px 30px rgba(2,6,23,0.6);backdrop-filter: blur(6px);}
 
     .status-pill{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:999px;font-weight:600}
-    .pill-coming{background:linear-gradient(90deg,#f97316,#f43f5e);color:white;animation:pulse 2s infinite}
-    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+    .pill-done{background:var(--accent-done);color:white;}
 
     .features{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
     .feature{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:10px;background:var(--glass)}
@@ -69,86 +69,81 @@
         <div class="logo"><small>42</small></div>
         <div>
           <h1>42 Webserv</h1>
-          <p class="lead">A teaching HTTP server built for <strong>42 School</strong> — fast, minimal, and extensible.</p>
-		  <p>Built by: <strong>olaaroub, ohammou & iahamdan</strong> — <span style="color:var(--muted)">42 Webserv Project</span></p>
+          <p class="lead">A custom HTTP server built with <strong> Love </strong> — fast, minimal, and fully-featured.</p>
+          <p>Built by: <strong>olaaroub, ohammou & iahamdan</strong> — <span style="color:var(--muted)">42 Webserv Project</span></p>
         </div>
       </div>
       <div class="meta">
-        <div class="status-pill pill-coming">🍪 Cookies & Sessions — Coming Soon</div>
-        <a class="btn ghost" href="#features">Explore</a>
+        <div class="status-pill pill-done">🏆 All Features Implemented</div>
       </div>
     </header>
 
     <section class="hero">
       <div class="card">
         <h3 style="margin:0 0 8px">Project Highlights</h3>
-        <p style="margin:0;color:var(--muted)">This repo implements the mandatory part (socket handling, parsing, request routing, CGI support basics). The cookies & sessions feature is planned next — it's called out above so reviewers know it's on the roadmap.</p>
+        <p style="margin:0;color:var(--muted)">This server implements all mandatory features, including socket handling, HTTP parsing, and CGI support, as well as the bonus features for cookies and session management.</p>
 
         <div class="features">
           <div class="feature">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 12h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 6h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 18h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             <div>
-              <h4>HTTP parsing & routing</h4>
-              <p>Robust parser for requests, support for routing and method handling (GET, POST).</p>
+              <h4>HTTP Parsing & Routing</h4>
+              <p>Robust parser for requests, with support for routing and method handling (GET, POST, DELETE).</p>
             </div>
           </div>
 
           <div class="feature">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7l3-7z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
             <div>
-              <h4>CGI</h4>
-              <p>Executes external programs to generate dynamic responses (configured via the assignment specs).</p>
+              <h4>CGI Execution</h4>
+              <p>Executes external scripts (PHP, Python, Bash) to generate dynamic responses, with timeout handling.</p>
             </div>
           </div>
 
           <div class="feature">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 21h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             <div>
-              <h4>Static file serving</h4>
-              <p>Efficient file read and correct Content-Length and MIME type responses.</p>
+              <h4>Static File Serving</h4>
+              <p>Efficiently serves static files with correct Content-Length and MIME type headers.</p>
             </div>
           </div>
 
           <div class="feature">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 12h3l3 8 4-16 3 8h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <div>
-              <h4>Virtual hosts & config</h4>
-              <p>Per-host configuration parsing to support several server blocks like the assignment.</p>
+              <h4>Virtual Hosts & Config</h4>
+              <p>Per-host configuration parsing to support multiple server blocks, similar to Nginx.</p>
             </div>
           </div>
 
           <div class="feature">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2v20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2 12h20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M8.5 10.5a.5.5 0 100-1 .5.5 0 000 1zM15.5 10.5a.5.5 0 100-1 .5.5 0 000 1zM10.5 15.5a.5.5 0 100-1 .5.5 0 000 1z"/></svg>
             <div>
-              <h4>Error handling</h4>
-              <p>Custom 4xx/5xx pages and careful status code management for graders.</p>
+              <h4>Cookies & Sessions</h4>
+              <p>Full support for session management via cookies, including creation, validation, and deletion.</p>
             </div>
           </div>
 
           <div class="feature">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             <div>
-              <h4>Extensible & tested</h4>
-              <p>Designed with small, testable components — easy to iterate and add sessions later.</p>
+              <h4>Error Handling</h4>
+              <p>Custom 4xx/5xx pages and careful status code management for all edge cases.</p>
             </div>
           </div>
         </div>
 
         <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
           <button class="btn" onclick="copyCurl()">Copy curl example</button>
-          <a class="btn ghost" href="#readme">Open README</a>
-          <div style="margin-left:auto;color:var(--muted);font-size:13px">Build: Mandatory ✅</div>
-        </div>
-
-        <div style="margin-top:12px;font-size:13px;color:var(--muted)">
-          <strong>Roadmap:</strong> Cookies & Sessions, persistent sessions, improved cookie flags (HttpOnly, Secure), and test coverage.
+          <a class="btn ghost" href="https://github.com/olaaroub/WebServer" target="_blank">View on GitHub</a>
+          <div style="margin-left:auto;color:var(--muted);font-size:13px">Build: Complete ✅</div>
         </div>
       </div>
 
       <aside class="right">
         <div class="card ghost">
           <h4 style="margin:0 0 8px">Try it locally</h4>
-          <div class="code" id="curlBlock">curl -i http://localhost:8080/ -H "Host: example.com"</div>
+          <div class="code" id="curlBlock">curl -i http://localhost:8080/</div>
           <div style="margin-top:8px;display:flex;gap:8px">
             <button class="btn" onclick="copyCurl()">Copy</button>
             <button class="btn ghost" onclick="showStatus()">Show status</button>
@@ -159,7 +154,7 @@
           <h4 style="margin:0 0 8px">Tech stack & style</h4>
           <div class="grid">
             <div class="ghost" style="padding:10px">C++98<br><small style="color:var(--muted)">(assignment requirement)</small></div>
-            <div class="ghost" style="padding:10px">POSIX sockets<br><small style="color:var(--muted)">poll/select</small></div>
+            <div class="ghost" style="padding:10px">POSIX Sockets<br><small style="color:var(--muted)">epoll</small></div>
             <div class="ghost" style="padding:10px">Makefile & Shell</div>
           </div>
         </div>
@@ -167,9 +162,9 @@
         <div class="card ghost">
           <h4 style="margin:0 0 8px">Quick links</h4>
           <div style="display:flex;flex-direction:column;gap:8px">
-            <a class="btn ghost" href="#code">Source</a>
-            <a class="btn ghost" href="#tests">Tests</a>
-            <a class="btn ghost" href="#issues">Issues</a>
+            <a class="btn ghost" href="/cgi-bin/php/login.php">Login Demo</a>
+            <a class="btn ghost" href="/uploads/postTest.html">Upload Demo</a>
+            <a class="btn ghost" href="/cgi-bin/php/env.php">CGI Env Test</a>
           </div>
         </div>
       </aside>
@@ -177,24 +172,24 @@
 
     <section id="features" style="margin-top:22px">
       <div class="card">
-        <h3 style="margin:0 0 8px">Implementation status snapshot</h3>
-        <p style="margin:0;color:var(--muted)">This summary helps reviewers quickly find what you completed and what you'll add.</p>
+        <h3 style="margin:0 0 8px">Implementation Status</h3>
+        <p style="margin:0;color:var(--muted)">This summary helps reviewers quickly verify that all required features have been completed.</p>
 
         <div style="margin-top:12px;display:grid;grid-template-columns:1fr 140px;gap:12px;align-items:center">
           <div>
             <ul style="margin:8px 0 0;padding-left:18px;color:var(--muted)">
-              <li>Socket handling, accept loop, worker management — <strong>done</strong></li>
-              <li>Request parsing and header handling — <strong>done</strong></li>
-              <li>CGI spawn & environment handling — <strong>done</strong></li>
-              <li>Static file serving & range support — <strong>done</strong></li>
-              <li>Cookies & sessions — <em>planned</em></li>
+              <li>Socket handling, accept loop, and non-blocking I/O — <strong>done</strong></li>
+              <li>Request/response parsing and header handling — <strong>done</strong></li>
+              <li>CGI spawning, environment setup, and I/O piping — <strong>done</strong></li>
+              <li>Static file serving with correct MIME types — <strong>done</strong></li>
+              <li>Cookies & sessions (Bonus) — <strong>done</strong></li>
             </ul>
           </div>
           <div>
             <div style="height:10px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden">
-              <div style="width:76%;height:100%;background:var(--accent)"></div>
+              <div style="width:100%;height:100%;background:var(--accent-done)"></div>
             </div>
-            <div style="font-size:13px;color:var(--muted);margin-top:6px">Progress: 76% (mandatory complete)</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:6px">Progress: 100%</div>
           </div>
         </div>
       </div>
@@ -212,12 +207,11 @@
       navigator.clipboard?.writeText(text).then(()=>{
         alert('curl command copied to clipboard!');
       }).catch(()=>{
-        // fallback
-        const ta = document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); alert('copied!')}catch(e){alert('could not copy')}; ta.remove();
+        const ta = document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); alert('Copied to clipboard!')}catch(e){alert('Could not copy command.')}; ta.remove();
       })
     }
     function showStatus(){
-      alert('Mandatory part implemented. Cookies & sessions coming soon.\nSuggested next steps:\n1) design session storage (file / memory)\n2) add Set-Cookie header helper\n3) test with browser and curl.');
+      alert('Project Complete!\nAll mandatory and bonus features have been implemented successfully.');
     }
   </script>
 </body>
