@@ -1,4 +1,3 @@
 #!/bin/bash
 
-
-sleep 10000000
+# sleep 10000000

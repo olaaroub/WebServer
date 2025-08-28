@@ -8,11 +8,6 @@ std::map<int, network *> serverManager::activeNetworks;
 std::map<std::string, SessionData> serverManager::s_activeSessions;
 const int serverManager::request_timeout = 60;
 const std::string serverManager::s_sessionFilePath = "database/sessions.db";
-bool isShutdown = false;
-void serverManager::signal_handler(int)
-{
-	isShutdown = true;
-}
 
 void serverManager::add_server(network *instance)
 {
@@ -228,28 +223,6 @@ void serverManager::listening()
 		checkCgiTimeouts();
 		reapChildProcesses();
 
-		signal(SIGINT, signal_handler);
-		signal(SIGTERM, signal_handler);
-		signal(SIGQUIT, signal_handler);
-		signal(SIGPIPE, SIG_IGN);
-		// for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end(); )
-		// {
-		//     client *Client = dynamic_cast<client *>(it->second);
-		//     if (Client != NULL && !Client->requestComplete && (current_time - Client->get_time()) > request_timeout)
-		//     {
-		//         std::cout << RED << "[FD: " << it->first << "] Client timed out. Closing connection." << RESET << std::endl;
-		//         Client->handleHttpError(timeout);
-		//         close(it->first);
-		//         epoll_ctl(kernel_identifier, EPOLL_CTL_DEL, it->first, 0);
-		//         delete it->second;
-		//         std::map<int, network *>::iterator to_erase = it;
-		//         ++it;
-		//         activeNetworks.erase(to_erase);
-		//     }
-		//     else
-		//         ++it;
-		// }
-
 		for (std::map<int, network *>::iterator it = activeNetworks.begin(); it != activeNetworks.end();)
 		{
 			if (!it->second->if_server())
@@ -281,12 +254,6 @@ void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
 	{
 		for (std::vector<int>::const_iterator its = it->ports.begin(); its != it->ports.end(); its++)
 		{
-			// struct addrinfo hints, *res;
-			// memset(&hints, 0, sizeof(hints));
-			// hints.ai_family = AF_INET;
-			// hints.ai_socktype = SOCK_STREAM;
-			// getaddrinfo((*it).host.c_str(), NULL, &hints, &res);
-			// struct sockaddr_in* ipv4 = (struct sockaddr_in*)res->ai_addr;
 			try
 			{
 				server *new_server = new server((*its), inet_addr((*it).host.c_str()), (*it));

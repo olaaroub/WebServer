@@ -88,14 +88,20 @@ void client::handleHttpError(int statusCode)
 	{
 
 		std::string error_page_uri = this->_server_config.error_pages.at(statusCode);
-		const LocationConfigs *error_loc = findLocation(error_page_uri);
-		if (error_loc)
-		{
-			std::string full_path = joinPaths(error_loc->root, error_page_uri);
-			body = getFileContents(full_path);
-			if (!body.empty())
-				customPageFound = true;
+		body = getFileContents(error_page_uri);
+		if (body.empty()){
+
+			const LocationConfigs *error_loc = findLocation(error_page_uri);
+			if (error_loc)
+			{
+				std::string full_path = joinPaths(error_loc->root, error_page_uri);//./error/404.html
+				body = getFileContents(full_path);
+				if (!body.empty())
+					customPageFound = true;
+			}
 		}
+		else
+			customPageFound = true;
 	}
 
 	if (!customPageFound)

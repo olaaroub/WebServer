@@ -36,7 +36,7 @@ public:
 	static void 								deleteSession(const std::string& sessionId);
 	static bool									validateSession(const std::string& sessionId);
 	static int 									kernel_identifier;
-
+	static bool									isShutdown;
 	static void 								setupServers(const std::vector<ServerConfigs> &servers);
 	static void 								startServers();
 };
