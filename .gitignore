@@ -7,7 +7,7 @@ dependencies/
 webserv
 *_POST_FILE
 nots.txt
-test
+test*
 *.ser
 longVid.mp4
 .vscode/

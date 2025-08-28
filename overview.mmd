@@ -1,0 +1,94 @@
+flowchart TD
+    %% PART 1: FOUNDATION
+    subgraph "Part 1: Foundation"
+        A0["Start Program"]
+        A1["Config File: l3robi.conf"]
+        A2["1.1: Configuration Parsing<br/>• FileReader::readFile<br/>• ConfigParser::parse<br/>• System Call: access()"]
+        A3(("Config Object<br/>vector<ServerConfigs>"))
+        A4["1.2: Server Setup<br/>• ServerManager::setupServers<br/>• System Calls: socket(), bind(), listen(), fcntl()"]
+        A0 --> A1 --> A2 --> A3 --> A4
+    end
+    %% Use lighter background colors for better font visibility
+    style A0 fill:#ffffff,stroke:#1565c0,color:#222
+    style A1 fill:#ffffff,stroke:#1565c0,color:#222
+    style A2 fill:#ffffff,stroke:#1565c0,color:#222
+    style A3 fill:#e3f6fd,stroke:#1565c0,color:#222
+    style A4 fill:#ffffff,stroke:#1565c0,color:#222
+
+    %% PART 2: CORE ENGINE
+    subgraph "Part 2: Core Engine"
+        B1["2.1: Create epoll Instance<br/>• System Call: epoll_create()"]
+        B2{"2.1: Main Event Loop<br/>ServerManager::listening<br/>System Call: epoll_wait()"}
+        B3["2.2: Accept New Connection<br/>• server::onEvent<br/>• System Call: accept()"]
+        B4["Add Client to epoll<br/>• epoll_ctl(ADD)"]
+        B5["2.3: Parse HTTP Request<br/>• Request::run_parser<br/>• Logic: State Machine"]
+        A4 --> B1 --> B2
+        B2 -- "Event on Listener" --> B3 --> B4
+        B2 -- "Event on Client" --> B5
+        B4 --> B5
+    end
+    style B1 fill:#fffbe7,stroke:#f57c00,color:#222
+    style B2 fill:#fffbe7,stroke:#f57c00,color:#222
+    style B3 fill:#fffbe7,stroke:#f57c00,color:#222
+    style B4 fill:#fffbe7,stroke:#f57c00,color:#222
+    style B5 fill:#fffbe7,stroke:#f57c00,color:#222
+
+    %% PART 3: REQUEST PROCESSING & RESPONSE
+    subgraph "Part 3: Request Processing & Response"
+        C1(("Complete Request Object"))
+        C2["3.2: Method Routing<br/>• client::onEvent"]
+        C3["GET Handler"]
+        C4["POST Handler"]
+        C5["DELETE Handler"]
+        D1["3.1: HttpResponse Builder<br/>• HttpResponse::toString()"]
+        D2["Send Response to Client"]
+        B5 --> C1 --> C2
+        C2 --> C3 --> D1
+        C2 --> C4 --> D1
+        C2 --> C5 --> D1
+        D1 --> D2
+    end
+    style C1 fill:#ffffff,stroke:#388e3c,color:#222
+    style C2 fill:#e8fbe9,stroke:#388e3c,color:#222
+    style C3 fill:#e8fbe9,stroke:#388e3c,color:#222
+    style C4 fill:#e8fbe9,stroke:#388e3c,color:#222
+    style C5 fill:#e8fbe9,stroke:#388e3c,color:#222
+    style D1 fill:#ffffff,stroke:#388e3c,color:#222
+    style D2 fill:#ffffff,stroke:#388e3c,color:#222
+
+    %% PART 4: DYNAMIC CONTENT & BONUS
+    subgraph "Part 4: Dynamic Content & Bonus"
+        E1["4.1: CGI Setup<br/>• CgiExecutor Constructor<br/>• System Call: pipe()"]
+        E2["4.1: Fork & Execute<br/>• System Calls: fork(), dup2(), execve()"]
+        E3["Manage I/O & Timeout<br/>• Read/Write to Pipes<br/>• System Call: kill()"]
+        E4["Becomes CGI Script"]
+        E5(("CGI Output"))
+        F1["4.2: Session Creation<br/>• ServerManager::createSession<br/>• Adds 'Set-Cookie' Header"]
+        F2["4.2: Session Validation<br/>• ServerManager::validateSession<br/>• Triggered by 'auth_required on'"]
+        G1["Error Handler<br/>• handleHttpError()<br/>• Returns 4xx/5xx Status"]
+
+        C4 -- "CGI Request" --> E1 --> E2
+        E2 -- "Parent Process" --> E3 --> E5
+        E2 -- "Child Process" --> E4
+        E5 --> D1
+
+        E5 --> F1 --> D1
+        B5 -- "Request has Cookie" --> F2
+        F2 -- "Valid" --> C2
+        F2 -- "Invalid" --> G1
+    end
+    style E1 fill:#f3e5f5,stroke:#6a1b9a,color:#222
+    style E2 fill:#f3e5f5,stroke:#6a1b9a,color:#222
+    style E3 fill:#f3e5f5,stroke:#6a1b9a,color:#222
+    style E4 fill:#ede7f6,stroke:#6a1b9a,color:#222
+    style E5 fill:#ede7f6,stroke:#6a1b9a,color:#222
+    style F1 fill:#e1f5fe,stroke:#0277bd,color:#222
+    style F2 fill:#e1f5fe,stroke:#0277bd,color:#222
+
+    %% ERROR HANDLING (PARALLEL)
+    subgraph "Error Handling (Parallel)"
+        style G1 fill:#ffebee,stroke:#d32f2f,stroke-width:2px,color:#222
+        C2 -- "e.g., Path Not Found" --> G1
+        B5 -- "e.g., Bad Request" --> G1
+        G1 --> D1
+    end
