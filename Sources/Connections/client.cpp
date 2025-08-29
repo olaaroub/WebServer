@@ -30,17 +30,13 @@ void client::prepareResponse(const std::string &response)
 	if (_is_monitored)
 	{
 		if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_MOD, _socket_fd, &ev) < 0)
-		{
 			throw std::runtime_error("Client Error: epoll_ctl MOD failed on a monitored client!");
-		}
 	}
 
 	else
 	{
 		if (epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_ADD, _socket_fd, &ev) < 0)
-		{
 			throw std::runtime_error("Client Error: epoll_ctl ADD failed on an unmonitored client!");
-		}
 		_is_monitored = true;
 	}
 }
@@ -48,29 +44,23 @@ void client::prepareResponse(const std::string &response)
 void client::_handleWrite()
 {
 	if (_response_buffer.empty())
-	{
 		throw ResponseSentException("response Sent");
-	}
 
 	size_t remaining = _response_buffer.length() - _bytes_sent;
 	if (remaining == 0)
-	{
 		throw ResponseSentException("response Sent");
-	}
 
 	ssize_t bytes_sent_now = send(this->_socket_fd, _response_buffer.c_str() + _bytes_sent, remaining, 0);
 
 	if (bytes_sent_now < 0)
-	{
 		throw std::runtime_error("Send Error: Failed to send data to client.");
-	}
+	if(bytes_sent_now == 0)
+		throw std::runtime_error("Send Error: Client closed connection while sending!");
 
 	_bytes_sent += bytes_sent_now;
 
 	if (_bytes_sent >= _response_buffer.length())
-	{
 		throw ResponseSentException("response Sent");
-	}
 }
 
 void client::handleHttpError(int statusCode)
