@@ -286,8 +286,6 @@ void client::onEvent()
 						return;
 					}
 					std::string content_type = _request.headers.map["content-type"].at(0);
-					std::cout << content_type << std::endl;
-
 					unsigned long check_multipartFOrmData = content_type.find("multipart/form-data");
 					if (check_multipartFOrmData != std::string::npos)
 					{
@@ -299,7 +297,7 @@ void client::onEvent()
 						}
 					}
 					else
-						post.post_Query(_request.requestLine.queryLine, _request.body_content.str());
+						post.post_Query(_request.requestLine.queryLine, _request.body_content.str(), content_type);
 
 					SendResp.setStatus(201);
 					SendResp.addHeader("Content-Type", "text/html");

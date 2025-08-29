@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/29 18:10:03 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/29 20:48:54 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,15 +94,19 @@ std::string trimWhitespace(const std::string &s)
 	return s.substr(first, (last - first + 1));
 }
 
-std::string generateUniqueFilename()
+std::string generateUniqueFilename(std::string contentType)
 {
+	std::string ext;
 	time_t currentTime = time(NULL);
 
 	std::stringstream ss;
 	ss << currentTime;
-
-	// 3. Add a file extension.
-	return ss.str() + ".ser";
+	std::string extention = Get_ReverseMimeType(contentType);
+	if (extention == "no")
+		ext = ".ser";
+	else
+		ext = extention;
+	return ss.str() + ext;
 }
 
 long parseSizeToBytes(const std::string &size_str)
@@ -296,4 +300,67 @@ std::string uRLEncoding(std::string url)
 			res += url[i];
 	}
 	return res;
+}
+
+
+
+std::string Get_ReverseMimeType(std::string mime)
+{
+    if (mime == "text/html")
+        return ".html";
+    if (mime == "text/css")
+        return ".css";
+    if (mime == "application/javascript")
+        return ".js";
+    if (mime == "image/jpeg")
+        return ".jpg";
+    if (mime == "image/png")
+        return ".png";
+    if (mime == "image/gif")
+        return ".gif";
+    if (mime == "image/x-icon")
+        return ".ico";
+    if (mime == "text/plain")
+        return ".txt";
+    if (mime == "video/mp4")
+        return ".mp4";
+    if (mime == "application/json")
+        return ".json";
+    if (mime == "application/xml")
+        return ".xml";
+    if (mime == "image/svg+xml")
+        return ".svg";
+    if (mime == "text/csv")
+        return ".csv";
+    if (mime == "application/pdf")
+        return ".pdf";
+    if (mime == "video/mpeg")
+        return ".mpeg";
+    if (mime == "video/webm")
+        return ".webm";
+    if (mime == "audio/ogg")
+        return ".ogg";
+    if (mime == "audio/mpeg")
+        return ".mp3";
+    if (mime == "audio/wav")
+        return ".wav";
+    if (mime == "application/zip")
+        return ".zip";
+    if (mime == "application/x-tar")
+        return ".tar";
+    if (mime == "application/x-rar-compressed")
+        return ".rar";
+    if (mime == "application/x-7z-compressed")
+        return ".7z";
+    if (mime == "font/woff")
+        return ".woff";
+    if (mime == "font/woff2")
+        return ".woff2";
+    if (mime == "font/ttf")
+        return ".ttf";
+    if (mime == "application/vnd.ms-fontobject")
+        return ".eot";
+    if (mime == "font/otf")
+        return ".otf";
+    return "no";
 }

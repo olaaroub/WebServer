@@ -66,10 +66,10 @@ int Post::post_multipartFormData(std::string content_type, std::string body_cont
 	return 1;
 }
 
-void Post::post_Query(std::string queryLine, std::string body_content)
+void Post::post_Query(std::string queryLine, std::string body_content, std::string contentType)
 {
 	if (queryLine.empty())
-		path_savedFile = joinPaths(get_locationFiles(), generateUniqueFilename());
+		path_savedFile = joinPaths(get_locationFiles(), generateUniqueFilename(contentType));
 	else
 		path_savedFile = joinPaths(get_locationFiles(), extractfileName(queryLine));
 
