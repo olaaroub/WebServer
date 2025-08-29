@@ -3,25 +3,25 @@
 
 #include "lib.hpp"
 
-
 class RequestLine
 {
-    private:
-        std::string method;
-        std::string HttpVerction;
+private:
+	std::string _method;
+	std::string _HttpVerction;
+	std::string _line;
+	std::string _url;
 
-        std::string line;
-        std::string _url;
+	void SeparateUrlAndQuerys(std::string buff);
+	;
 
-        void SeparateUrlAndQuerys(std::string buff);;
-    public:
-        void ParsRequestLine();
-        void set_line(std::string line);
-        std::string &get_line();
-        const std::string& get_method() const;
-        const std::string& getUrl()const;
-        std::string queryLine;
-        std::string getHttpVerction() {return HttpVerction;}
+public:
+	void ParsRequestLine();
+	void set_line(std::string line);
+	std::string &get_line();
+	std::string queryLine;
+	std::string getHttpVerction();
+	const std::string &get_method() const;
+	const std::string &getUrl() const;
 };
 
 #endif

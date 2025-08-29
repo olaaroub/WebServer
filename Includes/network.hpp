@@ -5,36 +5,32 @@
 #include "Configs.hpp"
 class network
 {
-    protected:
-        int socket_fd;
-        bool is_server;
-        sockaddr_in network_infos;
-        const ServerConfigs &server_config;
-         time_t lastActivity;
-        int event;
-    public:
-        epoll_event ev;
-        network(const ServerConfigs &server_config);
-        network(const ServerConfigs &server_config , bool is_server);
+protected:
+	int _socket_fd;
+	bool _is_server;
+	sockaddr_in _network_infos;
+	const ServerConfigs &_server_config;
+	int event;
 
-        int get_socket_fd();
+public:
+	epoll_event ev;
 
-        void epoll_crt(int event_flags);
-        void epoll_crt();
-        // void set_ToNoBlocking();
+	int get_socket_fd();
+	void epoll_crt(int event_flags);
+	void epoll_crt();
+	void set_ToNoBlocking();
+	sockaddr_in *get_sockaddr();
+	bool if_server();
+	void set_event(int ev);
+	int get_event();
 
-        sockaddr_in *get_sockaddr();
-        bool if_server();
-        void set_event(int ev);
-        int get_event();
+	network(const ServerConfigs &server_config);
+	network(const ServerConfigs &server_config, bool is_server);
 
-        virtual ~network();
-        virtual void onEvent() = 0;
-        time_t get_time();
-         void set_time(time_t new_time);
+	virtual ~network();
+	virtual void onEvent() = 0;
 
-        virtual bool isCgi() const { return false; }
-
+	virtual bool isCgi() const { return false; }
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 17:21:57 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/25 23:18:04 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/28 00:04:06 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -231,7 +231,7 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
 	}
 	if(!server_conf.client_max_body_size_set)
 	{
-		server_conf.client_max_body_size = 10 * 1024 * 1024;
+		server_conf.client_max_body_size = 10485760;
 		server_conf.client_max_body_size_set = true;
 	}
 	return server_conf;

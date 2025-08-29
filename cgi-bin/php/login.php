@@ -39,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = isset($_POST['password']) ? $_POST['password'] : '';
 
     if ($password === $correct_password) {
-        // SUCCESS: Tell the C++ server to create the session.
         header("X-Session-Action: CREATE;user=" . $username);
         header('Content-Type: text/html');
 
@@ -52,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </head><body><div class='box'>";
         echo "<h1>Welcome, " . $username . "!</h1>";
         echo "<p>You are now logged in.</p>";
-        echo "<p><a href='/secret/'>Proceed to the secret area</a> or <a href='login.php?action=logout'>Log Out</a></p>";
+        echo "<p><a href='/secret/secretFile.html'>Proceed to the secret area</a> or <a href='login.php?action=logout'>Log Out</a></p>";
         echo "</div></body></html>";
         exit();
     } else {

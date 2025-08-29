@@ -21,7 +21,6 @@ SRC = 	main.cpp \
 		Requests/request.cpp \
 		Requests/RequestLine.cpp \
 		Methods/Get.cpp \
-		Methods/Methods.cpp \
 		Methods/Post.cpp \
 		Methods/Delete.cpp \
 

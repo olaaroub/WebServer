@@ -1,0 +1,129 @@
+flowchart TD
+    %% Stage 0: Program Start
+    subgraph Stage0 [Program Start]
+        main["Entry Point: main()"]
+        checkargs["Checks command-line arguments"]
+        filereader["Instantiate FileReader"]
+        configparser["Instantiate ConfigParser"]
+        setupservers["ServerManager::setupServers"]
+        startservers["ServerManager::startServers"]
+        errorcatch["Top-level try...catch"]
+        main --> checkargs --> filereader --> configparser --> setupservers --> startservers --> errorcatch
+    end
+
+    %% Stage 1: Configuration Parsing
+    subgraph Stage1 [Configuration Parsing]
+      conf["Config File: l3robi.conf"]
+      fr["FileReader::readFile\n(access(), reads file)"]
+      cp["ConfigParser\ncleanContent(), parseServerBlock(), ...\nstd::vector<ServerConfigs>"]
+      conf --> fr --> cp
+    end
+    errorcatch --> conf
+
+    %% Stage 2: Server Setup
+    subgraph Stage2 [Server Setup]
+      sm["ServerManager::setupServers (create server per port)"]
+      ls["Listening Sockets\n(socket(), bind(), listen(), fcntl())"]
+      sm --> ls
+    end
+    cp --> sm
+
+    %% Stage 3: I/O Multiplexing
+    subgraph Stage3 ["I/O Multiplexing - Main Loop"]
+      epoll["epoll_create()\nAdd listening & client sockets"]
+      loop["Main Event Loop\nServerManager::listening()\nepoll_wait() & dispatch"]
+      epoll --> loop
+    end
+    ls --> epoll
+
+    %% Stage 4: HTTP Request Handling
+    subgraph Stage4 ["HTTP Request Handling"]
+      accept["Accept Connection\nserver::onEvent(), accept()"]
+      parsereq["Parse Request\nRequest::run_parser()\n(state machine)"]
+      accept --> parsereq
+    end
+    loop --> accept
+
+    %% Stage 5: Processing & Response Generation
+    subgraph Stage5 ["Processing & Response Generation"]
+      route["Method Routing <br> client::onEvent()"]
+      builder["HttpResponse Builder <br> HttpResponse::toString()"]
+      route --> builder
+    end
+    parsereq --> route
+
+    %% Stage 6: Action Handlers (Parallel Flows)
+    subgraph Stage6 ["Action Handlers"]
+      subgraph GET [GET Method]
+        getstat["stat()"]
+        fileget["Serve File\nread contents, MIME type"]
+        dirget["Directory\nAutoindex or index file"]
+        redirect["Trailing Slash\n301 Redirect"]
+        getstat -- File --> fileget
+        getstat -- Directory --> dirget
+        dirget -- Slash needed --> redirect
+      end
+      subgraph POST [POST Method]
+        upload["File Upload\nparse & save, check permissions"]
+        cgi_route["CGI\nproceed to Stage 7"]
+        postchoice["(File Upload | CGI)"]
+        postchoice -- File Upload --> upload
+        postchoice -- CGI --> cgi_route
+      end
+      subgraph DELETE [DELETE Method]
+        delstat["stat()"]
+        delaction["std::remove()\ncheck permissions"]
+        delstat --> delaction
+      end
+    end
+    builder --> GET
+    builder --> POST
+    builder --> DELETE
+
+    %% Stage 7: CGI Handling
+    subgraph Stage7 ["CGI Handling"]
+        cgisetup["CgiExecutor Constructor\npipe()"]
+        cgifork["fork(), dup2(), execve()"]
+        parentio["Parent-Child I/O\nadd pipe to epoll, write/read"]
+        timeout["Timeout check\nkill() if needed"]
+        cgisetup --> cgifork --> parentio
+        parentio --> timeout
+    end
+    cgi_route --> cgisetup
+
+    %% Stage 8: Cookies & Sessions (Bonus)
+    subgraph Stage8 ["Cookies & Sessions"]
+        sessionmgr["Session Manager\ncreateSession(), map & file"]
+        setcookie["Set-Cookie Header"]
+        authcheck["Auth Check\nvalidateSession()"]
+        sessionmgr --> setcookie
+        setcookie --> authcheck
+    end
+    parentio --> sessionmgr
+
+    %% Stage 9: Error Handling (Parallel)
+    subgraph Stage9 ["Error Handling"]
+        herr["handleHttpError\nhandle any error"]
+        errorpage["Error Page\ncustom or default"]
+        herr --> errorpage --> builder
+    end
+    %% Error branch from any main block
+    Stage0 -.-> herr
+    Stage1 -.-> herr
+    Stage2 -.-> herr
+    Stage3 -.-> herr
+    Stage4 -.-> herr
+    Stage5 -.-> herr
+    Stage6 -.-> herr
+    Stage7 -.-> herr
+    Stage8 -.-> herr
+
+    %% End point
+    endnode([END])
+    errorpage --> endnode
+    authcheck --> endnode
+    upload --> endnode
+    fileget --> endnode
+    dirget --> endnode
+    redirect --> endnode
+    delaction --> endnode

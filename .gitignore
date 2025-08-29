@@ -5,11 +5,9 @@
 *.out
 dependencies/
 webserv
-canvas.hpp
 *_POST_FILE
 nots.txt
-test
+test*
 *.ser
-*.mp4
+longVid.mp4
 .vscode/
-# *.py

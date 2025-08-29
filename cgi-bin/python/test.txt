@@ -1,0 +1,2 @@
+Salam from test.txt!
+If you can see this message, your server correctly changed the working directory before executing the CGI script.

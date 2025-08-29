@@ -14,6 +14,9 @@ CgiExecutor::CgiExecutor(const ServerConfigs &serverConf, const LocationConfigs 
 		std::string extension = getExtension(path);
 		if (!loc.cgi_handlers.count(extension))
 			throw CgiExecutorException("No valid CGI handler for script extension.");
+		std::string interpreter = loc.cgi_handlers.at(extension);
+		if (access(interpreter.c_str(), X_OK) != 0)
+			throw CgiExecutorException("CGI interpreter is not executable.");
 		_setupEnvironment(req, loc, path);
 		_setupArguments(loc.cgi_handlers.at(extension), path);
 
@@ -41,15 +44,15 @@ CgiExecutor::CgiExecutor(const ServerConfigs &serverConf, const LocationConfigs 
 			close(cgi_pipe_in[0]), close(cgi_pipe_out[1]);
 
 			std::string scriptDir = path.substr(0, path.find_last_of("/"));
-			// std::cerr << "CGI script directory: " << scriptDir << std::endl;
-
 			if (chdir(scriptDir.c_str()) != 0)
 			{
 				std::cerr << RED << "CGI Error: chdir to " << scriptDir << " failed." << RESET << std::endl;
+				_cleanup();
 				exit(EXIT_FAILURE);
 			}
 			execve(_argv[0], _argv, _envp);
 			std::cerr << RED << "CGI Error: execve failed for " << _argv[0] << RESET << std::endl;
+			_cleanup();
 			exit(EXIT_FAILURE);
 		}
 
@@ -60,7 +63,7 @@ CgiExecutor::CgiExecutor(const ServerConfigs &serverConf, const LocationConfigs 
 		if (!_requestBody.empty())
 		{
 			_state = CGI_WRITING;
-			this->socket_fd = _pipe_in_fd;
+			this->_socket_fd = _pipe_in_fd;
 			this->epoll_crt(EPOLLOUT);
 		}
 		else
@@ -68,13 +71,15 @@ CgiExecutor::CgiExecutor(const ServerConfigs &serverConf, const LocationConfigs 
 			_state = CGI_READING;
 			close(_pipe_in_fd);
 			_pipe_in_fd = -1;
-			this->socket_fd = _pipe_out_fd;
+			this->_socket_fd = _pipe_out_fd;
 			this->epoll_crt(EPOLLIN);
 		}
-		serverManager::activeNetworks[this->socket_fd] = this;
+		serverManager::activeNetworks[this->_socket_fd] = this;
 	}
 	catch (...)
 	{
+		serverManager::activeNetworks[_client->get_socket_fd()] = _client;
+		_client = NULL;
 		_cleanup();
 		throw;
 	}
@@ -90,40 +95,6 @@ CgiExecutor::~CgiExecutor()
 	}
 }
 
-void CgiExecutor::_cleanup()
-{
-	_closeFds();
-	if (_argv)
-	{
-		for (int i = 0; _argv[i]; ++i)
-			free(_argv[i]);
-		delete[] _argv;
-		_argv = NULL;
-	}
-	if (_envp)
-	{
-		for (int i = 0; _envp[i]; ++i)
-			free(_envp[i]);
-		delete[] _envp;
-		_envp = NULL;
-	}
-}
-
-void CgiExecutor::_closeFds()
-{
-	if (_pipe_in_fd != -1)
-	{
-		epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, _pipe_in_fd, 0);
-		close(_pipe_in_fd);
-		_pipe_in_fd = -1;
-	}
-	if (_pipe_out_fd != -1)
-	{
-		epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, _pipe_out_fd, 0);
-		close(_pipe_out_fd);
-		_pipe_out_fd = -1;
-	}
-}
 
 void CgiExecutor::onEvent()
 {
@@ -144,24 +115,24 @@ void CgiExecutor::onEvent()
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
 		{
 			std::cerr << RED << "[CGI] Script exited with non-zero status for PID " << _pid << RESET << std::endl;
+			_cleanup();
 			_client->handleHttpError(502);
 			serverManager::activeNetworks[_client->get_socket_fd()] = _client;
     		_client = NULL;
+			return;
 		}
-            // _client->sendErrorResponse(502, "Bad Gateway");
         else
         {
 			HttpResponse cgiResponseBuilder;
             cgiResponseBuilder.setFromCgiOutput(_responseBuffer);
 
-			if (cgiResponseBuilder.getHeader("content-type").empty()) // get header kat rje3 kolchi miniscule bach manb9ach nchecki bzf
+			if (cgiResponseBuilder.getHeader("content-type").empty())
             {
 				std::cerr << YELLOW << "[CGI] Script for PID " << _pid << " did not return a Content-Type header." << RESET << std::endl;
 				_client->handleHttpError(502);
 				serverManager::activeNetworks[_client->get_socket_fd()] = _client;
     			_client = NULL;
 			}
-
 
             else
             {
@@ -193,7 +164,7 @@ void CgiExecutor::onEvent()
 
 				_client->prepareResponse(cgiResponseBuilder.toString());
 				serverManager::activeNetworks[_client->get_socket_fd()] = _client;
-    			_client = NULL; // fach kansift can rje3 l client wkan7ydo mn 3ndi servermanager how li mklef db
+    			_client = NULL;
 
 			}
     	}
@@ -209,15 +180,15 @@ void CgiExecutor::_handleWrite()
 
     if (_bytesWritten >= _requestBody.length() || bytes <= 0)
     {
-        serverManager::activeNetworks.erase(this->socket_fd);
-        epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, this->socket_fd, 0);
+        serverManager::activeNetworks.erase(this->_socket_fd);
+        epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, this->_socket_fd, 0);
         close(_pipe_in_fd);
         _pipe_in_fd = -1;
 
         _state = CGI_READING;
-        this->socket_fd = _pipe_out_fd;
+        this->_socket_fd = _pipe_out_fd;
         this->epoll_crt(EPOLLIN);
-        serverManager::activeNetworks[this->socket_fd] = this;
+        serverManager::activeNetworks[this->_socket_fd] = this;
     }
 }
 
@@ -250,14 +221,14 @@ void CgiExecutor::_setupEnvironment(const Request &req, const LocationConfigs &l
 	std::string sessionId = req.headers.getCookie("sessionid");
 
 
-	if (!server_config.server_names.empty())
-		env.push_back("SERVER_NAME=" + server_config.server_names[0]);
+	if (!_server_config.server_names.empty())
+		env.push_back("SERVER_NAME=" + _server_config.server_names[0]);
 	else
-		env.push_back("SERVER_NAME=" + server_config.host);
+		env.push_back("SERVER_NAME=" + _server_config.host);
 
-	if (!server_config.ports.empty())
+	if (!_server_config.ports.empty())
 	{
-		ss << server_config.ports[0];
+		ss << _server_config.ports[0];
 		env.push_back("SERVER_PORT=" + ss.str());
 		ss.str("");
 	}
@@ -319,3 +290,46 @@ void CgiExecutor::_setupArguments(const std::string &cgi_path, const std::string
 	// exit(0);
 	_argv[2] = NULL;
 }
+
+void CgiExecutor::_cleanup()
+{
+	_closeFds();
+	if (_argv)
+	{
+		for (int i = 0; _argv[i]; ++i)
+			free(_argv[i]);
+		delete[] _argv;
+		_argv = NULL;
+	}
+	if (_envp)
+	{
+		for (int i = 0; _envp[i]; ++i)
+			free(_envp[i]);
+		delete[] _envp;
+		_envp = NULL;
+	}
+}
+
+void CgiExecutor::_closeFds()
+{
+	if (_pipe_in_fd != -1)
+	{
+		epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, _pipe_in_fd, 0);
+		close(_pipe_in_fd);
+		_pipe_in_fd = -1;
+	}
+	if (_pipe_out_fd != -1)
+	{
+		epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, _pipe_out_fd, 0);
+		close(_pipe_out_fd);
+		_pipe_out_fd = -1;
+	}
+}
+
+bool CgiExecutor::isCgi() const { return true; }
+pid_t CgiExecutor::getPid() const { return _pid; }
+time_t CgiExecutor::getStartTime() const { return _startTime; }
+client* CgiExecutor::getClient() const { return _client; }
+void CgiExecutor::removeClient() { _client = NULL; }
+void CgiExecutor::setState(CgiState state) { _state = state; }
+CgiExecutor::CgiState CgiExecutor::getState() const { return _state; }
