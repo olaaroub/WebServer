@@ -15,8 +15,7 @@
 ResponseSentException::ResponseSentException(const std::string &message) : messageSent(message) { ; }
 const char *ResponseSentException::what() const throw() { return messageSent.c_str(); }
 
-ParseError::ParseError(std::string Error, short stute) : _Error(Error), ErrorStute(stute) {}
-short ParseError::getStutError() const { return ErrorStute; }
+ParseError::ParseError(std::string Error, short code) : _Error(Error), errorCode(code) {}
 const char *ParseError::what() const throw() { return _Error.c_str(); }
 ParseError::~ParseError() throw() {}
 

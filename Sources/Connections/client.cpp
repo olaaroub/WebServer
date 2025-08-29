@@ -346,11 +346,11 @@ void client::onEvent()
 		}
 		catch (const ParseError &e)
 		{
-			// _errorStute = e.getStutError();
+			// _errorCode = e.getcoderror();
 			std::cerr << RED << e.what() << RESET << '\n';
-			if (e.ErrorStute == closeConnection)
+			if (e.errorCode == closeConnection)
 				throw std::runtime_error("client close connection");
-			handleHttpError(e.ErrorStute);
+			handleHttpError(e.errorCode);
 			return;
 			// _handleWrite();
 		}

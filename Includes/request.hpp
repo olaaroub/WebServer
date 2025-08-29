@@ -22,7 +22,7 @@ private:
 	void 										ContentLenghtRead();
 	std::string 								_ignoreExtension(std::string line);
 
-	enum ParserStute
+	enum ParserState
 	{
 		_InRequestLine,
 		_InHeaders,

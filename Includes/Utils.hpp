@@ -31,10 +31,9 @@ private:
 	std::string 											_Error;
 
 public:
-	ParseError(std::string Error, short stute);
+	ParseError(std::string Error, short code);
 	~ParseError() throw();
-	short 													ErrorStute;
-	short													getStutError() const;
+	short 													errorCode;
 	const char 												*what() const throw();
 };
 

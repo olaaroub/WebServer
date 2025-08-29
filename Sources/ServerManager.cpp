@@ -254,8 +254,8 @@ void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
 			}
 			catch (ParseError &e)
 			{
-				if (e.ErrorStute > 0)
-					close(e.ErrorStute);
+				if (e.errorCode > 0)
+					close(e.errorCode);
 				std::cerr << RED << e.what() << RESET;
 			}
 		}
