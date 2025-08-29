@@ -127,8 +127,7 @@ void client::onEvent()
 
 	if (_state == WRITING && (event & EPOLLOUT))
 	{
-		// std::cout << YELLOW << "sending response: " << _response_buffer << RESET << std::endl;
-		// std::cout << "=== how many times did you enter here" << std::endl;
+		// std::cout << YELLOW << "sending response: " << (_response_buffer + " (bytes sent: " + std::to_string(_bytes_sent) + ")") << RESET << std::endl;
 		_handleWrite();
 		return;
 	}
@@ -206,7 +205,7 @@ void client::onEvent()
 					if (serverManager::validateSession(sessionId) == false)
 					{
 						std::cout << YELLOW << "[FD: " << this->_socket_fd << "] Access denied for " << requestUri << ": Invalid session." << RESET << std::endl;
-						handleHttpError(403);
+						handleHttpError(401);
 						return;
 					}
 					std::cout << GREEN << "[FD: " << this->_socket_fd << "] Access granted for " << requestUri << ": Valid session." << RESET << std::endl;

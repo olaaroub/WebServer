@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/28 00:03:06 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/29 18:10:03 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,6 +152,7 @@ const char *getReasonPhrase(int code)
 	case 408: return "Request Timeout";
 	case 413: return "Payload Too Large";
 	case 414: return "URI Too Long";
+	case 431: return "Request Header Fields Too Large";
 	case 500: return "Internal Server Error";
 	case 501: return "Not Implemented";
 	case 502: return "Bad Gateway";
