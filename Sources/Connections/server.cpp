@@ -2,11 +2,7 @@
 #include "client.hpp"
 #include "ServerManager.hpp"
 
-server::server(const ServerConfigs &server_config) : network(server_config)
-{
-	_is_server = true;
-}
-
+server::server(const ServerConfigs &server_config) : network(server_config, true) {}
 server::server(in_port_t port, in_addr_t ip_addres, const ServerConfigs &server_config) : network(server_config, true), _port(port), _ip_addres(ip_addres)
 {
 	creat_socket();

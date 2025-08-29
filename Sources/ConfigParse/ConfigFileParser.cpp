@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 17:21:57 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/28 00:04:06 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/29 21:42:31 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,8 +126,7 @@ void ConfigParser::parse()
 		if (isWhitespaces(blockContent))
 			throw std::runtime_error("Config Error: Empty 'server' block found.");
 		this->_servers.push_back(this->parseServerBlock(blockContent));
-		// std::cout << "tfo 3la mk" << _rawServerBlocks[0] << std::endl;
-		// std::cout << "tfo 3la mk" << _rawServerBlocks[1] << std::endl;
+
 		pos = closingBrace;
 	}
 	if (this->_servers.empty())

@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:18 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/29 20:51:16 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/29 21:27:05 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,10 @@
 
 class ResponseSentException : public std::exception
 {
-	const std::string messageSent;
+	const std::string 										messageSent;
 
 public:
-	const char *what() const throw();
+	const char 												*what() const throw();
 	ResponseSentException(const std::string &message);
 	~ResponseSentException() throw() {}
 };
@@ -28,14 +28,14 @@ public:
 class ParseError : public std::exception
 {
 private:
-	std::string _Error;
+	std::string 											_Error;
 
 public:
-	short ErrorStute;
 	ParseError(std::string Error, short stute);
-	short getStutError() const;
-	const char *what() const throw();
 	~ParseError() throw();
+	short 													ErrorStute;
+	short													getStutError() const;
+	const char 												*what() const throw();
 };
 
 enum ErrorCode
@@ -51,17 +51,17 @@ enum ErrorCode
 	methodNotImplemented = 501
 };
 
-std::string joinPaths(const std::string &p1, const std::string &p2);
-std::string normalizePath(const std::string &uri);
-std::string getExtension(const std::string &path);
-std::string getFileContents(const std::string &filePath);
-std::string trimWhitespace(const std::string &s);
-const char *getReasonPhrase(int code);
-std::string getMimeType(const std::string &filePath);
-std::string generate_body_FromFile(std::string pathFIle);
-std::string toLower(const std::string &str);
-long parseSizeToBytes(const std::string &size_str);
-bool pathChecker(std::string Uri);
-std::string uRLEncoding(std::string url);
-std::string generateUniqueFilename(std::string contentType);
-std::string Get_ReverseMimeType(std::string mime);
+std::string 												joinPaths(const std::string &p1, const std::string &p2);
+std::string 												normalizePath(const std::string &uri);
+std::string 												getExtension(const std::string &path);
+std::string 												getFileContents(const std::string &filePath);
+std::string 												trimWhitespace(const std::string &s);
+const char 													*getReasonPhrase(int code);
+std::string 												getMimeType(const std::string &filePath);
+std::string 												generate_body_FromFile(std::string pathFIle);
+std::string 												toLower(const std::string &str);
+long 														parseSizeToBytes(const std::string &size_str);
+bool 														pathChecker(std::string Uri);
+std::string 												uRLEncoding(std::string url);
+std::string 												generateUniqueFilename(std::string contentType);
+std::string 												Get_ReverseMimeType(std::string mime);

@@ -1,21 +1,10 @@
 #include "Headers.hpp"
 #include "Utils.hpp"
 
-void Headers::set_buffer(std::string buffer)
-{
-	this->_buffer += buffer;
-}
-std::string Headers::get_buffer()
-{
-	return _buffer;
-}
+void Headers::set_buffer(std::string buffer) { this->_buffer += buffer; }
+std::string Headers::get_buffer() { return _buffer; }
 
-// std::string Headers::toLower(const std::string& str) const {
-//     std::string result = str;
-//     std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-//     // std::cout << GREEN << result << RESET << std::endl;
-//         return result;
-// }
+
 
 std::string Headers::getCookie(const std::string &key) const
 {
@@ -87,7 +76,7 @@ void Headers::HeadersParser()
 	}
 	if (map.find("host") == map.end() || map["host"].size() != 1 || (!map["host"].empty() && map["host"].at(0).empty()))
 		throw ParseError("Headers Error: host not found", badRequest);
-	
+
 	std::string keysCheck[3] = {"content-length", "authorization", "transfer-encoding"};
 	for (int i = 0; i < 3; i++)
 	{
@@ -96,11 +85,6 @@ void Headers::HeadersParser()
 	}
 	if (map.find("content-length") != map.end() && map.find("transfer-encoding") != map.end())
 		throw ParseError("Headers Error: content-length and transfer-encoding not allowed together", badRequest);
-	// for (std::map<std::string, std::vector<std::string> >::iterator it = map.begin(); it != map.end(); it++)
-	// {
-	//     std::cout << "first: '" << it->first << "' second: '" << it->second.at(0) << "'" << std::endl;
-	// }
-	// exit(1);
 }
 
 int Headers::_toDecimal(std::string::iterator begin, std::string::iterator end)
@@ -164,12 +148,3 @@ void Headers::cookieParser()
 		_splitCookie(firstCookie);
 	}
 }
-
-/*
-
-5\r\n
-rredf\r\n
-0\r\n
-\r\n
-
-*/

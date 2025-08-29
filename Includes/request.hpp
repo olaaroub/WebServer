@@ -7,20 +7,20 @@
 class Request
 {
 private:
-	std::string _buffer;
-	unsigned long _chunkSize;
-	unsigned long _contentSize;
-	bool _waiting_for_new_chunk;
+	std::string 								_buffer;
+	unsigned long 								_chunkSize;
+	unsigned long 								_contentSize;
+	bool 										_waiting_for_new_chunk;
 
-	void is_finished();
-	void is_number(std::string string);
-	void ParsRequstLine();
-	void ParsHeaders();
-	void ParsBody();
-	void StateOFParser();
-	void ChunkReaContent();
-	void ContentLenghtRead();
-	std::string _ignoreExtension(std::string line);
+	void 										is_finished();
+	void 										is_number(std::string string);
+	void 										ParsRequstLine();
+	void 										ParsHeaders();
+	void 										ParsBody();
+	void 										StateOFParser();
+	void 										ChunkReaContent();
+	void 										ContentLenghtRead();
+	std::string 								_ignoreExtension(std::string line);
 
 	enum ParserStute
 	{
@@ -30,16 +30,13 @@ private:
 	};
 
 public:
-	Headers headers;
-	RequestLine requestLine;
-	short state;
-	bool request_ended;
-	unsigned long long max_body_size;
-
-	std::stringstream body_content;
-
-	bool run_parser(int socket_fd);
-
+	Headers 									headers;
+	RequestLine 								requestLine;
+	short 										state;
+	bool 										request_ended;
+	unsigned long  								max_body_size;
+	std::stringstream 							body_content;
+	bool 										run_parser(int socket_fd);
 	Request();
 	~Request();
 };

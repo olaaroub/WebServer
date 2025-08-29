@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/08 19:02:05 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/28 00:39:36 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/29 21:41:51 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,7 +121,6 @@ void HttpResponse::setFromCgiOutput(const std::string &cgiOutput)
 				if (!value.empty() && value[0] == ' ')
 					value.erase(0, 1);
 				addHeader(key, value);
-				// std::cout << "Header added: " << key << ": " << value << std::endl;
 			}
 		}
 	}

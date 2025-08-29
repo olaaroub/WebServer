@@ -41,7 +41,6 @@ void Request::ParsHeaders()
 		_buffer = _buffer.substr(cont + 4);
 		headers.HeadersParser();
 		headers.cookieParser();
-		// cookie here
 		if (requestLine.get_method() != "POST")
 			request_ended = true;
 		else

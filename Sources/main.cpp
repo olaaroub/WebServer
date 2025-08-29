@@ -4,10 +4,7 @@
 
 
 bool serverManager::isShutdown = false;
-void signal_handler(int)
-{
-	serverManager:: isShutdown = true;
-}
+void signal_handler(int) { serverManager:: isShutdown = true; }
 
 int main(int ac, char **av)
 {

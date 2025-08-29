@@ -9,10 +9,7 @@ std::map<std::string, SessionData> serverManager::s_activeSessions;
 const int serverManager::request_timeout = 60;
 const std::string serverManager::s_sessionFilePath = "database/sessions.db";
 
-void serverManager::add_server(network *instance)
-{
-	activeNetworks[instance->get_socket_fd()] = instance;
-}
+void serverManager::add_server(network *instance) { activeNetworks[instance->get_socket_fd()] = instance; }
 
 std::string serverManager::createSession(const std::string &username)
 {
@@ -100,9 +97,7 @@ void serverManager::saveSessionsToFile()
 	}
 
 	for (std::map<std::string, SessionData>::const_iterator it = s_activeSessions.begin(); it != s_activeSessions.end(); ++it)
-	{
 		sessionFile << it->first << " " << it->second.name << " " << it->second.expiry_time << std::endl;
-	}
 }
 
 void serverManager::reapChildProcesses()
@@ -111,10 +106,7 @@ void serverManager::reapChildProcesses()
 	pid_t pid;
 
 	while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
-	{
-
 		std::cout << YELLOW << "[SERVER] Reaped zombie CGI process with PID " << pid << RESET << std::endl;
-	}
 }
 
 void serverManager::checkCgiTimeouts()
@@ -209,7 +201,7 @@ void serverManager::listening()
 			throw std::runtime_error("signal catched");
 		if (event < 0)
 		{
-			perror("Epoll Error: ");
+			perror("Epoll Error:");
 			throw std::runtime_error("!");
 		}
 		for (int i = 0; i < event; i++)

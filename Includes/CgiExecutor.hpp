@@ -48,7 +48,6 @@ private:
 
 	char			**_envp;
 	char			**_argv;
-
 	void 			_setupEnvironment(const Request &req, const LocationConfigs &loc, const std::string &path);
 	void 			_setupArguments(const std::string &cgi_path, const std::string &script_path);
 	void 			_cleanup();

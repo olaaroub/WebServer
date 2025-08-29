@@ -8,7 +8,7 @@
 #include "Delete.hpp"
 
 client::client(const ServerConfigs &server_config) : network(server_config, false),
-													 _state(READING), _bytes_sent(0), _is_monitored(true), requestComplete(false) { _request.max_body_size = get_max_body(); }
+		_state(READING), _bytes_sent(0), _is_monitored(true), requestComplete(false) { _request.max_body_size = get_max_body(); }
 
 void client::setMonitored(bool monitored) { _is_monitored = monitored; }
 bool client::isMonitored() const { return _is_monitored; }

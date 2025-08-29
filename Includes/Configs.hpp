@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 18:29:07 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/26 20:43:29 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/29 21:45:27 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ struct ServerConfigs
 	long 									client_max_body_size;
 	bool 									host_set;
 	bool 									client_max_body_size_set;
-
 	std::vector<int> 						ports;
 	std::vector<std::string>				server_names;
 	std::map<int, std::string> 				error_pages;
