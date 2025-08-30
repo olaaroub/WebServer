@@ -386,13 +386,6 @@ const LocationConfigs *client::findLocation(const std::string &uri)
 	return bestMatch;
 }
 
-void client::sendResponseString(const std::string &response)
-{
-	ssize_t bytes_sent = send(this->_socket_fd, response.c_str(), response.length(), 0);
-	if (bytes_sent < 0 || static_cast<size_t>(bytes_sent) < response.length())
-		throw std::runtime_error("Send Error: Failed to send full response to client.");
-}
-
 client::~client()
 {
 	if (this->_socket_fd != -1)

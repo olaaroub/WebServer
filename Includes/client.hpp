@@ -24,7 +24,6 @@ public:
 	~client();
 	bool 				requestComplete;
 	void 				prepareResponse(const std::string &response);
-	void 				sendResponseString(const std::string &response);
 	const 				LocationConfigs *findLocation(const std::string &uri);
 	void 				handleHttpError(int statusCode);
 	void 				onEvent();
