@@ -7,7 +7,6 @@
 
 class CgiExecutor;
 
-
 struct SessionData{
 	std::string 								name;
 	time_t										expiry_time;

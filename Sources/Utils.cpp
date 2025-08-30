@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/09 14:55:27 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/29 20:48:54 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/29 21:36:31 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,7 @@
 ResponseSentException::ResponseSentException(const std::string &message) : messageSent(message) { ; }
 const char *ResponseSentException::what() const throw() { return messageSent.c_str(); }
 
-ParseError::ParseError(std::string Error, short stute) : _Error(Error), ErrorStute(stute) {}
-short ParseError::getStutError() const { return ErrorStute; }
+ParseError::ParseError(std::string Error, short code) : _Error(Error), errorCode(code) {}
 const char *ParseError::what() const throw() { return _Error.c_str(); }
 ParseError::~ParseError() throw() {}
 
@@ -306,61 +305,41 @@ std::string uRLEncoding(std::string url)
 
 std::string Get_ReverseMimeType(std::string mime)
 {
-    if (mime == "text/html")
-        return ".html";
-    if (mime == "text/css")
-        return ".css";
-    if (mime == "application/javascript")
-        return ".js";
-    if (mime == "image/jpeg")
-        return ".jpg";
-    if (mime == "image/png")
-        return ".png";
-    if (mime == "image/gif")
-        return ".gif";
-    if (mime == "image/x-icon")
-        return ".ico";
-    if (mime == "text/plain")
-        return ".txt";
-    if (mime == "video/mp4")
-        return ".mp4";
-    if (mime == "application/json")
-        return ".json";
-    if (mime == "application/xml")
-        return ".xml";
-    if (mime == "image/svg+xml")
-        return ".svg";
-    if (mime == "text/csv")
-        return ".csv";
-    if (mime == "application/pdf")
-        return ".pdf";
-    if (mime == "video/mpeg")
-        return ".mpeg";
-    if (mime == "video/webm")
-        return ".webm";
-    if (mime == "audio/ogg")
-        return ".ogg";
-    if (mime == "audio/mpeg")
-        return ".mp3";
-    if (mime == "audio/wav")
-        return ".wav";
-    if (mime == "application/zip")
-        return ".zip";
-    if (mime == "application/x-tar")
-        return ".tar";
-    if (mime == "application/x-rar-compressed")
-        return ".rar";
-    if (mime == "application/x-7z-compressed")
-        return ".7z";
-    if (mime == "font/woff")
-        return ".woff";
-    if (mime == "font/woff2")
-        return ".woff2";
-    if (mime == "font/ttf")
-        return ".ttf";
-    if (mime == "application/vnd.ms-fontobject")
-        return ".eot";
-    if (mime == "font/otf")
-        return ".otf";
-    return "no";
+	static std::map<std::string, std::string> reverse_mime_types;
+	if (reverse_mime_types.empty())
+	{
+		reverse_mime_types["text/html"] = ".html";
+		reverse_mime_types["text/css"] = ".css";
+		reverse_mime_types["application/javascript"] = ".js";
+		reverse_mime_types["image/jpeg"] = ".jpg";
+		reverse_mime_types["image/png"] = ".png";
+		reverse_mime_types["image/gif"] = ".gif";
+		reverse_mime_types["image/x-icon"] = ".ico";
+		reverse_mime_types["image/webp"] = ".webp";
+		reverse_mime_types["text/plain"] = ".txt";
+		reverse_mime_types["video/mp4"] = ".mp4";
+		reverse_mime_types["application/json"] = ".json";
+		reverse_mime_types["application/xml"] = ".xml";
+		reverse_mime_types["image/svg+xml"] = ".svg";
+		reverse_mime_types["text/csv"] = ".csv";
+		reverse_mime_types["application/pdf"] = ".pdf";
+		reverse_mime_types["video/mpeg"] = ".mpeg";
+		reverse_mime_types["video/webm"] = ".webm";
+		reverse_mime_types["audio/ogg"] = ".ogg";
+		reverse_mime_types["audio/mpeg"] = ".mp3";
+		reverse_mime_types["audio/wav"] = ".wav";
+		reverse_mime_types["application/zip"] = ".zip";
+		reverse_mime_types["application/x-tar"] = ".tar";
+		reverse_mime_types["application/x-rar-compressed"] = ".rar";
+		reverse_mime_types["application/x-7z-compressed"] = ".7z";
+		reverse_mime_types["font/woff"] = ".woff";
+		reverse_mime_types["font/woff2"] = ".woff2";
+		reverse_mime_types["font/ttf"] = ".ttf";
+		reverse_mime_types["application/vnd.ms-fontobject"] = ".eot";
+		reverse_mime_types["font/otf"] = ".otf";
+	}
+	std::map<std::string, std::string>::const_iterator it = reverse_mime_types.find(mime);
+	if (it != reverse_mime_types.end())
+		return it->second;
+	return "no";
 }

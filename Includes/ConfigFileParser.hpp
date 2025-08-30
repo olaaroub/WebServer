@@ -6,14 +6,14 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 14:21:00 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/26 20:23:22 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/30 22:03:15 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "lib.hpp"
 #include "Configs.hpp"
+#include "lib.hpp"
 
 class ConfigParser{
 public:

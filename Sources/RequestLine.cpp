@@ -31,7 +31,6 @@ void RequestLine::ParsRequestLine()
 	str >> buff;
 	SeparateUrlAndQuerys(buff);
 	str >> _HttpVerction;
-	// std::cout << "'" << _url << "'" << std::endl;
 	for (size_t i = 0; i < _url.size(); i++)
 	{
 		size_t index = forbidenChars.find(_url[i]);

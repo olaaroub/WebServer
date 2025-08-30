@@ -12,9 +12,7 @@ int Get::check_dir(struct stat file_info)
 	if ((file_info.st_mode & S_IXUSR) == 0)
 		return 403;
 
-	// auto index handle !
-	// std::cout <<  red << "----------  " << RESET << std::endl;
-	if (location->index_file.empty()) // mean the index file is not found
+	if (location->index_file.empty())
 	{
 		if (location->autoindex == true)
 			return 0;
@@ -32,8 +30,6 @@ int Get::check_dir(struct stat file_info)
 std::string Get::generate_Fileautoindex(std::string requestUri)
 {
 	DIR *dir = opendir(path.c_str());
-	// if (dir == NULL)
-	//     return 500;
 
 	std::stringstream html;
 	html << "<!DOCTYPE html>\n<html>\n<head><title>listing directory " << path << "</title></head>\n";
@@ -51,22 +47,14 @@ std::string Get::generate_Fileautoindex(std::string requestUri)
 		std::string name = entry->d_name;
 
 		if (name == "." || name == "..")
-		{
 			continue;
-		}
 		std::string link_path = name;
 
-		// Check if the entry is a directory
 		if (entry->d_type == DT_DIR)
 			link_path += "/";
-		// check
 		if (path[path.length() - 1] != '/')
-		{
 			link_path = requestUri + "/" + link_path;
-		}
-		// Add the link
 		html << "<li><a href=\"" << link_path << "\">" << name << "</a></li>\n";
-		// std::cout << "!!!!!!!!!!!   " << link_path << std::endl;
 	}
 
 	html << "</ul>\n</body>\n</html>";
@@ -86,10 +74,7 @@ int Get::check_path()
 	return check_dir(file_info);
 }
 
-std::string Get::get_final_path()
-{
-	return path;
-}
+std::string Get::get_final_path() { return path; }
 
 Get::Get(std::string path, const LocationConfigs *location)
 {

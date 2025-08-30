@@ -1,26 +1,26 @@
 #ifndef LIB_HPP
 #define LIB_HPP
 
-#define ERROR_PAGES "error_page"
-#define LISTEN "listen"
-#define CLIENT_MAX_BODY_SIZE "client_max_body_size"
-#define SERVER_NAME "server_name"
-#define LOCATION "location"
-#define GET "GET"
-#define POST "POST"
-#define DELETE "DELETE"
+#define ERROR_PAGES     		"error_page"
+#define LISTEN 					"listen"
+#define CLIENT_MAX_BODY_SIZE	"client_max_body_size"
+#define SERVER_NAME 			"server_name"
+#define LOCATION 				"location"
+#define GET 					"GET"
+#define POST 					"POST"
+#define DELETE 					"DELETE"
 
-#define MAX_REQUESTLINE_SIZE 4002
-#define MAX_HEADERS_SIZE 16004
-#define MAX_EPOLL 1024
+#define MAX_REQUESTLINE_SIZE 	4002
+#define MAX_HEADERS_SIZE 		16004
+#define MAX_EPOLL 				1024
 
-#define RESET "\033[0m"
-#define RED "\033[31m"
-#define GREEN "\033[32m"
-#define YELLOW "\033[33m"
-#define BLUE "\033[34m"
-#define MAGENTA "\033[35m"
-#define CYAN "\033[36m"
+#define RESET 					"\033[0m"
+#define RED 					"\033[31m"
+#define GREEN 					"\033[32m"
+#define YELLOW 					"\033[33m"
+#define BLUE 					"\033[34m"
+#define MAGENTA 				"\033[35m"
+#define CYAN 					"\033[36m"
 
 #include <iostream>
 #include <string.h>
@@ -48,5 +48,7 @@
 #include <dirent.h>
 #include <csignal>
 #include <stack>
+#include <netdb.h>
+
 
 #endif

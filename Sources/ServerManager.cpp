@@ -9,9 +9,38 @@ std::map<std::string, SessionData> serverManager::s_activeSessions;
 const int serverManager::request_timeout = 60;
 const std::string serverManager::s_sessionFilePath = "database/sessions.db";
 
-void serverManager::add_server(network *instance)
+void serverManager::add_server(network *instance) { activeNetworks[instance->get_socket_fd()] = instance; }
+
+in_addr_t resolveHost(const std::string& host_str)
 {
-	activeNetworks[instance->get_socket_fd()] = instance;
+	if (host_str == "255.255.255.255")
+		throw std::runtime_error("Config Error: Host '255.255.255.255' is a broadcast address and cannot be used to host a server.");
+    struct addrinfo hints;
+    struct addrinfo *result;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
+    hints.ai_flags = AI_NUMERICHOST;
+    if (getaddrinfo(host_str.c_str(), NULL, &hints, &result) == 0)
+    {
+        struct sockaddr_in* addr = (struct sockaddr_in*)result->ai_addr;
+        in_addr_t ip_addr = addr->sin_addr.s_addr;
+        freeaddrinfo(result);
+        return ip_addr;
+    }
+
+    hints.ai_flags = 0;
+    if (getaddrinfo(host_str.c_str(), NULL, &hints, &result) == 0)
+    {
+        struct sockaddr_in* addr = (struct sockaddr_in*)result->ai_addr;
+        in_addr_t ip_addr = addr->sin_addr.s_addr;
+        freeaddrinfo(result);
+        return ip_addr;
+    }
+
+    throw std::runtime_error("Config Error: Could not resolve host '" + host_str + "'");
 }
 
 std::string serverManager::createSession(const std::string &username)
@@ -100,9 +129,7 @@ void serverManager::saveSessionsToFile()
 	}
 
 	for (std::map<std::string, SessionData>::const_iterator it = s_activeSessions.begin(); it != s_activeSessions.end(); ++it)
-	{
 		sessionFile << it->first << " " << it->second.name << " " << it->second.expiry_time << std::endl;
-	}
 }
 
 void serverManager::reapChildProcesses()
@@ -111,10 +138,7 @@ void serverManager::reapChildProcesses()
 	pid_t pid;
 
 	while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
-	{
-
 		std::cout << YELLOW << "[SERVER] Reaped zombie CGI process with PID " << pid << RESET << std::endl;
-	}
 }
 
 void serverManager::checkCgiTimeouts()
@@ -209,7 +233,7 @@ void serverManager::listening()
 			throw std::runtime_error("signal catched");
 		if (event < 0)
 		{
-			perror("Epoll Error: ");
+			perror("Epoll Error:");
 			throw std::runtime_error("!");
 		}
 		for (int i = 0; i < event; i++)
@@ -256,14 +280,15 @@ void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
 		{
 			try
 			{
-				server *new_server = new server((*its), inet_addr((*it).host.c_str()), (*it));
+				in_addr_t host_addr = resolveHost((*it).host);
+				server *new_server = new server((*its), host_addr, (*it));
 				std::cout << CYAN << "[SERVER] Listening on " << (*it).host << ":" << *its << RESET << std::endl;
 				add_server(new_server);
 			}
 			catch (ParseError &e)
 			{
-				if (e.ErrorStute > 0)
-					close(e.ErrorStute);
+				if (e.errorCode > 0)
+					close(e.errorCode);
 				std::cerr << RED << e.what() << RESET;
 			}
 		}

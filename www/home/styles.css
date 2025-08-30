@@ -1,0 +1,464 @@
+:root {
+  /* Updated to Gold & Deep Teal - luxurious aesthetic palette */
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --primary: #0f766e; /* Deep teal as primary */
+  --primary-foreground: #ffffff;
+  --secondary: #d97706; /* Warm gold accent */
+  --accent: #0891b2; /* Bright teal complement */
+  --secondary-foreground: #ffffff;
+  --muted: #f8fafc;
+  --muted-foreground: #475569;
+  --destructive: #ef4444;
+  --border: #e2e8f0;
+  --ring: #0f766e;
+
+  --neutral-static: #64748b;
+  --game-static: #0891b2;
+}
+
+[data-theme="dark"] {
+  /* Enhanced dark mode with sophisticated teal and gold */
+  --background: #0a0f0f;
+  --foreground: #f1f5f9;
+  --primary: #14b8a6; /* Lighter teal for dark mode */
+  --primary-foreground: #ffffff;
+  --secondary: #f59e0b; /* Bright gold for dark mode */
+  --accent: #22d3ee; /* Bright cyan teal for dark mode */
+  --secondary-foreground: #1a0b3d;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --destructive: #f87171;
+  --border: #334155;
+  --ring: #14b8a6;
+
+  --neutral-static: #64748b;
+  --game-static: #22d3ee;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  transition: all 0.3s ease;
+}
+
+.container {
+  min-height: 100vh;
+  /* Updated background gradients to use deep teal with gold and cyan accents */
+  background: radial-gradient(circle at 20% 80%, rgba(15, 118, 110, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(217, 119, 6, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(8, 145, 178, 0.04) 0%, transparent 70%),
+    linear-gradient(135deg, var(--background) 0%, var(--muted) 50%, rgba(15, 118, 110, 0.03) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 20;
+  background: transparent;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--foreground);
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--muted);
+}
+
+.sun-icon {
+  display: block;
+}
+
+.moon-icon {
+  display: none;
+}
+
+[data-theme="dark"] .sun-icon {
+  display: none;
+}
+
+[data-theme="dark"] .moon-icon {
+  display: block;
+}
+
+.background-grid {
+  position: absolute;
+  inset: 0;
+  /* Updated grid pattern with deep teal, gold, and cyan tones */
+  background-image: radial-gradient(circle, rgba(15, 118, 110, 0.04) 1px, transparent 1px),
+    radial-gradient(circle, rgba(217, 119, 6, 0.03) 1px, transparent 1px),
+    radial-gradient(circle, rgba(8, 145, 178, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px, 80px 80px, 120px 120px;
+  background-position: 0 0, 25px 25px, 60px 60px;
+  animation: gridFloat 20s ease-in-out infinite;
+}
+
+[data-theme="dark"] .background-grid {
+  /* Enhanced dark mode grid with subtle teal, gold, and cyan */
+  background-image: radial-gradient(circle, rgba(20, 184, 166, 0.06) 1px, transparent 1px),
+    radial-gradient(circle, rgba(245, 158, 11, 0.04) 1px, transparent 1px),
+    radial-gradient(circle, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
+}
+
+.background-blur {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: pulse 4s ease-in-out infinite;
+}
+
+.blur-1 {
+  top: 25%;
+  left: 25%;
+  width: 288px;
+  height: 288px;
+  /* Gold blur for warm aesthetic accent */
+  background: rgba(217, 119, 6, 0.15);
+}
+
+[data-theme="dark"] .blur-1 {
+  background: rgba(245, 158, 11, 0.18);
+}
+
+.blur-2 {
+  bottom: 25%;
+  right: 25%;
+  width: 384px;
+  height: 384px;
+  /* Deep teal blur for sophisticated balance */
+  background: rgba(15, 118, 110, 0.12);
+  animation-delay: 1s;
+}
+
+.blur-3 {
+  top: 60%;
+  left: 70%;
+  width: 200px;
+  height: 200px;
+  /* Cyan teal blur for depth */
+  background: rgba(8, 145, 178, 0.1);
+  animation-delay: 2s;
+}
+
+@keyframes gridFloat {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(10px, -5px);
+  }
+  50% {
+    transform: translate(-5px, 10px);
+  }
+  75% {
+    transform: translate(-10px, -10px);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1) rotate(180deg);
+  }
+}
+
+.content {
+  /* Increased max-width and added full-width padding for wider layout */
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 96px 32px;
+  position: relative;
+  z-index: 10;
+  text-align: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  /* Updated badge with deep teal and subtle gold accent */
+  background: rgba(15, 118, 110, 0.06);
+  color: var(--primary);
+  border: 1px solid rgba(217, 119, 6, 0.12);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-family: "Courier New", monospace;
+  margin-bottom: 24px;
+  animation: slideInUp 1s ease-out;
+  box-shadow: 0 0 15px rgba(217, 119, 6, 0.08);
+}
+
+.title {
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 700;
+  margin-bottom: 32px;
+  /* Enhanced gradient with deep teal, gold, and cyan */
+  background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent), var(--primary));
+  background-size: 400% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: slideInUp 1s ease-out 0.2s both, gradientShift 4s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.description {
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  color: var(--muted-foreground);
+  line-height: 1.6;
+  /* Increased max-width for wider text layout */
+  max-width: 768px;
+  margin: 0 auto 48px;
+  animation: slideInUp 1s ease-out 0.4s both;
+}
+
+/* Using explicit bright white for dark mode description text */
+[data-theme="dark"] .description {
+  color: #c9d1d9;
+}
+
+.features {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--muted-foreground);
+  margin-bottom: 48px;
+  animation: slideInUp 1s ease-out 0.6s both;
+}
+
+/* Using explicit bright white for dark mode features text */
+[data-theme="dark"] .features {
+  color: #8b949e;
+}
+
+.features svg:first-child {
+  /* Updated first icon to use gold accent */
+  color: var(--secondary);
+}
+
+.features svg:last-child {
+  /* Updated to use emerald accent for feature highlighting */
+  color: var(--accent);
+  margin-left: 8px;
+}
+
+.main-button {
+  margin-bottom: 32px;
+  animation: slideInUp 1s ease-out 0.8s both;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-primary {
+  /* Updated primary button with deep teal and gold gradient */
+  background: linear-gradient(90deg, var(--primary), rgba(217, 119, 6, 0.8));
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(15, 118, 110, 0.25), 0 0 25px rgba(217, 119, 6, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-primary:hover {
+  /* Updated hover with teal and gold glow effects */
+  background: linear-gradient(90deg, rgba(15, 118, 110, 0.95), var(--secondary));
+  box-shadow: 0 8px 25px rgba(15, 118, 110, 0.35), 0 0 40px rgba(217, 119, 6, 0.25);
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background: linear-gradient(180deg, var(--background), var(--muted));
+  /* Updated outline button border to use deep teal */
+  border: 1px solid rgba(15, 118, 110, 0.15);
+  color: var(--foreground);
+  flex-direction: column;
+  height: 80px;
+  justify-content: center;
+}
+
+.btn-outline:hover {
+  transform: scale(1.05);
+  /* Enhanced hover effects with gold glow */
+  border-color: var(--secondary);
+  background: rgba(217, 119, 6, 0.06);
+  color: var(--secondary);
+  box-shadow: 0 4px 20px rgba(217, 119, 6, 0.25), 0 0 30px rgba(217, 119, 6, 0.15);
+}
+
+.btn-outline span {
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  /* Increased max-width for wider button layout */
+  max-width: 900px;
+  margin: 0 auto 24px;
+  animation: slideInUp 1s ease-out 1s both;
+}
+
+@media (min-width: 1024px) {
+  .button-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.button-grid-small {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  /* Increased max-width for wider small button layout */
+  max-width: 450px;
+  margin: 0 auto;
+  animation: slideInUp 1s ease-out 1.2s both;
+}
+
+.btn-private {
+  /* Updated private button to use cyan teal accent */
+  border-color: rgba(8, 145, 178, 0.2);
+}
+
+.btn-private:hover {
+  border-color: rgba(8, 145, 178, 0.4);
+  background: rgba(8, 145, 178, 0.05);
+  color: var(--accent);
+  box-shadow: 0 4px 20px rgba(8, 145, 178, 0.25), 0 0 25px rgba(8, 145, 178, 0.12);
+}
+
+.btn-game {
+  /* Updated to use bright teal for game button */
+  border-color: rgba(34, 211, 238, 0.3);
+}
+
+.btn-game:hover {
+  border-color: rgba(34, 211, 238, 0.5);
+  background: rgba(34, 211, 238, 0.05);
+  color: var(--game-static);
+  box-shadow: 0 4px 20px rgba(34, 211, 238, 0.15);
+}
+
+.btn-upload {
+  /* Updated to use neutral gray for upload button */
+  border-color: rgba(139, 148, 158, 0.3);
+}
+
+.btn-upload:hover {
+  border-color: rgba(139, 148, 158, 0.5);
+  background: rgba(139, 148, 158, 0.05);
+  color: var(--neutral-static);
+  box-shadow: 0 4px 20px rgba(139, 148, 158, 0.15), 0 0 25px rgba(139, 148, 158, 0.08);
+}
+
+.btn-video {
+  /* Updated to use neutral gray for video button */
+  border-color: rgba(139, 148, 158, 0.3);
+}
+
+.btn-video:hover {
+  border-color: rgba(139, 148, 158, 0.5);
+  background: rgba(139, 148, 158, 0.05);
+  color: var(--neutral-static);
+  box-shadow: 0 4px 20px rgba(139, 148, 158, 0.15), 0 0 25px rgba(139, 148, 158, 0.08);
+}
+
+.btn-image {
+  /* Updated to use neutral gray for image button */
+  border-color: rgba(139, 148, 158, 0.3);
+}
+
+.btn-image:hover {
+  border-color: rgba(139, 148, 158, 0.5);
+  background: rgba(139, 148, 158, 0.05);
+  color: var(--neutral-static);
+  box-shadow: 0 4px 20px rgba(139, 148, 158, 0.15), 0 0 25px rgba(139, 148, 158, 0.08);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .content {
+    /* Maintained wider padding on mobile */
+    padding: 48px 24px;
+  }
+
+  .features {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .features span {
+    text-align: center;
+  }
+}

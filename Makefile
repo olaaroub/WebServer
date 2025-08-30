@@ -7,19 +7,19 @@ NAME = webserv
 
 SPATH = ./Sources/
 SRC = 	main.cpp \
-		Utils.cpp \
+ 		ServerManager.cpp\
 		CgiExecutor.cpp \
 		HttpResponse.cpp \
+		client.cpp \
+		network.cpp \
+		server.cpp \
+		Headers.cpp \
+		request.cpp \
+		RequestLine.cpp \
+		Utils.cpp \
 		ConfigParse/ConfigFileParser.cpp \
 		ConfigParse/ConfigFileReader.cpp\
 		ConfigParse/Configs.cpp\
- 		ServerManager.cpp\
-		Connections/client.cpp \
-		Connections/network.cpp \
-		Connections/server.cpp \
-		Requests/Headers.cpp \
-		Requests/request.cpp \
-		Requests/RequestLine.cpp \
 		Methods/Get.cpp \
 		Methods/Post.cpp \
 		Methods/Delete.cpp \
@@ -40,9 +40,7 @@ all: $(OPATH)  $(NAME)
 $(OPATH):
 	mkdir -p $(OPATH)
 	mkdir -p $(OPATH)ConfigParse
-	mkdir -p $(OPATH)Connections
 	mkdir -p $(OPATH)Methods
-	mkdir -p $(OPATH)Requests
 
 
 $(OPATH)%.o:  $(SPATH)%.cpp

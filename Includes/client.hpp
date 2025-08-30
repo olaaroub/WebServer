@@ -17,7 +17,6 @@ private:
 	std::string			_response_buffer;
 	size_t 				_bytes_sent;
 	bool 				_is_monitored;
-
 	void 				_handleWrite();
 
 public:
