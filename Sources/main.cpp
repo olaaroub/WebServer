@@ -14,7 +14,7 @@ int main(int ac, char **av)
 		return 1;
 	}
 
-	std::string configPath = (ac == 2) ? av[1] : "configs/l3robi.conf";
+	std::string configPath = (ac == 2) ? av[1] : "configs/laaroubi.conf";
 
 	try
 	{
@@ -22,6 +22,7 @@ int main(int ac, char **av)
 		signal(SIGTERM, signal_handler);
 		signal(SIGQUIT, signal_handler);
 		signal(SIGPIPE, SIG_IGN);
+
 		srand(time(0));
 
 		FileReader reader(configPath);
@@ -29,7 +30,7 @@ int main(int ac, char **av)
 
 		const std::vector<ServerConfigs> &servers = parser.getServers();
 		if (serverManager:: isShutdown)
-			throw std::runtime_error("signle catshed");
+			throw std::runtime_error("Signal received!");
 		serverManager::setupServers(servers);
 
 		serverManager::startServers();

@@ -4,7 +4,6 @@
 #include "network.hpp"
 #include "lib.hpp"
 
-// class network;
 class server : public network
 {
 private:

@@ -11,6 +11,38 @@ const std::string serverManager::s_sessionFilePath = "database/sessions.db";
 
 void serverManager::add_server(network *instance) { activeNetworks[instance->get_socket_fd()] = instance; }
 
+in_addr_t resolveHost(const std::string& host_str)
+{
+	if (host_str == "255.255.255.255")
+		throw std::runtime_error("Config Error: Host '255.255.255.255' is a broadcast address and cannot be used to host a server.");
+    struct addrinfo hints;
+    struct addrinfo *result;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
+    hints.ai_flags = AI_NUMERICHOST;
+    if (getaddrinfo(host_str.c_str(), NULL, &hints, &result) == 0)
+    {
+        struct sockaddr_in* addr = (struct sockaddr_in*)result->ai_addr;
+        in_addr_t ip_addr = addr->sin_addr.s_addr;
+        freeaddrinfo(result);
+        return ip_addr;
+    }
+
+    hints.ai_flags = 0;
+    if (getaddrinfo(host_str.c_str(), NULL, &hints, &result) == 0)
+    {
+        struct sockaddr_in* addr = (struct sockaddr_in*)result->ai_addr;
+        in_addr_t ip_addr = addr->sin_addr.s_addr;
+        freeaddrinfo(result);
+        return ip_addr;
+    }
+
+    throw std::runtime_error("Config Error: Could not resolve host '" + host_str + "'");
+}
+
 std::string serverManager::createSession(const std::string &username)
 {
 	std::stringstream ss;
@@ -248,7 +280,8 @@ void serverManager::setupServers(const std::vector<ServerConfigs> &servers)
 		{
 			try
 			{
-				server *new_server = new server((*its), inet_addr((*it).host.c_str()), (*it));
+				in_addr_t host_addr = resolveHost((*it).host);
+				server *new_server = new server((*its), host_addr, (*it));
 				std::cout << CYAN << "[SERVER] Listening on " << (*it).host << ":" << *its << RESET << std::endl;
 				add_server(new_server);
 			}

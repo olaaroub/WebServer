@@ -48,5 +48,7 @@
 #include <dirent.h>
 #include <csignal>
 #include <stack>
+#include <netdb.h>
+
 
 #endif

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebServ - 42 School Project</title>
+    <link rel="stylesheet" href="/home/styles.css">
+</head>
+<body>
+    <div class="container">
+        <button class="theme-toggle" id="themeToggle">
+            <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="m12 2 0 2"/>
+                <path d="m12 20 0 2"/>
+                <path d="m4.93 4.93 1.41 1.41"/>
+                <path d="m17.66 17.66 1.41 1.41"/>
+                <path d="m2 12 2 0"/>
+                <path d="m20 12 2 0"/>
+                <path d="m6.34 17.66-1.41 1.41"/>
+                <path d="m19.07 4.93-1.41 1.41"/>
+            </svg>
+            <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+            </svg>
+        </button>
+
+        <div class="background-grid"></div>
+        <div class="background-blur blur-1"></div>
+        <div class="background-blur blur-2"></div>
+        <div class="background-blur blur-3"></div>
+
+        <div class="content">
+            <div class="badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="16,18 22,12 16,6"/>
+                    <polyline points="8,6 2,12 8,18"/>
+                </svg>
+                42 School Project
+            </div>
+
+            <h1 class="title">WebServ</h1>
+
+            <p class="description">
+                A high-performance web server built from scratch in C++
+            </p>
+
+            <div class="features">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="20" height="8" x="2" y="2" rx="2" ry="2"/>
+                    <rect width="20" height="8" x="2" y="14" rx="2" ry="2"/>
+                    <line x1="6" x2="6" y1="6" y2="6.01"/>
+                    <line x1="6" x2="6" y1="18" y2="18.01"/>
+                </svg>
+                <span>RFC Compliant • CGI Support • Cookies and Sessions</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/>
+                </svg>
+            </div>
+
+            <div class="main-button">
+                <button class="btn btn-primary" onclick="window.open('https://github.com/olaaroub/Webserver', '_blank')"">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5 0-1.1-.35-2.04-1-2.5.7-.4 1.1-1.25 1-2.5 0-1.1-.35-2.04-1-2.5.7-.4 1.1-1.25 1-2.5C20 2.04 19.65 1 19 .5c-.65-.5-1.65-.5-2.5 0-.85.5-1.35 1.54-1.35 2.5 0 1.25.4 2.1 1 2.5-.65.46-1 1.4-1 2.5 0 3.5 3 5.5 6 5.5a4.8 4.8 0 0 0-1 3.5v4"/>
+                        <path d="M9 18c-4.51 2-5-2-7-2"/>
+                    </svg>
+                    View Source Code
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="button-grid">
+                <button class="btn btn-outline btn-login" onclick="window.open('cgi-bin/php/login.php', '_blank')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                        <polyline points="10,17 15,12 10,7"/>
+                        <line x1="15" x2="3" y1="12" y2="12"/>
+                    </svg>
+                    <span>Login</span>
+                </button>
+
+                <button class="btn btn-outline btn-private" onclick="window.open('secret/secretFile.html', '_blank')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    <span>Private</span>
+                </button>
+
+                <button class="btn btn-outline btn-game" onclick="window.open('onlineGame', '_blank')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="6" x2="10" y1="12" y2="12"/>
+                        <line x1="8" x2="8" y1="10" y2="14"/>
+                        <line x1="15" x2="15.01" y1="13" y2="13"/>
+                        <line x1="18" x2="18.01" y1="11" y2="11"/>
+                        <rect width="20" height="12" x="2" y="6" rx="2"/>
+                    </svg>
+                    <span>Game</span>
+                </button>
+
+                <button class="btn btn-outline btn-upload" onclick="window.open('uploads/postTest.html', '_blank')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <line x1="12" x2="12" y1="18" y2="12"/>
+                        <polyline points="9,15 12,12 15,15"/>
+                    </svg>
+                    <span>Upload</span>
+                </button>
+            </div>
+
+            <div class="button-grid-small">
+                <button class="btn btn-outline btn-video" onclick="window.open('videos/win7.mp4', '_blank')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5,3 19,12 5,21 5,3"/>
+                    </svg>
+                    <span>Video</span>
+                </button>
+
+                <button class="btn btn-outline btn-image" onclick="window.open('/images/image.jpg', '_blank')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                        <circle cx="9" cy="9" r="2"/>
+                        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                    </svg>
+                    <span>Image</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/home/script.js"></script>
+</body>
+</html>

@@ -6,12 +6,13 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 17:21:57 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/29 21:42:31 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/30 22:03:31 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ConfigFileParser.hpp"
 #include "Utils.hpp"
+#include "lib.hpp"
 
 ConfigParser::ConfigParser(const std::string &rawContent) : _content(rawContent) { this->parse(); }
 
@@ -153,8 +154,8 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
 
 			if (colon_pos != std::string::npos) {
 				parsed_host = listen_val.substr(0, colon_pos);
-                if (parsed_host.empty())
-                    parsed_host = "0.0.0.0";
+				if(parsed_host.empty())
+					parsed_host = "0.0.0.0";
 
 				std::string port_str = listen_val.substr(colon_pos + 1);
 				parsed_port = validateAndParsePort(port_str);
@@ -183,7 +184,6 @@ ServerConfigs ConfigParser::parseServerBlock(const std::string &block)
     											server_conf.ports.end(), parsed_port);
 			if(index == server_conf.ports.end())
 				server_conf.ports.push_back(parsed_port);
-
 
 			if (!(ss >> token) || token != ";")
 				throw std::runtime_error("Config Error: Missing ';' after 'listen' directive.");
