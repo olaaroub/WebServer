@@ -162,7 +162,7 @@ bool Request::run_parser(int socket_fd)
 
 	int count = read(socket_fd, &bfr, 1023);
 	if (count < 0)
-		throw ParseError("Request Error: read failed!", ServerError);
+		return false;
 	if (count == 0)
 		throw ParseError("Request Error: Client closed connection unexpectedly", closeConnection);
 	if (count > 3 && bfr[0] == 0x16 && bfr[1] == 0x03 && bfr[2] >= 0x00 && bfr[2] <= 0x04)

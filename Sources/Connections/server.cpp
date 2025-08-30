@@ -28,7 +28,6 @@ void server::bind_and_listen()
 	{
 		perror("Server Error: listen error");
 		throw ParseError("Exiting...", _socket_fd);
-		;
 	}
 }
 
