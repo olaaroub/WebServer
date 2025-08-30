@@ -6,7 +6,7 @@
 /*   By: olaaroub <olaaroub@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/29 21:50:26 by olaaroub          #+#    #+#             */
-/*   Updated: 2025/08/29 21:50:29 by olaaroub         ###   ########.fr       */
+/*   Updated: 2025/08/30 23:35:17 by olaaroub         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,8 +190,9 @@ void CgiExecutor::_handleWrite()
 
     if (bytes > 0)
         _bytesWritten += bytes;
-
-    if (_bytesWritten >= _requestBody.length() || bytes <= 0)
+	else if(bytes <=0)
+		return;
+    if (_bytesWritten >= _requestBody.length())
     {
         serverManager::activeNetworks.erase(this->_socket_fd);
         epoll_ctl(serverManager::kernel_identifier, EPOLL_CTL_DEL, this->_socket_fd, 0);
@@ -214,6 +215,10 @@ void CgiExecutor::_handleRead()
 
         if (bytes_read > 0)
             _responseBuffer.append(buffer, bytes_read);
+		if(bytes_read == 0){
+			this->_state = CGI_DONE;
+			break;
+		}
         else
             break;
     }

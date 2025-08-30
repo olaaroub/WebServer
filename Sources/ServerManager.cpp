@@ -143,7 +143,7 @@ void serverManager::reapChildProcesses()
 
 void serverManager::checkCgiTimeouts()
 {
-	const int CGI_TIMEOUT_SECONDS = 10;
+	const int CGI_TIMEOUT_SECONDS = 60;
 	std::map<int, network *>::iterator it;
 
 	for (it = activeNetworks.begin(); it != activeNetworks.end();)
