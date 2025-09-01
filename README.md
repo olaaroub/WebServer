@@ -1,192 +1,108 @@
-# 1337 Webserv — HTTP/1.1 Server (C++98)
+# 1337 Webserv — An HTTP/1.1 Server in C++98
 
-> A lightweight, event‑driven HTTP/1.1 server built from scratch for the 42 curriculum. Implements non‑blocking I/O, virtual hosts, CGI, uploads, and custom error pages — all in C++98.
+This project is a high-performance, event-driven HTTP server built from scratch. It is a deep dive into the fundamentals of network programming, implementing the core components of the HTTP/1.1 protocol using non-blocking I/O, a flexible configuration system, and a robust CGI handler for dynamic content.
 
-<br/>
+The entire server is written in C++98, adhering to the strict project guidelines of the 42 curriculum, without the use of modern libraries for networking or HTTP handling.
 
-## ✨ Highlights
+---
 
-* **C++98 only** (no external networking libs)
-* **Non‑blocking sockets + epoll** main loop
-* **Multiple servers / virtual hosts** (per‑port, per‑server config)
-* **HTTP methods**: `GET`, `POST`, `DELETE`
-* **Static files** with `index` and **autoindex**
-* **Uploads** (configurable `upload_store`)
-* **CGI** via `fork/execve` (e.g., Python, PHP)
-* **Custom error pages** (`error_page`)
-* **Optional sessions** (bonus): simple cookie‑based session store
+## ⚙️ Core Concepts & Technologies
 
-<br/>
+This server is built on three foundational pillars of network programming. Understanding them is key to understanding the project.
 
-## 🗺️ Architecture at a Glance (Mermaid)
+### 1. Non-Blocking I/O with epoll
 
-> Kept intentionally **basic** for README — an overview of the request path. (This is a simplified and clearer version of your `2nd.mmd` diagram.)
+* **What is it?**
+  Instead of getting stuck waiting for one client to send data, the server uses epoll to monitor hundreds of connections at once. The operating system efficiently tells us exactly which clients are ready for reading or writing.
+
+* **Why does it matter?**
+  This model allows the server to handle a high number of concurrent connections with a single thread, making it incredibly lightweight and scalable. It's the same principle used by modern servers like Nginx.
+
+### 2. HTTP Request/Response Cycle
+
+The server implements the core logic of HTTP/1.1.
+
+* It features a robust, state-machine-based parser for incoming requests, capable of handling the request line, headers, and body.
+* It constructs and sends back well-formed HTTP responses, with correct status codes and headers like `Content-Type` and `Content-Length`.
+
+### 3. CGI (Common Gateway Interface)
+
+To serve dynamic content, the server implements the CGI/1.1 standard.
+
+* **What is it?**
+  CGI is a protocol that allows the web server to execute an external script (like PHP or Python) to generate a response, instead of just serving a static file.
+
+* **How it works:**
+  The server uses `fork()` to create a new process and `pipe()` to create communication channels. It uses `dup2()` to redirect the script's stdin and stdout to these pipes, and finally `execve()` to run the script. All request information is passed to the script via environment variables. This allows the C++ server to act as a secure gateway to powerful scripting languages.
+
+---
+
+## 🏗️ Architectural Canvas
 
 ```mermaid
 flowchart LR
-  S[Start] --> P[Parse config]
-  P --> L[Create listening sockets]
-  L --> E[Event loop (epoll)]
+  S([Start])
+  P[Parse config]
+  L[Create listening sockets]
+  E[Event loop - epoll]
+  A[Accept client]
+  R[Parse HTTP request]
+  D{Route}
+  ST[Serve static / autoindex]
+  UP[Save upload]
+  CG[Run CGI]
+  RB[Read CGI output]
+  B[Build response]
+  ERR[Error response]
+  SND[Send response]
 
-  E -->|new connection| A[Accept client]
-  A --> R[Parse HTTP/1.1 request]
-  R --> D{Route}
-
-  D -->|Static| ST[Serve file or autoindex]
-  D -->|Upload (POST)| UP[Save file]
-  D -->|CGI| CG[Launch CGI (fork/execve)]
-  CG --> RB[Read CGI output]
-
-  ST --> B[Build response]
+  S --> P
+  P --> L
+  L --> E
+  E -->|new connection| A
+  A --> R
+  R --> D
+  D -->|static| ST
+  D -->|upload| UP
+  D -->|cgi| CG
+  CG --> RB
+  ST --> B
   UP --> B
   RB --> B
-
-  R -->|invalid| ERR[Generate error response]
-  B --> SND[Send + keep-alive/close]
+  R -->|invalid| ERR
+  B --> SND
   ERR --> SND
   SND --> E
-
-  %% Optional bonus: cookie/session hop (kept minimal)
-  CG -. may set .-> SC[(Session cookie)]
 ```
 
-<br/>
+---
 
-## ⚙️ Build & Run
+## ✨ Features Implemented
 
-```bash
-# build
-make
+* **HTTP Methods:** GET, POST, DELETE
+* **Configuration:** Nginx-inspired config parsing (server blocks, locations)
+* **Virtual Hosts:** Support multiple server blocks on different ports
+* **Static Serving:** `root`, `index`, and `autoindex` directives
+* **File Uploads:** Handles `multipart/form-data` uploads to a configured path
+* **CGI Handling:** Executes scripts with robust timeout management
 
-# run with your config
-./webserv path/to/your.conf
+---
 
-# example
-./webserv configs/l3robi.conf
-```
+## 🌟 Bonus Features
 
-* The server spawns one listener **per configured port**.
-* Use `Ctrl+C` to stop.
+* Persistent, cookie-based session management
+* Support for multiple CGI interpreters (PHP, Perl, Python, Bash...)
 
-<br/>
+---
 
-## 📑 Minimal Configuration Example
+## 📚 References
 
-```conf
-# l3robi.conf (example)
+* **HTTP Specification:** [RFC 2616 — HTTP/1.1](https://www.rfc-editor.org/rfc/rfc2616)
+* **CGI Specification:** [RFC 3875 — CGI/1.1](https://www.rfc-editor.org/rfc/rfc3875)
+* **Beej’s Guide to Network Programming** — [https://beej.us/guide/bgnet/](https://beej.us/guide/bgnet/) (practical sockets tutorial)
+* **epoll(7)** — [Linux manual page](https://man7.org/linux/man-pages/man7/epoll.7.html) (epoll API and behavior)
+* **RFC 7230** — [HTTP/1.1: Message Syntax and Routing](https://datatracker.ietf.org/doc/html/rfc7230)
+* **The C10k problem** — [https://www.kegel.com/c10k.html](https://www.kegel.com/c10k.html) (scalability background)
 
-server {
-    listen              8080;
-    server_name         localhost;
+---
 
-    root                ./www;
-    index               index.html;
-    autoindex           on;
-
-    client_max_body_size  10M;   # supports K/M suffix
-
-    error_page 404 /errors/404.html;
-    error_page 500 /errors/500.html;
-
-    location /uploads {
-        allowed_methods   POST;
-        upload_store      ./www/uploads;
-    }
-
-    location /cgi-bin {
-        allowed_methods   GET POST;
-        cgi_pass          .py /usr/bin/python3;
-        cgi_pass          .php /usr/bin/php-cgi;
-    }
-
-    location /redirect-me {
-        return 301 /new-place;   # simple redirect
-    }
-}
-```
-
-**Supported (typical) directives**
-
-* `listen <port>`
-* `server_name <name>`
-* `root <path>`
-* `index <file>`
-* `autoindex on|off`
-* `allowed_methods GET|POST|DELETE`
-* `client_max_body_size <bytes|K|M>`
-* `upload_store <path>` (in a `location`)
-* `cgi_pass <.ext> <interpreter>` (in a `location`)
-* `error_page <code> <uri>`
-* `return 301|302 <uri>` (redirect)
-
-> Notes: exact directive names may vary with your parser; adjust to match your project.
-
-<br/>
-
-## 🔁 Request Lifecycle (condensed)
-
-1. **Startup:** parse config → open non‑blocking listeners → register in **epoll**.
-2. **Event loop:** `epoll_wait()` → accept new clients → read request bytes.
-3. **HTTP parse:** request line, headers, optional body (state machine, chunked/body size checks).
-4. **Route:** by method + location block.
-
-   * **Static:** build path from `root`/`index`, apply autoindex.
-   * **Upload:** validate size & permissions, save to `upload_store`.
-   * **CGI:** prepare envp/argv, `pipe()` + `fork()` + `execve()`, watchdog timeout.
-5. **Respond:** status line + headers (+ optional `Set-Cookie`) + body; handle keep‑alive.
-6. **Errors:** map to `error_page` when configured.
-
-<br/>
-
-## 🧪 Quick Testing
-
-```bash
-# Static
-curl -i http://localhost:8080/
-
-# Autoindex (if enabled)
-curl -i http://localhost:8080/some/dir/
-
-# Upload (POST)
-curl -i -X POST -F file=@hello.txt http://localhost:8080/uploads
-
-# CGI (Python example)
-curl -i 'http://localhost:8080/cgi-bin/hello.py?name=webserv'
-
-# Delete
-curl -i -X DELETE http://localhost:8080/uploads/hello.txt
-```
-
-<br/>
-
-## 📂 Project Layout (example)
-
-```
-webserv/
-├─ src/
-│  ├─ server/              # ServerManager, epoll loop
-│  ├─ http/                # Request, Response, headers utils
-│  ├─ cgi/                 # CgiExecutor, env builder
-│  ├─ config/              # FileReader, ConfigParser
-│  └─ utils/
-├─ www/                    # Public files (root)
-├─ configs/                # Sample .conf files
-├─ Makefile
-└─ README.md
-```
-
-<br/>
-
-## 👥 Authors
-
-* **olaaroub** (Oussama Laaroubi)
-* **ohammou**
-* **iahamdan**
-
-> 1337 (UM6P) — 42 Network. Project validated ✅
-
-<br/>
-
-## 📜 License
-
-This is an educational 42 project. If you intend to use or redistribute, please add a LICENSE file and update this section accordingly.
