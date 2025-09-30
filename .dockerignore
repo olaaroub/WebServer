@@ -1,0 +1,8 @@
+.git
+.vscode/
+*.md
+*.mmd
+pdf/
+*.o
+webserv
+.dockerignore
