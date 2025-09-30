@@ -27,7 +27,6 @@ COPY ./www  ./www/
 
 RUN chmod +x ./cgi-bin/*
 
-
 COPY --from=builder /app/webserv .
 
 EXPOSE 8080
