@@ -1,0 +1,21 @@
+# webserv-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webserv-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-webserver
+  template:
+    metadata:
+      labels:
+        app: my-webserver
+    spec:
+      containers:
+      - name: webserv-container
+        image: webserv
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080

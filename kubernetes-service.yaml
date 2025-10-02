@@ -1,0 +1,23 @@
+
+# webserv-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-webserver
+spec:
+  type: NodePort
+  selector:
+    app: my-webserver
+  ports:
+    - port: 8080
+      targetPort: 8080
+
+
+# minikube kubectl -- port-forward --address 0.0.0.0 service/my-webserver 8080:8080 this so i can acess if from host maachine
+
+# kubectl apply -f webserv-deployment.yaml
+# kubectl apply -f webserv-service.yaml
+# minikube service my-webserver --url this gives url to acess it
+
+# before all this installi minikube 3awtani and expose local docker engine to it :
+#  eval $(minikube -p minikube docker-env)
