@@ -23,7 +23,7 @@ int main(int ac, char **av)
 		signal(SIGQUIT, signal_handler);
 		signal(SIGPIPE, SIG_IGN);
 
-		srand(time(0))
+		srand(time(0));
 
 		FileReader reader(configPath);
 		ConfigParser parser(reader.getContent());
