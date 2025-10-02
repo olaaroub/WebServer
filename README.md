@@ -1,4 +1,4 @@
-# 1337 Webserv — An HTTP/1.1 Server in C++98
+# Webserv — An HTTP/1.1 Server in C++98
 
 This project is a high-performance, event-driven HTTP server built from scratch. It is a deep dive into the fundamentals of network programming, implementing the core components of the HTTP/1.1 protocol using non-blocking I/O, a flexible configuration system, and a robust CGI handler for dynamic content.
 

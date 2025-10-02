@@ -189,7 +189,7 @@ void client::onEvent()
 
 				if (location->auth_required)
 				{
-
+					// exit(1); this was to test if kubernetes re runs the container if it is shut down
 					std::string sessionId = _request.headers.getCookie("sessionid");
 
 					if (serverManager::validateSession(sessionId) == false)
