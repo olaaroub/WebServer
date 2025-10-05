@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
 	php-cgi \
 	python3 \
 	&& rm -rf /var/lib/apt/lists/*
+	#the last cmd deletes the packages that i dont need so the container stays small
 
 WORKDIR /webserver
 
